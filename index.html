@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trackcard Card Game</title>
+  <meta name="description" content="Trackcard adalah game kartu cepat dan strategis. Pelajari cara main, mode permainan, dan informasi kartu di sini." />
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    :root{
+      --bg:#0e0f13;--card:#141722;--muted:#98a2b3;--text:#e6e8ec;--brand:#7c5cff;--brand-2:#5ccfff;--accent:#1f2330;
+      --ring: rgba(124,92,255,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,var(--bg),#0a0b0f);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,"Noto Sans",sans-serif;}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{width:min(1100px,92vw);margin-inline:auto}
+    header{position:sticky;top:0;z-index:50;background:rgba(14,15,19,.7);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid #1b2030}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .logo{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 6px 22px rgba(124,92,255,.35)}
+    nav ul{list-style:none;display:flex;gap:18px;margin:0;padding:0}
+    nav a{padding:8px 10px;border-radius:10px}
+    nav a:hover{background:var(--accent)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border:1px solid #2a3146;border-radius:12px;background:linear-gradient(180deg,#171b27,#121625);box-shadow:0 10px 30px rgba(10,12,18,.25);color:var(--text);font-weight:600}
+    .btn:hover{border-color:#3a4360}
+
+    .hero{padding:72px 0 40px;border-bottom:1px solid #1b2030;background:radial-gradient(1000px 400px at 70% -150px, rgba(124,92,255,.25), transparent)}
+    .hero h1{font-size:clamp(32px,4.5vw,56px);line-height:1.05;margin:0 0 14px}
+    .hero p{color:var(--muted);font-size:clamp(16px,2.6vw,18px);margin:0 0 24px}
+    .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+
+    .grid{display:grid;gap:18px}
+    .cols-3{grid-template-columns:repeat(3,1fr)}
+    .cols-2{grid-template-columns:repeat(2,1fr)}
+    @media(max-width:900px){.cols-3{grid-template-columns:1fr}.cols-2{grid-template-columns:1fr}}
+
+    .card{background:linear-gradient(180deg,#121420,#0f1220);border:1px solid #1e2436;border-radius:18px;padding:18px;box-shadow:0 8px 30px rgba(10,12,18,.3)}
+    .card h3{margin:0 0 8px}
+    .muted{color:var(--muted)}
+
+    section{padding:42px 0;border-bottom:1px solid #1b2030}
+    section h2{margin:0 0 8px;font-size:clamp(22px,3.2vw,28px)}
+    section > p{margin:0 0 16px;color:var(--muted)}
+
+    .steps{counter-reset:step}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px dashed #2a3146;border-radius:14px}
+    .step::before{counter-increment:step;content:counter(step);display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:white;font-weight:700}
+
+    .badge{display:inline-flex;gap:8px;align-items:center;font-size:12px;padding:4px 8px;border:1px solid #2a3146;border-radius:999px;color:var(--muted)}
+
+    .feature{display:flex;gap:12px;align-items:flex-start}
+    .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 0 0 4px var(--ring)}
+
+    .ctaBlock{display:flex;justify-content:space-between;gap:16px;align-items:center;background:linear-gradient(180deg,#171b27,#121625);border:1px solid #2a3146;border-radius:18px;padding:22px}
+    .ctaBlock h3{margin:0}
+
+    footer{padding:30px 0;color:#9aa3b2}
+    footer .links{display:flex;gap:12px;flex-wrap:wrap}
+
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:12px;border:1px solid #2a3146;border-bottom-width:3px;padding:2px 6px;border-radius:8px;background:#0e1220}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#top">
+        <span class="logo">🔷</span>
+        <span>Trackcard</span>
+      </a>
+      <nav>
+        <ul>
+          <li><a href="#tentang">Tentang</a></li>
+          <li><a href="#caramain">Cara Main</a></li>
+          <li><a href="#fitur">Fitur</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="play.html">Main Sekarang</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero container">
+      <span class="badge">Game Kartu • Strategi • Cepat</span>
+      <h1>Trackcard — Card Game Strategis, Tempo Cepat</h1>
+      <p>Bangun deck, dan outplay lawanmu dalam duel 1v1 yang ringkas namun penuh keputusan penting. Mulai dari pemula sampai pro, semua bisa main.</p>
+      <div class="cta">
+        <a class="btn" href="play.html">▶️ Main Sekarang</a>
+        <a class="btn" href="#caramain">📘 Pelajari Cara Main</a>
+        <a class="btn" href="cards.html">🂡 Lihat Kartu</a>
+      </div>
+    </section>
+
+    <section id="tentang" class="container">
+      <h2>Apa itu Trackcard?</h2>
+      <p>Trackcard adalah game kartu kompetitif dengan konsep <em>batu gunting kertas</em>: kamu harus mengalahkan musuh dengan menang batu gunting kertas dan menghancurkan lawanmu lewat kombinasi kartu <strong>Unit</strong>dan, <strong>Skill</strong>. Setiap ronde berdurasi singkat sehingga satu match terasa padat dan seru.</p>
+      <div class="grid cols-3">
+        <div class="card"><h3>Durasi Cepat</h3><p class="muted">Rata-rata 5–10 menit per match. Cocok buat main cepat atau ketika gadgetmu di charge.</p></div>
+        <div class="card"><h3>Strategi Dalam</h3><p class="muted">Deckbuilding fleksibel:Fleksibel build deck untuk melawan musuh.</p></div>
+        <div class="card"><h3>Mudah dikuasai</h3><p class="muted">Game yang mudah dikuasai pemain</p></div>
+      </div>
+    </section>
+
+    <section id="caramain" class="container">
+      <h2>Cara Main (Ringkas)</h2>
+      <p>Berikut alur umum permainan. Versi lengkap tersedia di <a href="rules.html">Rules</a>.</p>
+      <div class="grid steps">
+        <div class="step card">
+          <div>
+            <strong>Setup</strong>
+            <p class="muted">Kedua pemain mulai langsung dengan 10 kartu. Batu Gunting Kertas untuk mendapat giliran menyerang, dilakukan setiap ronde. Pastikan <a href="deckbuilding.html">deck</a> minimal 10 kartu.</p>
+          </div>
+        </div>
+        <div class="step card">
+          <div>
+            <strong>Phase Giliran</strong>
+            <p class="muted">Batu Gunting Kertas → Main Unit/Skill → Serang → End.</p>
+          </div>
+        </div>
+        <div class="step card">
+          <div>
+            <strong>Menang</strong>
+            <p class="muted">Hancurkan semua kartu musuh <em>atau</em> curi kartu musuh. Beberapa kartu punya kondisi menang alternatif.</p>
+          </div>
+        </div>
+      </div>
+      
+    </section>
+
+    <section id="faq" class="container">
+      <h2>FAQ</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Apakah rarity card penting?</h3>
+          <p class="muted">Rarity kartu tidak menentukan kamu menang atau kalah, atur strategi dan hancurkan lawan dengan apapun kartumu.</p>
+        </div>
+        <div class="card">
+          <h3>Beli di mana?</h3>
+          <p class="muted">Untuk sekarang kami menjual card pada platform <a href="offline.html">Shopee</a>.</p>
+        </div>
+        <div class="card">
+          <h3>Daerah yang terjangkau penjualan</h3>
+          <p class="muted">Sejauh ini baru ada di daerah Cirebon <a href="download.html">Link donasi agar kami bisa menjual hingga keluar kota</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="ctaBlock">
+        <div>
+          <h3>Siap main?</h3>
+          <p class="muted">Klik “Main Sekarang” untuk mulai. Butuh ilmu dulu? Baca <a href="rules.html">Rules Lengkap</a>.</p>
+        </div>
+        <a class="btn" href="play.html">▶️ Main Sekarang</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="links">
+        <a href="about.html">Tentang Dev</a>
+        <a href="news.html">Update</a>
+        <a href="privacy.html">Privasi</a>
+        <a href="terms.html">Ketentuan</a>
+        <a href="support.html">Dukungan</a>
+      </div>
+      <p style="margin-top:10px" class="muted">© <span id="year"></span> Trackcard. Semua hak dilindungi.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Tahun otomatis
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Smooth anchor scroll (optional, aman tanpa library)
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click',e=>{
+        const id=a.getAttribute('href');
+        const target=document.querySelector(id);
+        if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'});} 
+      });
+    });
+  </script>
+</body>
+</html>
