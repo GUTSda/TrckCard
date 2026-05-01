@@ -22,13 +22,10 @@
   --gold-glow: rgba(255,215,0,0.3);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;width:100%;overflow:hidden;}
-body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
 
-.screen{display:none;height:100dvh;height:100vh;width:100%;position:fixed;inset:0;z-index:1;overflow:hidden;}
-.screen.active{display:flex;flex-direction:column;}
-/* Scrollable screens get overflow-y on their inner wrapper */
-#inv-screen.active,#shop-screen.active,#quest-screen.active,#login-screen.active,#howto-screen.active,#gameover-screen.active{overflow-y:auto;}
+.screen{display:none;min-height:100vh;position:relative;z-index:1}
+.screen.active{display:flex;flex-direction:column}
 
 /* ===================== COMMON ===================== */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem 1.8rem;font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;letter-spacing:.08em;border:none;border-radius:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-decoration:none;min-height:44px}
@@ -351,40 +348,40 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 
 /* ===================== INVENTORY ===================== */
 #inv-screen{overflow-y:auto}
-.page-wrap{max-width:1100px;margin:0 auto;width:100%;padding:.65rem .75rem;}
-.page-header{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap}
-.page-header h2{font-family:'Cinzel',serif;font-size:1.15rem;color:var(--gold);flex:1}
-.coin-badge{display:flex;align-items:center;gap:.3rem;font-size:.82rem;color:var(--gold);padding:.2rem .6rem;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);border-radius:20px}
-.tab-row{display:flex;gap:.3rem;margin-bottom:.7rem;overflow-x:auto;padding-bottom:2px}
-.tab-btn{padding:.35rem .75rem;font-family:'Cinzel',serif;font-size:.7rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap;min-height:32px}
+.page-wrap{max-width:1100px;margin:0 auto;width:100%;padding:1rem}
+.page-header{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap}
+.page-header h2{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);flex:1}
+.coin-badge{display:flex;align-items:center;gap:.3rem;font-size:.9rem;color:var(--gold);padding:.3rem .8rem;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);border-radius:20px}
+.tab-row{display:flex;gap:.4rem;margin-bottom:1rem;overflow-x:auto;padding-bottom:2px}
+.tab-btn{padding:.45rem .9rem;font-family:'Cinzel',serif;font-size:.75rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap;min-height:36px}
 .tab-btn.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold)}
-.deck-info{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.5rem .75rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.deck-info span{font-size:.8rem;color:var(--text2)}.deck-info b{color:var(--text)}
-.mode-select-row{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
-.mode-btn{padding:.25rem .65rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer}
+.deck-info{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;margin-bottom:.8rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.deck-info span{font-size:.85rem;color:var(--text2)}.deck-info b{color:var(--text)}
+.mode-select-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.mode-btn{padding:.3rem .8rem;font-size:.75rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer}
 .mode-btn.active{background:rgba(255,215,0,.15);border-color:var(--gold);color:var(--gold)}
-.deck-btn-row{display:flex;gap:.4rem;margin-left:auto;flex-wrap:wrap}
-.filter-row{display:flex;gap:.3rem;margin-bottom:.6rem;flex-wrap:wrap}
-.filter-btn{padding:.22rem .55rem;font-size:.68rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer}
+.deck-btn-row{display:flex;gap:.5rem;margin-left:auto;flex-wrap:wrap}
+.filter-row{display:flex;gap:.35rem;margin-bottom:.8rem;flex-wrap:wrap}
+.filter-btn{padding:.3rem .7rem;font-size:.72rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer}
 .filter-btn.active{background:rgba(255,215,0,.1);border-color:var(--gold);color:var(--gold)}
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.5rem}
-.gcard{border-radius:8px;border:2px solid transparent;padding:.5rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;min-height:140px;display:flex;flex-direction:column}
-.gcard:hover{transform:translateY(-2px)}
-.gcard.in-deck{box-shadow:0 0 0 2px var(--gold),0 0 10px rgba(255,215,0,.3)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.7rem}
+.gcard{border-radius:10px;border:2px solid transparent;padding:.65rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;min-height:160px;display:flex;flex-direction:column}
+.gcard:hover{transform:translateY(-3px)}
+.gcard.in-deck{box-shadow:0 0 0 2px var(--gold),0 0 12px rgba(255,215,0,.3)}
 .gcard.silhouette{filter:brightness(.18) saturate(0);cursor:default}
 .gcard.silhouette:hover{transform:none}
-.g-icon{font-size:1.4rem;margin-bottom:.2rem}
-.g-name{font-family:'Cinzel',serif;font-size:.62rem;font-weight:700;line-height:1.2;margin-bottom:.12rem}
-.g-rarity{font-size:.54rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:1px 3px;border-radius:3px;margin-bottom:.2rem;display:inline-block}
-.g-elem-badge{font-size:.54rem;text-transform:uppercase;color:var(--text2);margin-bottom:.25rem}
-.g-stat{font-size:.6rem;color:var(--text2)}.g-stat b{color:var(--text)}
-.g-skill{font-size:.58rem;color:var(--gold);margin-top:.2rem;font-style:italic}
-.g-desc{font-size:.56rem;color:var(--text2);line-height:1.3;flex:1;margin-top:.12rem}
-.equip-btn{margin-top:.3rem;font-size:.58rem;padding:.18rem .45rem;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text2);transition:all .2s;font-family:'Rajdhani',sans-serif;font-weight:600}
+.g-icon{font-size:1.6rem;margin-bottom:.25rem}
+.g-name{font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;line-height:1.2;margin-bottom:.15rem}
+.g-rarity{font-size:.58rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;padding:1px 4px;border-radius:3px;margin-bottom:.25rem;display:inline-block}
+.g-elem-badge{font-size:.58rem;text-transform:uppercase;color:var(--text2);margin-bottom:.3rem}
+.g-stat{font-size:.65rem;color:var(--text2)}.g-stat b{color:var(--text)}
+.g-skill{font-size:.62rem;color:var(--gold);margin-top:.25rem;font-style:italic}
+.g-desc{font-size:.6rem;color:var(--text2);line-height:1.3;flex:1;margin-top:.15rem}
+.equip-btn{margin-top:.35rem;font-size:.62rem;padding:.2rem .5rem;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text2);transition:all .2s;font-family:'Rajdhani',sans-serif;font-weight:600}
 .equip-btn:hover{border-color:var(--gold);color:var(--gold)}
 .gcard.in-deck .equip-btn{border-color:rgba(255,69,0,.5);color:#ff6b6b}
-.deck-num{position:absolute;top:3px;right:3px;background:var(--gold);color:#000;font-size:.54rem;font-weight:700;padding:1px 3px;border-radius:3px;font-family:'Cinzel',serif}
-.unlock-tag{position:absolute;top:3px;left:3px;background:rgba(0,0,0,.6);color:var(--text2);font-size:.5rem;padding:1px 3px;border-radius:3px}
+.deck-num{position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:.58rem;font-weight:700;padding:1px 4px;border-radius:3px;font-family:'Cinzel',serif}
+.unlock-tag{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:var(--text2);font-size:.55rem;padding:1px 4px;border-radius:3px}
 
 /* ===================== SHOP ===================== */
 #shop-screen{overflow-y:auto}
@@ -464,9 +461,9 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 .setting-row label{color:var(--text2)}
 
 /* ===================== GAME SCREEN ===================== */
-#game-screen{padding:.3rem;gap:.3rem;max-width:920px;margin:0 auto;width:100%;overflow-y:auto;}
-.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:.25rem .4rem;background:var(--panel2);border:1px solid var(--border);border-radius:7px;flex-shrink:0;}
-.topbar-item{display:flex;align-items:center;gap:.2rem;font-size:.68rem;color:var(--text2)}
+#game-screen{padding:.4rem;gap:.4rem;max-width:920px;margin:0 auto;width:100%}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:.35rem .5rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px}
+.topbar-item{display:flex;align-items:center;gap:.25rem;font-size:.75rem;color:var(--text2)}
 .topbar-item b{color:var(--text)}
 .topbar-coin{color:var(--gold)}
 #bot-zone{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:center}
@@ -614,27 +611,31 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 
 /* ===================== LANDSCAPE ENFORCE ===================== */
 #rotate-overlay{
-  display:none;position:fixed;inset:0;z-index:99999;
-  background:#07070f;
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
   flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
 }
 #rotate-overlay .rotate-icon{
-  font-size:4rem;display:block;
+  font-size:4rem;
   animation:rotatePhone 2s ease-in-out infinite;
+  display:block;
 }
 @keyframes rotatePhone{
   0%{transform:rotate(0deg);}
-  35%{transform:rotate(-90deg);}
-  65%{transform:rotate(-90deg);}
+  30%{transform:rotate(-90deg);}
+  70%{transform:rotate(-90deg);}
   100%{transform:rotate(0deg);}
 }
 #rotate-overlay .rotate-msg{
-  font-family:'Cinzel',serif;font-size:1.1rem;color:#eeeeff;text-align:center;
-  padding:0 2rem;line-height:1.7;
+  font-family:'Cinzel',serif;font-size:1.1rem;color:var(--text);text-align:center;
+  padding:0 2rem;line-height:1.6;
 }
-/* Fallback CSS — JS will override */
 @media (orientation:portrait) and (max-width:900px){
-  #rotate-overlay{display:flex;}
+  #rotate-overlay{display:flex!important;}
+  body > *:not(#rotate-overlay){pointer-events:none;}
+}
+@media (orientation:landscape), (min-width:901px){
+  #rotate-overlay{display:none!important;}
 }
 
 /* ===================== FLOATING DAMAGE/HEAL POPUPS ===================== */
@@ -701,44 +702,35 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 .sort-btn.active{background:rgba(0,191,255,.12);border-color:rgba(0,191,255,.4);color:var(--water)}
 
 /* ===================== DECK SLOTS ===================== */
-.deck-slots{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.8rem;}
+.deck-slots{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
 .deck-slot{
-  width:80px;min-height:110px;border-radius:8px;
+  width:90px;min-height:130px;border-radius:10px;
   border:2px dashed rgba(255,215,0,.3);
   background:rgba(255,215,0,.03);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  position:relative;font-size:.58rem;color:var(--text2);
-  transition:all .2s;cursor:pointer;text-align:center;gap:.15rem;
-  user-select:none;-webkit-user-select:none;
+  position:relative;font-size:.6rem;color:var(--text2);
+  transition:all .2s;cursor:pointer;text-align:center;gap:.2rem;
 }
 .deck-slot.occupied{
   border-style:solid;border-color:rgba(255,215,0,.5);
-  background:rgba(255,215,0,.06);
+  background:rgba(255,215,0,.06);cursor:grab;
 }
+.deck-slot.occupied:active{cursor:grabbing;}
 .deck-slot.drag-over{border-color:var(--water);background:rgba(0,191,255,.1);}
-.deck-slot.touch-dragging{opacity:.5;border-color:var(--gold);}
 .deck-slot .slot-num{
-  position:absolute;top:2px;left:4px;
-  font-family:'Cinzel',serif;font-size:.56rem;color:var(--gold);font-weight:700;
+  position:absolute;top:3px;left:5px;
+  font-family:'Cinzel',serif;font-size:.6rem;color:var(--gold);font-weight:700;
 }
-.deck-slot .slot-icon{font-size:1.4rem;}
-.deck-slot .slot-name{font-family:'Cinzel',serif;font-size:.54rem;font-weight:700;line-height:1.2;padding:0 2px;}
-.deck-slot .slot-rarity{font-size:.48rem;margin-top:.05rem;}
+.deck-slot .slot-icon{font-size:1.6rem;}
+.deck-slot .slot-name{font-family:'Cinzel',serif;font-size:.58rem;font-weight:700;line-height:1.2;}
+.deck-slot .slot-rarity{font-size:.52rem;margin-top:.1rem;}
 .deck-slot .slot-remove{
-  position:absolute;top:1px;right:3px;
-  font-size:.6rem;color:var(--red);cursor:pointer;font-weight:700;
-  background:rgba(0,0,0,.6);border-radius:50%;width:14px;height:14px;
+  position:absolute;top:2px;right:4px;
+  font-size:.65rem;color:var(--red);cursor:pointer;font-weight:700;
+  background:rgba(0,0,0,.5);border-radius:50%;width:14px;height:14px;
   display:flex;align-items:center;justify-content:center;
-  z-index:5;
 }
-.deck-pool-label{font-size:.7rem;color:var(--text2);margin-bottom:.4rem;font-family:'Cinzel',serif;}
-
-/* Touch drag ghost */
-#touch-drag-ghost{
-  position:fixed;pointer-events:none;z-index:9990;
-  opacity:.85;transform:scale(1.1);transition:none;
-  display:none;
-}
+.deck-pool-label{font-size:.75rem;color:var(--text2);margin-bottom:.5rem;font-family:'Cinzel',serif;}
 
 /* ===================== SWITCH BTN HIDDEN ===================== */
 #btn-switch{display:none!important;}
@@ -759,9 +751,6 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
   <span class="rotate-icon">📱</span>
   <div class="rotate-msg">Please rotate your device<br>to landscape mode</div>
 </div>
-
-<!-- TOUCH DRAG GHOST -->
-<div id="touch-drag-ghost"></div>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -1778,22 +1767,6 @@ function renderInventory(tab){
   else renderCollectionIndex(el,false);
 }
 
-// ═══════════════════════════════════════════
-// LANDSCAPE ROTATION — JS-driven for webview compat
-// ═══════════════════════════════════════════
-function checkOrientation(){
-  const overlay=document.getElementById('rotate-overlay');
-  if(!overlay)return;
-  const isMobile=Math.min(screen.width,screen.height)<600||('ontouchstart' in window);
-  if(!isMobile){overlay.style.display='none';return;}
-  const isPortrait=window.innerHeight>window.innerWidth;
-  overlay.style.display=isPortrait?'flex':'none';
-}
-window.addEventListener('resize',checkOrientation);
-window.addEventListener('orientationchange',()=>setTimeout(checkOrientation,150));
-document.addEventListener('DOMContentLoaded',checkOrientation);
-setTimeout(checkOrientation,300);
-
 // ── INVENTORY SORT STATE ──
 let invSortMode = 'rarity-asc';
 const RARITY_ORDER = {common:0,rare:1,epic:2,legendary:3};
@@ -1873,100 +1846,24 @@ function renderDeckBuilder(el){
       <button class="equip-btn" onclick="toggleDeckPool(${id})">${inDeck?'✕ Remove':'+ Equip'}</button>`;
     grid.appendChild(div);
   });
-  setTimeout(attachSlotTouchListeners,50);
 }
 
-// ══ DECK SLOT TOUCH + MOUSE DRAG ══
+// Slot drag/drop
 let _dragSlotIdx=null;
-let _touchDragActive=false;
-let _touchStartSlot=null;
-
 function slotDragStart(e,i){_dragSlotIdx=i;e.dataTransfer.effectAllowed='move';}
-function slotDragOver(e,i){e.preventDefault();document.getElementById('dslot-'+i).classList.add('drag-over');}
-function slotDragLeave(e,i){document.getElementById('dslot-'+i).classList.remove('drag-over');}
+function slotDragOver(e,i){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function slotDragLeave(e,i){e.currentTarget.classList.remove('drag-over');}
 function slotDrop(e,i){
-  e.preventDefault();document.getElementById('dslot-'+i).classList.remove('drag-over');
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
   if(_dragSlotIdx===null||_dragSlotIdx===i)return;
-  swapDeckSlots(_dragSlotIdx,i);_dragSlotIdx=null;
+  // Swap
+  const a=SD.deck[_dragSlotIdx],b=SD.deck[i];
+  if(a!==undefined&&b!==undefined){SD.deck[_dragSlotIdx]=b;SD.deck[i]=a;}
+  else if(a!==undefined&&b===undefined){SD.deck.splice(_dragSlotIdx,1);SD.deck.splice(i,0,a);}
+  _dragSlotIdx=null;saveProfile();renderInventory('deck');
 }
-
-function swapDeckSlots(a,b){
-  if(!SD)return;
-  const mode=SD.deckMode||5;
-  // Pad deck to mode length with undefined
-  while(SD.deck.length<mode)SD.deck.push(undefined);
-  const tmp=SD.deck[a];SD.deck[a]=SD.deck[b];SD.deck[b]=tmp;
-  SD.deck=SD.deck.filter(x=>x!==undefined&&x!==null);
-  saveProfile();renderInventory('deck');
-}
-
-// Touch drag for mobile
-function slotTouchStart(e,i){
-  if(!SD||!SD.deck[i])return;
-  _touchStartSlot=i;
-  const slot=document.getElementById('dslot-'+i);
-  const rect=slot.getBoundingClientRect();
-  const ghost=document.getElementById('touch-drag-ghost');
-  ghost.innerHTML=slot.innerHTML;
-  ghost.style.cssText=`display:block;position:fixed;width:${rect.width}px;height:${rect.height}px;
-    background:rgba(255,215,0,0.15);border:2px solid var(--gold);border-radius:8px;
-    pointer-events:none;z-index:9990;opacity:0.85;padding:.5rem;font-size:.58rem;
-    left:${rect.left}px;top:${rect.top}px;color:#eeeeff;`;
-  slot.classList.add('touch-dragging');
-  _touchDragActive=true;
-  e.preventDefault();
-}
-
-function slotTouchMove(e){
-  if(!_touchDragActive)return;
-  e.preventDefault();
-  const t=e.touches[0];
-  const ghost=document.getElementById('touch-drag-ghost');
-  ghost.style.left=(t.clientX-40)+'px';
-  ghost.style.top=(t.clientY-55)+'px';
-  // Highlight target slot
-  document.querySelectorAll('.deck-slot').forEach(s=>s.classList.remove('drag-over'));
-  const el=document.elementFromPoint(t.clientX,t.clientY);
-  const slot=el&&el.closest('.deck-slot');
-  if(slot)slot.classList.add('drag-over');
-}
-
-function slotTouchEnd(e){
-  if(!_touchDragActive)return;
-  _touchDragActive=false;
-  const ghost=document.getElementById('touch-drag-ghost');
-  ghost.style.display='none';
-  document.querySelectorAll('.deck-slot').forEach(s=>{s.classList.remove('drag-over');s.classList.remove('touch-dragging');});
-  const t=e.changedTouches[0];
-  const el=document.elementFromPoint(t.clientX,t.clientY);
-  const targetSlot=el&&el.closest('.deck-slot');
-  if(targetSlot){
-    const targetId=targetSlot.id;// 'dslot-N'
-    const targetIdx=parseInt(targetId.replace('dslot-',''));
-    if(!isNaN(targetIdx)&&targetIdx!==_touchStartSlot){
-      swapDeckSlots(_touchStartSlot,targetIdx);
-    }
-  }
-  _touchStartSlot=null;
-}
-
-// Attach touch listeners after render
-function attachSlotTouchListeners(){
-  document.querySelectorAll('.deck-slot').forEach(slot=>{
-    slot.addEventListener('touchstart',e=>{
-      const idx=parseInt(slot.id.replace('dslot-',''));
-      slotTouchStart(e,idx);
-    },{passive:false});
-  });
-  document.addEventListener('touchmove',slotTouchMove,{passive:false});
-  document.addEventListener('touchend',slotTouchEnd,{passive:false});
-}
-
-function slotClick(i){showToast('Tap a card below to add it to your deck');}
-function removeDeckSlot(i){
-  if(!SD)return;
-  SD.deck.splice(i,1);saveProfile();renderInventory('deck');
-}
+function slotClick(i){showToast('Click a card below to place it here.');}
+function removeDeckSlot(i){if(!SD)return;SD.deck.splice(i,1);saveProfile();renderInventory('deck');}
 function toggleDeckPool(id){
   if(!SD)return;
   const card=CARD_DB.find(c=>c.id===id);if(!card)return;
