@@ -609,6 +609,132 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);mi
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:.85rem;padding:.6rem 1.4rem;border-radius:20px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
 
+/* ===================== LANDSCAPE ENFORCE ===================== */
+#rotate-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
+}
+#rotate-overlay .rotate-icon{
+  font-size:4rem;
+  animation:rotatePhone 2s ease-in-out infinite;
+  display:block;
+}
+@keyframes rotatePhone{
+  0%{transform:rotate(0deg);}
+  30%{transform:rotate(-90deg);}
+  70%{transform:rotate(-90deg);}
+  100%{transform:rotate(0deg);}
+}
+#rotate-overlay .rotate-msg{
+  font-family:'Cinzel',serif;font-size:1.1rem;color:var(--text);text-align:center;
+  padding:0 2rem;line-height:1.6;
+}
+@media (orientation:portrait) and (max-width:900px){
+  #rotate-overlay{display:flex!important;}
+  body > *:not(#rotate-overlay){pointer-events:none;}
+}
+@media (orientation:landscape), (min-width:901px){
+  #rotate-overlay{display:none!important;}
+}
+
+/* ===================== FLOATING DAMAGE/HEAL POPUPS ===================== */
+.float-popup{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-weight:900;font-size:1.4rem;
+  pointer-events:none;z-index:50;
+  animation:floatUp .9s ease forwards;
+  white-space:nowrap;
+  text-shadow:0 2px 8px rgba(0,0,0,0.8);
+}
+.float-popup.dmg{color:#ff3333;}
+.float-popup.heal{color:#2ecc71;}
+.float-popup.shield{color:#5dade2;}
+.float-popup.buff{color:var(--gold);}
+.float-popup.poison{color:#a569bd;}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+  30%{opacity:1;transform:translateX(-50%) translateY(-20px) scale(1.15);}
+  100%{opacity:0;transform:translateX(-50%) translateY(-60px) scale(.85);}
+}
+
+/* ===================== DEATH SLASH ANIMATION ===================== */
+.slash-overlay{
+  position:absolute;inset:0;z-index:30;pointer-events:none;overflow:hidden;
+}
+.slash-line{
+  position:absolute;
+  top:10%;left:-10%;
+  width:120%;height:4px;
+  background:linear-gradient(90deg,transparent,#ff2222 30%,#fff 50%,#ff2222 70%,transparent);
+  transform:rotate(35deg);transform-origin:left center;
+  animation:slashAnim .3s ease forwards;
+  opacity:0;
+}
+.slash-line2{
+  position:absolute;
+  top:40%;left:-10%;
+  width:120%;height:3px;
+  background:linear-gradient(90deg,transparent,#ff4444 30%,#fffbe0 50%,#ff4444 70%,transparent);
+  transform:rotate(30deg);transform-origin:left center;
+  animation:slashAnim .3s ease .08s forwards;
+  opacity:0;
+}
+@keyframes slashAnim{0%{opacity:0;transform:rotate(35deg) scaleX(0)}50%{opacity:1;transform:rotate(35deg) scaleX(1)}100%{opacity:0;transform:rotate(35deg) scaleX(1)}}
+.arena-side.dying{animation:cardDie .7s ease forwards!important;}
+@keyframes cardDie{0%{opacity:1;filter:none}40%{filter:brightness(2) saturate(0);opacity:.8}100%{opacity:0;transform:scale(.85);filter:grayscale(1) brightness(.4)}}
+
+/* ===================== QUEST NOTIFICATION DOT ===================== */
+.menu-nav-btn{position:relative;}
+.notif-dot{
+  position:absolute;top:4px;right:4px;
+  width:10px;height:10px;border-radius:50%;
+  background:#e74c3c;
+  border:2px solid var(--bg);
+  display:none;
+}
+.notif-dot.show{display:block;}
+
+/* ===================== INVENTORY SORT ===================== */
+.sort-row{display:flex;gap:.35rem;margin-bottom:.8rem;flex-wrap:wrap;align-items:center;}
+.sort-row label{font-size:.72rem;color:var(--text2);margin-right:.2rem;}
+.sort-btn{padding:.28rem .65rem;font-size:.7rem;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s}
+.sort-btn.active{background:rgba(0,191,255,.12);border-color:rgba(0,191,255,.4);color:var(--water)}
+
+/* ===================== DECK SLOTS ===================== */
+.deck-slots{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
+.deck-slot{
+  width:90px;min-height:130px;border-radius:10px;
+  border:2px dashed rgba(255,215,0,.3);
+  background:rgba(255,215,0,.03);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;font-size:.6rem;color:var(--text2);
+  transition:all .2s;cursor:pointer;text-align:center;gap:.2rem;
+}
+.deck-slot.occupied{
+  border-style:solid;border-color:rgba(255,215,0,.5);
+  background:rgba(255,215,0,.06);cursor:grab;
+}
+.deck-slot.occupied:active{cursor:grabbing;}
+.deck-slot.drag-over{border-color:var(--water);background:rgba(0,191,255,.1);}
+.deck-slot .slot-num{
+  position:absolute;top:3px;left:5px;
+  font-family:'Cinzel',serif;font-size:.6rem;color:var(--gold);font-weight:700;
+}
+.deck-slot .slot-icon{font-size:1.6rem;}
+.deck-slot .slot-name{font-family:'Cinzel',serif;font-size:.58rem;font-weight:700;line-height:1.2;}
+.deck-slot .slot-rarity{font-size:.52rem;margin-top:.1rem;}
+.deck-slot .slot-remove{
+  position:absolute;top:2px;right:4px;
+  font-size:.65rem;color:var(--red);cursor:pointer;font-weight:700;
+  background:rgba(0,0,0,.5);border-radius:50%;width:14px;height:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.deck-pool-label{font-size:.75rem;color:var(--text2);margin-bottom:.5rem;font-family:'Cinzel',serif;}
+
+/* ===================== SWITCH BTN HIDDEN ===================== */
+#btn-switch{display:none!important;}
+
 /* BGM state synced via JS, not a visible bar anymore */
 #bgm-vol, #settings-bgm-vol {
   -webkit-appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;
@@ -619,6 +745,12 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);mi
 </style>
 </head>
 <body>
+
+<!-- ROTATE OVERLAY -->
+<div id="rotate-overlay">
+  <span class="rotate-icon">📱</span>
+  <div class="rotate-msg">Please rotate your device<br>to landscape mode</div>
+</div>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -693,8 +825,8 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);mi
   <div id="menu-bottom-nav">
     <button class="menu-nav-btn" onclick="showScreen('inv-screen');renderInventory('deck')">Inventory</button>
     <button class="menu-nav-btn" onclick="showScreen('shop-screen');initShop()">Shop</button>
-    <button class="menu-nav-btn" onclick="showScreen('login-screen');renderLoginRewards()">Rewards</button>
-    <button class="menu-nav-btn" onclick="showScreen('quest-screen');renderQuests()">Quest</button>
+    <button class="menu-nav-btn" id="rewards-nav-btn" onclick="showScreen('login-screen');renderLoginRewards()">Rewards<span class="notif-dot" id="rewards-notif-dot"></span></button>
+    <button class="menu-nav-btn" id="quest-nav-btn" onclick="showScreen('quest-screen');renderQuests()">Quest<span class="notif-dot" id="quest-notif-dot"></span></button>
   </div>
 
 </div>
@@ -1457,7 +1589,36 @@ function updateAllCoins(){
   const mw=document.getElementById('menu-wins');if(mw)mw.textContent=SD.wins;
   const ms=document.getElementById('menu-streak');if(ms)ms.textContent=Math.max(1,SD.loginStreak);
   const sd2=document.getElementById('streak-display');if(sd2)sd2.textContent=Math.max(1,SD.loginStreak);
+  updateNotifDots();
   saveProfile();
+}
+
+function updateNotifDots(){
+  if(!SD)return;
+  // Quest dot: any completed unclaimed quest
+  const questReady=checkQuestReady();
+  const qd=document.getElementById('quest-notif-dot');
+  if(qd)qd.classList.toggle('show',questReady);
+  // Rewards dot: login reward available today
+  const rewardReady=!SD.loginClaimedToday;
+  const rd=document.getElementById('rewards-notif-dot');
+  if(rd)rd.classList.toggle('show',rewardReady);
+}
+
+function checkQuestReady(){
+  if(!SD)return false;
+  checkQuestReset();
+  // Check daily quests
+  for(const q of DAILY_QUESTS){
+    const prog=SD.dailyQ[q.id]||0;const claimed=SD.dailyQ[q.id+'c'];
+    if(prog>=q.goal&&!claimed)return true;
+  }
+  // Check weekly quests
+  for(const q of WEEKLY_QUESTS){
+    const prog=SD.weeklyQ[q.id]||0;const claimed=SD.weeklyQ[q.id+'c'];
+    if(prog>=q.goal&&!claimed)return true;
+  }
+  return false;
 }
 
 // ═══════════════════════════════════════════
@@ -1606,40 +1767,116 @@ function renderInventory(tab){
   else renderCollectionIndex(el,false);
 }
 
+// ── INVENTORY SORT STATE ──
+let invSortMode = 'rarity-asc';
+const RARITY_ORDER = {common:0,rare:1,epic:2,legendary:3};
+
+function sortCards(ids){
+  return [...ids].sort((a,b)=>{
+    const ca=CARD_DB.find(x=>x.id===a),cb=CARD_DB.find(x=>x.id===b);
+    if(!ca||!cb)return 0;
+    if(invSortMode==='rarity-asc') return RARITY_ORDER[ca.rarity]-RARITY_ORDER[cb.rarity]||ca.name.localeCompare(cb.name);
+    if(invSortMode==='rarity-desc') return RARITY_ORDER[cb.rarity]-RARITY_ORDER[ca.rarity]||ca.name.localeCompare(cb.name);
+    if(invSortMode==='name') return ca.name.localeCompare(cb.name);
+    if(invSortMode==='element') return ca.element.localeCompare(cb.element)||ca.name.localeCompare(cb.name);
+    return 0;
+  });
+}
+
+function renderSortRow(containerId){
+  const opts=[['rarity-asc','⬆ Rarity'],['rarity-desc','⬇ Rarity'],['name','A-Z'],['element','Element']];
+  return `<div class="sort-row"><label>Sort:</label>${opts.map(([m,l])=>`<button class="sort-btn${invSortMode===m?' active':''}" onclick="invSortMode='${m}';renderInventory('${containerId}')">${l}</button>`).join('')}</div>`;
+}
+
 function renderDeckBuilder(el){
   if(!SD)return;
   const mode=SD.deckMode||5;const minActive=mode===5?2:6;
   const deckIds=SD.deck;const deckActives=deckIds.filter(id=>{const c=CARD_DB.find(x=>x.id===id);return c&&c.type==='active';}).length;
   const valid=deckIds.length===mode&&deckActives>=minActive;
-  el.innerHTML=`<div class="deck-info"><div class="mode-select-row"><span style="font-size:.8rem;color:var(--text2)">Mode:</span>
-    <button class="mode-btn${mode===5?' active':''}" onclick="setDeckMode(5)">5-Card</button>
-    <button class="mode-btn${mode===10?' active':''}" onclick="setDeckMode(10)">10-Card</button></div>
-    <span>Deck: <b>${deckIds.length}</b>/${mode}</span><span>Active: <b>${deckActives}</b> (min ${minActive})</span>
+
+  let slotsHtml='<div class="deck-slots" id="deck-slots-row">';
+  for(let i=0;i<mode;i++){
+    const id=deckIds[i];const card=id?CARD_DB.find(c=>c.id===id):null;
+    const elClass=card?(card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`):'';
+    slotsHtml+=`<div class="deck-slot${card?' occupied '+elClass:''}" id="dslot-${i}"
+      draggable="${card?'true':'false'}"
+      ondragstart="slotDragStart(event,${i})"
+      ondragover="slotDragOver(event,${i})"
+      ondragleave="slotDragLeave(event,${i})"
+      ondrop="slotDrop(event,${i})"
+      onclick="${card?'':'slotClick('+i+')'}"
+      title="${card?card.name:'Empty slot — click card below to add'}">
+      <span class="slot-num">${i+1}</span>
+      ${card?`<div class="slot-icon">${card.icon}</div>
+        <div class="slot-name">${card.name}</div>
+        <div class="slot-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</div>
+        <div class="slot-remove" onclick="event.stopPropagation();removeDeckSlot(${i})">✕</div>`
+      :'<div style="opacity:.4;font-size:1.4rem">＋</div><div style="opacity:.4">Empty</div>'}
+    </div>`;
+  }
+  slotsHtml+='</div>';
+
+  el.innerHTML=`<div class="deck-info">
+    <div class="mode-select-row"><span style="font-size:.8rem;color:var(--text2)">Mode:</span>
+      <button class="mode-btn${mode===5?' active':''}" onclick="setDeckMode(5)">5-Card</button>
+      <button class="mode-btn${mode===10?' active':''}" onclick="setDeckMode(10)">10-Card</button></div>
+    <span>Active: <b>${deckActives}</b> (min ${minActive})</span>
     <div class="deck-btn-row"><button class="btn btn-secondary btn-sm" onclick="clearDeck()">🗑 Clear</button>
-    <button class="btn btn-primary btn-sm" id="go-battle-btn" onclick="goToBattle()" ${!valid?'disabled':''}>⚔️ Battle!</button></div></div>
-    <div class="cards-grid" id="deck-grid"></div>`;
-  const grid=document.getElementById('deck-grid');
-  const owned=[...new Set(SD.ownedIds)];
+    <button class="btn btn-primary btn-sm" id="go-battle-btn" onclick="goToBattle()" ${!valid?'disabled':''}>⚔️ Battle!</button></div>
+  </div>
+  <div class="deck-pool-label">🎴 Deck Slots (drag to reorder)</div>
+  ${slotsHtml}
+  <div class="deck-pool-label">📦 Your Cards — click to add to deck</div>
+  ${renderSortRow('deck')}
+  <div class="cards-grid" id="deck-pool-grid"></div>`;
+
+  const grid=document.getElementById('deck-pool-grid');
+  const owned=sortCards([...new Set(SD.ownedIds)]);
   owned.forEach(id=>{
     const card=CARD_DB.find(c=>c.id===id);if(!card)return;
-    const inDeck=SD.deck.includes(id);const deckPos=inDeck?SD.deck.indexOf(id)+1:null;
+    const inDeck=SD.deck.includes(id);
     const elClass=card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`;
     const div=document.createElement('div');div.className=`gcard ${elClass}${inDeck?' in-deck':''}`;
-    div.innerHTML=`${inDeck?`<div class="deck-num">#${deckPos}</div>`:''}
+    div.innerHTML=`${inDeck?`<div class="deck-num">#${SD.deck.indexOf(id)+1}</div>`:''}
       <div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
       ${card.type==='active'?`<div class="g-stat">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>`:''}
       <div class="g-desc">${card.skillDesc}</div>
-      <button class="equip-btn" onclick="toggleDeck(${id})">${inDeck?'✕ Remove':'+ Equip'}</button>`;
+      <button class="equip-btn" onclick="toggleDeckPool(${id})">${inDeck?'✕ Remove':'+ Equip'}</button>`;
     grid.appendChild(div);
   });
 }
 
+// Slot drag/drop
+let _dragSlotIdx=null;
+function slotDragStart(e,i){_dragSlotIdx=i;e.dataTransfer.effectAllowed='move';}
+function slotDragOver(e,i){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function slotDragLeave(e,i){e.currentTarget.classList.remove('drag-over');}
+function slotDrop(e,i){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(_dragSlotIdx===null||_dragSlotIdx===i)return;
+  // Swap
+  const a=SD.deck[_dragSlotIdx],b=SD.deck[i];
+  if(a!==undefined&&b!==undefined){SD.deck[_dragSlotIdx]=b;SD.deck[i]=a;}
+  else if(a!==undefined&&b===undefined){SD.deck.splice(_dragSlotIdx,1);SD.deck.splice(i,0,a);}
+  _dragSlotIdx=null;saveProfile();renderInventory('deck');
+}
+function slotClick(i){showToast('Click a card below to place it here.');}
+function removeDeckSlot(i){if(!SD)return;SD.deck.splice(i,1);saveProfile();renderInventory('deck');}
+function toggleDeckPool(id){
+  if(!SD)return;
+  const card=CARD_DB.find(c=>c.id===id);if(!card)return;
+  const mode=SD.deckMode||5;const inDeck=SD.deck.includes(id);
+  if(inDeck){SD.deck=SD.deck.filter(x=>x!==id);}
+  else{if(SD.deck.length>=mode){showToast(`Deck full! Max ${mode} cards`);return;}SD.deck.push(id);}
+  saveProfile();renderInventory('deck');
+}
+
 function renderOwnedCards(el){
   if(!SD)return;
-  const owned=[...new Set(SD.ownedIds)];
-  el.innerHTML=`<p style="color:var(--text2);font-size:.82rem;margin-bottom:.7rem">You own <b style="color:var(--gold)">${owned.length}</b> / ${CARD_DB.length} cards</p><div class="cards-grid" id="owned-grid"></div>`;
+  const owned=sortCards([...new Set(SD.ownedIds)]);
+  el.innerHTML=`<p style="color:var(--text2);font-size:.82rem;margin-bottom:.7rem">You own <b style="color:var(--gold)">${owned.length}</b> / ${CARD_DB.length} cards</p>${renderSortRow('owned')}<div class="cards-grid" id="owned-grid"></div>`;
   const grid=document.getElementById('owned-grid');
   owned.forEach(id=>{
     const card=CARD_DB.find(c=>c.id===id);if(!card)return;
@@ -1682,14 +1919,7 @@ function renderCollGrid(){
   });
 }
 function setDeckMode(m){SD.deckMode=m;saveProfile();renderInventory('deck');}
-function toggleDeck(id){
-  if(!SD)return;
-  const card=CARD_DB.find(c=>c.id===id);if(!card)return;
-  const mode=SD.deckMode||5;const inDeck=SD.deck.includes(id);
-  if(inDeck){SD.deck=SD.deck.filter(x=>x!==id);}
-  else{if(SD.deck.length>=mode){showToast(`Deck full! Max ${mode} cards`);return;}SD.deck.push(id);}
-  saveProfile();renderInventory('deck');
-}
+function toggleDeck(id){toggleDeckPool(id);}
 function clearDeck(){if(!SD)return;SD.deck=[];saveProfile();renderInventory('deck');}
 
 // ═══════════════════════════════════════════
@@ -1823,8 +2053,6 @@ function botDecide(){
     if(healNames.includes(bot.skillName)&&bot.hp<bot.maxHp*.5)return 'skill';
     return 'skill';
   }
-  const alts=GS.botCards.filter((c,i)=>c&&c.type==='active'&&c.hp>0&&i!==GS.botActiveIdx);
-  if(pl&&beats(pl.element,bot.element)&&alts.length>0&&bot.hp<bot.maxHp*.5)return 'switch';
   return 'attack';
 }
 
@@ -1887,7 +2115,7 @@ async function botActOnce(){
       log(`🤖 ${bot.name} attacks — ${dmg} dmg!${bonus>0?' (advantage!)':''}`,'atk');anim('player','hit');
     } else if(action==='skill'&&bot.skill){
       bot.skill(bot,pl,GS);bot.currentCd=bot.cooldown;anim('bot','skill');
-    } else if(action==='switch'){botSwitch();}
+    }
     updateUI();
     if(checkDeaths())return;
     await delay(600);
@@ -1932,7 +2160,9 @@ function tickPoisons(){
   [[GS.playerActiveIdx,GS.playerCards,true],[GS.botActiveIdx,GS.botCards,false]].forEach(([idx,cards])=>{
     if(idx===null||idx===undefined||idx<0)return;
     const card=cards[idx];if(!card||!card.buffs)return;
-    card.buffs.filter(b=>b.type==='poison').forEach(p=>{const d=Math.max(0,p.dmg);card.hp=Math.max(0,card.hp-d);log(`☠️ ${card.name} takes ${d} poison!`,'atk');p.turns--;});
+    card.buffs.filter(b=>b.type==='poison').forEach(p=>{const d=Math.max(0,p.dmg);card.hp=Math.max(0,card.hp-d);
+      const side=cards===GS.playerCards?'player':'bot';
+      log(`☠️ ${card.name} takes ${d} poison!`,'atk');floatPopup(side,`-${d} ☠️`,'poison');p.turns--;});
     card.buffs=card.buffs.filter(b=>!(b.type==='poison'&&b.turns<=0));
     card.buffs.filter(b=>b.type==='reflect').forEach(r=>{r.turns--;});
     card.buffs=card.buffs.filter(b=>!(b.type==='reflect'&&b.turns<=0));
@@ -1999,19 +2229,22 @@ function removeBuff(buffs,type){if(!buffs)return;const i=buffs.findIndex(b=>b.ty
 
 function applyDmg(target,raw,isPlayerTarget,gs){
   if(!target||raw<=0)return 0;
-  if(target.buffs&&target.buffs.some(b=>b.type==='dodge')){removeBuff(target.buffs,'dodge');log(`${target.name} dodges!`,'skill');return 0;}
+  if(target.buffs&&target.buffs.some(b=>b.type==='dodge')){removeBuff(target.buffs,'dodge');log(`${target.name} dodges!`,'skill');floatPopup(isPlayerTarget?'player':'bot','DODGE','buff');return 0;}
   let dmg=raw;
   if(target.buffs){const sh=target.buffs.find(b=>b.type==='shield');if(sh){dmg=Math.floor(dmg*(1-sh.value));sh.turns--;if(sh.turns<=0)removeBuff(target.buffs,'shield');}}
   const ownerCards=isPlayerTarget?(gs?gs.playerCards:[]):(gs?gs.botCards:[]);
   const reduction=ownerCards.filter(c=>c&&c.type==='passive'&&c.passive&&c.passive.type==='damageReduction'&&c.passive.element===target.element).reduce((a,c)=>a+c.passive.value,0);
   dmg=Math.max(0,dmg-reduction);
   if(target.buffs&&target.buffs.some(b=>b.type==='reflect')){const ref=target.buffs.find(b=>b.type==='reflect');log(`${target.name} reflects ${ref.dmg} damage!`,'skill');}
-  target.hp=Math.max(0,target.hp-dmg);return dmg;
+  target.hp=Math.max(0,target.hp-dmg);
+  if(dmg>0) floatPopup(isPlayerTarget?'player':'bot',`-${dmg}`,'dmg');
+  return dmg;
 }
 
 function healCard(card,amt,gs){
   if(!card)return;card.hp=Math.min(card.maxHp,card.hp+amt);
-  const side=gs&&gs.playerCards&&gs.playerCards.includes(card)?'player':'bot';anim(side,'heal');
+  const side=gs&&gs.playerCards&&gs.playerCards.includes(card)?'player':'bot';
+  anim(side,'heal');floatPopup(side,`+${amt}`,'heal');
 }
 
 // ═══════════════════════════════════════════
@@ -2052,7 +2285,7 @@ function attachBuff(cardId){
 function closeBuff(){document.getElementById('buff-modal').classList.add('hidden');}
 
 // ═══════════════════════════════════════════
-// DEATH CHECK
+// DEATH CHECK — manual switch on player death
 // ═══════════════════════════════════════════
 function checkDeaths(){
   if(!GS||GS.gameOver)return false;
@@ -2062,17 +2295,29 @@ function checkDeaths(){
     log(`💀 ${bc.name} defeated!`,'win');GS.stats.kills++;addQuestProgress('kills',null,1);bc.buffs=[];
     if(pc&&pc._katana){pc.baseDamage+=5;log(`⚔️ Katana kill bonus! ${pc.name} ATK +5 (now ${pc.baseDamage})`,'skill');}
     const next=GS.botCards.findIndex((c,i)=>c&&c.type==='active'&&c.hp>0&&i!==GS.botActiveIdx);
-    if(next===-1){endGame(true);return true;}
-    GS.botActiveIdx=next;updateUI();
-    setTimeout(()=>{log(`🤖 Bot sends ${GS.botCards[GS.botActiveIdx].name}!`,'info');updateUI();advanceRound();},800);
+    if(next===-1){
+      playDeathAnim('bot',()=>endGame(true));return true;
+    }
+    playDeathAnim('bot',()=>{
+      GS.botActiveIdx=next;updateUI();
+      log(`🤖 Bot sends ${GS.botCards[GS.botActiveIdx].name}!`,'info');updateUI();
+      setTimeout(()=>advanceRound(),500);
+    });
     return true;
   }
   if(pc&&pc.hp<=0){
     if(pc._revive){pc._revive=false;pc.hp=50;log(`${pc.name} revives at 50 HP!`,'heal');updateUI();return false;}
     log(`💀 Your ${pc.name} defeated!`,'atk');pc.buffs=[];pc.attachedBuffs=[];
     const hasNext=GS.playerCards.some((c,i)=>c&&c.type==='active'&&c.hp>0&&i!==GS.playerActiveIdx);
-    if(!hasNext){endGame(false);return true;}
-    setButtons(false);openSwitch(true);return true;
+    if(!hasNext){
+      playDeathAnim('player',()=>endGame(false));return true;
+    }
+    // Play death animation then open manual switch modal
+    playDeathAnim('player',()=>{
+      setButtons(false);
+      openSwitch(true);
+    });
+    return true;
   }
   return false;
 }
@@ -2108,7 +2353,7 @@ function endGame(won){
   if(!GS||!SD)return;GS.gameOver=true;setButtons(false);
   let coinsEarned=0;
   if(won){const alive=GS.playerCards.filter(c=>c&&c.type==='active'&&c.hp>0).length;
-    coinsEarned=Math.min(500,Math.max(100,alive*60+GS.stats.kills*30));SD.coins+=coinsEarned;SD.wins++;addQuestProgress('wins',null,1);saveProfile();
+    coinsEarned=Math.min(300,Math.max(40,alive*40+GS.stats.kills*20));SD.coins+=coinsEarned;SD.wins++;addQuestProgress('wins',null,1);saveProfile();
   }else{coinsEarned=40;SD.coins+=coinsEarned;saveProfile();}
   document.getElementById('go-title').textContent=won?'Victory!':'Defeat!';
   document.getElementById('go-title').className=`go-title ${won?'win':'lose'}`;
@@ -2214,7 +2459,6 @@ function setButtons(on){
     const buffAvail=on&&GS.playerCards&&GS.playerCards.some(c=>c&&c.type==='buff'&&!(GS.usedBuffs||[]).includes(c.id));
     const ba=document.getElementById('btn-atk');if(ba)ba.disabled=!on;
     const bs=document.getElementById('btn-skill');if(bs){bs.disabled=!skillOk;bs.textContent=pc&&pc.currentCd>0?`✨ (${pc.currentCd})`:'✨ Skill';}
-    const bsw=document.getElementById('btn-switch');if(bsw)bsw.disabled=!on;
     const bb=document.getElementById('btn-buff');if(bb)bb.disabled=!buffAvail;
   }catch(e){}
 }
@@ -2231,6 +2475,29 @@ function anim(side,type){
     void el.offsetWidth;cls.forEach(c=>el.classList.add(c));
     setTimeout(()=>cls.forEach(c=>el.classList.remove(c)),700);
   }catch(e){}
+}
+
+function floatPopup(side,text,kind='dmg'){
+  try{
+    const el=document.getElementById(`arena-${side}`);if(!el)return;
+    const pop=document.createElement('div');
+    pop.className=`float-popup ${kind}`;
+    pop.textContent=text;
+    pop.style.top=(Math.random()*30+20)+'%';
+    el.appendChild(pop);
+    setTimeout(()=>pop.remove(),950);
+  }catch(e){}
+}
+
+function playDeathAnim(side,callback){
+  try{
+    const el=document.getElementById(`arena-${side}`);if(!el)return;
+    const slash=document.createElement('div');slash.className='slash-overlay';
+    slash.innerHTML='<div class="slash-line"></div><div class="slash-line2"></div>';
+    el.appendChild(slash);
+    el.classList.add('dying');
+    setTimeout(()=>{slash.remove();el.classList.remove('dying');if(callback)callback();},750);
+  }catch(e){if(callback)callback();}
 }
 
 // ═══════════════════════════════════════════
