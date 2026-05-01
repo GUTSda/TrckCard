@@ -13,19 +13,21 @@
   --bg:#07070f;--bg2:#0d0d1a;--bg3:#121225;--panel:#181830;--panel2:#141428;
   --border:#252545;--text:#eeeeff;--text2:#8888aa;--gold:#ffd700;
   --purple:#9b59b6;--red:#e74c3c;--green:#2ecc71;--blue:#3498db;
+
+  /* Glass UI System */
+  --glass-bg: rgba(0,0,0,0.45);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-hover: rgba(255,255,255,0.06);
+  --glass-blur: blur(12px);
+  --gold-glow: rgba(255,215,0,0.3);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
-body::before{content:'';position:fixed;inset:0;background:
-  radial-gradient(ellipse at 15% 40%,rgba(91,33,182,.1) 0%,transparent 50%),
-  radial-gradient(ellipse at 85% 20%,rgba(255,69,0,.08) 0%,transparent 50%),
-  radial-gradient(ellipse at 50% 90%,rgba(0,191,255,.06) 0%,transparent 50%);
-  pointer-events:none;z-index:0}
 
 .screen{display:none;min-height:100vh;position:relative;z-index:1}
 .screen.active{display:flex;flex-direction:column}
 
-/* ===== COMMON ===== */
+/* ===================== COMMON ===================== */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem 1.8rem;font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;letter-spacing:.08em;border:none;border-radius:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-decoration:none;min-height:44px}
 .btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.08);opacity:0;transition:opacity .2s}
 .btn:hover::after{opacity:1}
@@ -43,8 +45,13 @@ body::before{content:'';position:fixed;inset:0;background:
 .btn:disabled::after{display:none}
 .zone{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:.8rem}
 
-/* ===== LOGIN SCREEN ===== */
-#auth-screen{align-items:center;justify-content:center;padding:1rem}
+/* ===================== LOGIN SCREEN ===================== */
+#auth-screen{align-items:center;justify-content:center;padding:1rem;background:var(--bg)}
+#auth-screen::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 15% 40%,rgba(91,33,182,.1) 0%,transparent 50%),
+  radial-gradient(ellipse at 85% 20%,rgba(255,69,0,.08) 0%,transparent 50%),
+  radial-gradient(ellipse at 50% 90%,rgba(0,191,255,.06) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
 .auth-box{position:relative;z-index:1;width:100%;max-width:380px;margin:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem 1.8rem;box-shadow:0 0 60px rgba(255,69,0,.08)}
 .auth-logo{font-family:'Cinzel',serif;font-size:2.8rem;font-weight:900;text-align:center;background:linear-gradient(135deg,#ff4500 0%,#ffd700 50%,#00bfff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(255,100,0,.4));margin-bottom:.2rem}
 .auth-sub{text-align:center;font-size:.75rem;color:var(--text2);letter-spacing:.35em;text-transform:uppercase;margin-bottom:1.5rem}
@@ -63,59 +70,274 @@ body::before{content:'';position:fixed;inset:0;background:
 .acc-item{display:flex;align-items:center;justify-content:space-between;padding:.4rem .7rem;background:var(--bg2);border-radius:6px;margin-bottom:.35rem;font-size:.82rem;cursor:pointer;border:1px solid transparent;transition:all .2s}
 .acc-item:hover{border-color:var(--border)}
 .acc-del{font-size:.65rem;color:var(--red);padding:.15rem .4rem;border:1px solid rgba(231,76,60,.3);border-radius:4px;cursor:pointer;background:transparent;color:var(--red)}
-
-/* ===== MENU ===== */
-#menu-screen{align-items:center;justify-content:center;text-align:center;padding:1rem}
 .orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.25;animation:drift 10s ease-in-out infinite}
 .orb1{width:500px;height:500px;background:radial-gradient(circle,#ff4500,transparent);top:-150px;left:-150px}
 .orb2{width:400px;height:400px;background:radial-gradient(circle,#00bfff,transparent);bottom:-120px;right:-120px;animation-delay:-5s}
 .orb3{width:350px;height:350px;background:radial-gradient(circle,#32cd32,transparent);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-2.5s}
 @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(25px,-18px) scale(1.08)}66%{transform:translate(-18px,25px) scale(.94)}}
-.menu-wrap{position:relative;z-index:1;width:100%;max-width:420px;margin:auto;padding:1rem}
-.game-title{font-family:'Cinzel',serif;font-size:clamp(2.8rem,10vw,5rem);font-weight:900;line-height:1;letter-spacing:.05em;margin-bottom:.2rem;background:linear-gradient(135deg,#ff4500 0%,#ffd700 50%,#00bfff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 40px rgba(255,100,0,.4))}
-.game-sub{font-size:.9rem;color:var(--text2);letter-spacing:.4em;text-transform:uppercase;margin-bottom:.5rem}
-/* User bar */
-.user-bar{display:flex;align-items:center;justify-content:space-between;padding:.4rem .8rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px;margin-bottom:.6rem;font-size:.8rem}
-.user-bar-left{display:flex;align-items:center;gap:.4rem;color:var(--text2)}
-.user-bar-left b{color:var(--gold)}
-.menu-stats{display:flex;gap:.6rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap}
-.menu-stat{display:flex;align-items:center;gap:.3rem;font-size:.85rem;padding:.35rem .8rem;border-radius:20px;font-family:'Cinzel',serif}
-.ms-coins{color:var(--gold);background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.2)}
-.ms-wins{color:var(--green);background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.2)}
-.ms-streak{color:#e67e22;background:rgba(230,126,18,.1);border:1px solid rgba(230,126,18,.2)}
-.preview-row{display:flex;gap:.6rem;justify-content:center;margin-bottom:1.5rem;perspective:800px}
-.prev-card{width:60px;height:84px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;font-size:1.4rem;animation:float 3s ease-in-out infinite;border:1px solid transparent}
-.prev-card.fire{background:linear-gradient(145deg,#1a0800,#2d1200);border-color:rgba(255,69,0,.4)}
-.prev-card.water{background:linear-gradient(145deg,#00091a,#001828);border-color:rgba(0,191,255,.4)}
-.prev-card.nature{background:linear-gradient(145deg,#001800,#002000);border-color:rgba(50,205,50,.4)}
-.prev-card.ground{background:linear-gradient(145deg,#120900,#1e0e00);border-color:rgba(205,133,63,.4)}
-.prev-card small{font-size:.5rem;font-family:'Rajdhani',sans-serif;color:var(--text2);letter-spacing:.1em;text-transform:uppercase}
-@keyframes float{0%,100%{transform:translateY(0) rotateY(-6deg)}50%{transform:translateY(-10px) rotateY(6deg)}}
-.prev-card:nth-child(2){animation-delay:-.75s}.prev-card:nth-child(3){animation-delay:-1.5s}.prev-card:nth-child(4){animation-delay:-2.25s}
-.menu-btns{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-.menu-btns .btn{font-size:.8rem;padding:.65rem .5rem}
-.menu-btns .btn-wide{grid-column:1/-1}
 
-/* ===== BGM PLAYER ===== */
-.bgm-bar{display:flex;align-items:center;gap:.6rem;padding:.45rem .8rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px;margin-bottom:.6rem;font-size:.8rem;color:var(--text2)}
-.bgm-bar label{font-size:.72rem;color:var(--text2)}
-.bgm-toggle{width:32px;height:18px;border-radius:9px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
-.bgm-toggle.on{background:var(--fire)}
-.bgm-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .2s}
-.bgm-toggle.on::after{left:16px}
-.bgm-vol{flex:1;max-width:80px;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
-.bgm-vol::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--fire);cursor:pointer}
-.bgm-track{font-size:.68rem;color:var(--text2);font-style:italic;flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ===================== NEW MAIN MENU ===================== */
+#menu-screen{position:relative;overflow:hidden}
 
-/* ===== RARITY ===== */
+/* Video Background */
+#menu-video-bg{
+  position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
+  pointer-events:none;
+}
+#menu-video-overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.3) 40%,
+    rgba(0,0,0,0.6) 75%,
+    rgba(0,0,0,0.82) 100%
+  );
+  z-index:1;pointer-events:none;
+}
+
+/* Top Bar */
+#menu-topbar{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.1rem;
+}
+#menu-welcome{
+  display:flex;flex-direction:column;
+}
+#menu-welcome-label{
+  font-size:.65rem;color:rgba(255,255,255,0.5);letter-spacing:.12em;text-transform:uppercase;line-height:1;
+}
+#menu-welcome-name{
+  font-family:'Cinzel',serif;font-size:1.05rem;font-weight:700;
+  color:#fff;line-height:1.2;
+  text-shadow:0 2px 12px rgba(0,0,0,0.7);
+}
+#menu-settings-btn{
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+  color:#fff;
+  font-family:'Rajdhani',sans-serif;
+  font-size:.82rem;font-weight:600;
+  padding:.45rem 1.1rem;
+  border-radius:8px;
+  cursor:pointer;
+  letter-spacing:.04em;
+  transition:all .2s;
+  min-height:38px;
+}
+#menu-settings-btn:hover{
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.2);
+}
+
+/* Stats row under topbar */
+#menu-stats-row{
+  position:relative;z-index:10;
+  display:flex;align-items:center;gap:.5rem;
+  padding:.2rem 1.1rem .5rem;
+}
+.ms-pill{
+  display:flex;align-items:center;gap:.3rem;
+  font-size:.78rem;font-weight:600;
+  padding:.25rem .7rem;
+  border-radius:20px;
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+}
+.ms-pill.gold{background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.25);color:var(--gold);}
+.ms-pill.green{background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.2);color:#5dffa0;}
+.ms-pill.orange{background:rgba(255,120,0,0.12);border:1px solid rgba(255,120,0,0.2);color:#ffaa66;}
+
+/* Center area — title + hero art + START BATTLE */
+#menu-center{
+  position:relative;z-index:10;
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 1.5rem;
+  gap:1.2rem;
+}
+#menu-game-logo{
+  text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:.1rem;
+}
+#menu-game-logo .logo-text{
+  font-family:'Cinzel',serif;
+  font-size:clamp(2.6rem,11vw,5rem);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:.05em;
+  background:linear-gradient(170deg,#ffffff 0%,#ffd700 40%,#ff8c00 80%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(255,165,0,0.5)) drop-shadow(0 4px 20px rgba(0,0,0,0.8));
+}
+#menu-game-logo .logo-sub{
+  font-size:.72rem;color:rgba(255,255,255,0.5);letter-spacing:.5em;text-transform:uppercase;
+}
+
+/* START BATTLE button — hero button */
+#btn-start-battle{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  width:clamp(200px,70vw,320px);
+  padding:1rem 2rem;
+  font-family:'Cinzel',serif;
+  font-size:1.15rem;
+  font-weight:900;
+  letter-spacing:.12em;
+  color:#000;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:linear-gradient(135deg,#ffd700 0%,#ffaa00 50%,#ff8800 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,215,0,0.4),
+    0 4px 24px rgba(255,165,0,0.5),
+    0 0 60px rgba(255,130,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  transition:all .22s ease;
+  overflow:hidden;
+}
+#btn-start-battle::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.2) 0%,transparent 60%);
+  border-radius:inherit;
+}
+#btn-start-battle::after{
+  content:'';position:absolute;
+  top:-50%;left:-60%;
+  width:40%;height:200%;
+  background:rgba(255,255,255,0.25);
+  transform:skewX(-20deg);
+  transition:left .4s ease;
+}
+#btn-start-battle:hover{
+  transform:translateY(-3px) scale(1.03);
+  box-shadow:
+    0 0 0 1px rgba(255,215,0,0.6),
+    0 8px 32px rgba(255,165,0,0.65),
+    0 0 80px rgba(255,130,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+#btn-start-battle:hover::after{left:120%;}
+#btn-start-battle:active{transform:scale(.97);}
+
+/* Bottom Nav */
+#menu-bottom-nav{
+  position:relative;z-index:10;
+  padding:.7rem 1rem 1rem;
+  display:flex;align-items:center;justify-content:center;
+  gap:.5rem;
+}
+.menu-nav-btn{
+  flex:1;
+  max-width:90px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.18rem;
+  padding:.65rem .4rem;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .2s;
+  font-family:'Rajdhani',sans-serif;
+  font-weight:600;
+  font-size:.8rem;
+  color:rgba(255,255,255,0.75);
+  letter-spacing:.03em;
+  min-height:52px;
+}
+.menu-nav-btn:hover{
+  background:rgba(255,255,255,0.1);
+  border-color:rgba(255,255,255,0.2);
+  color:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 4px 16px rgba(0,0,0,0.4);
+}
+.menu-nav-btn:active{transform:scale(.96);}
+
+/* ===================== SETTINGS PANEL (overlay) ===================== */
+#settings-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;
+  display:none;align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+#settings-overlay.show{display:flex;}
+#settings-panel{
+  background:rgba(10,10,25,0.92);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px 20px 0 0;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:1.2rem 1.4rem 2rem;
+  width:100%;max-width:480px;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.6);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+#settings-panel h3{
+  font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);
+  text-align:center;margin-bottom:1.2rem;
+  padding-bottom:.7rem;border-bottom:1px solid rgba(255,215,0,0.15);
+}
+.sp-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.sp-row:last-child{border-bottom:none;}
+.sp-label{font-size:.9rem;color:rgba(255,255,255,0.7);font-weight:500;}
+.sp-btns{display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem;}
+.sp-btn{
+  width:100%;padding:.7rem;
+  border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.05);
+  color:rgba(255,255,255,0.8);
+  font-family:'Rajdhani',sans-serif;font-size:.92rem;font-weight:600;
+  cursor:pointer;transition:all .2s;
+  letter-spacing:.03em;
+}
+.sp-btn:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.sp-btn.danger{border-color:rgba(231,76,60,0.3);color:var(--red);}
+.sp-btn.danger:hover{background:rgba(231,76,60,0.1);}
+.sp-btn.primary{background:rgba(255,69,0,0.15);border-color:rgba(255,69,0,0.3);color:#ff9966;}
+.sp-btn.primary:hover{background:rgba(255,69,0,0.25);}
+.sp-close-btn{
+  width:100%;margin-top:.5rem;
+  padding:.7rem;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.5);
+  font-family:'Rajdhani',sans-serif;font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.sp-close-btn:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);}
+
+/* Toggle switch for music */
+.sp-toggle{width:44px;height:24px;border-radius:12px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.sp-toggle.on{background:var(--fire)}
+.sp-toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.sp-toggle.on::after{left:23px}
+.sp-vol{flex:1;max-width:110px;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;}
+.sp-vol::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--fire);cursor:pointer}
+
+/* ===================== BGM PLAYER (hidden, functional) ===================== */
+.bgm-bar{display:none} /* hidden from new menu, handled in settings */
+
+/* ===================== RARITY ===================== */
 .rarity-common{color:#aaa}.rarity-rare{color:#5dade2}.rarity-epic{color:#a569bd}.rarity-legendary{color:var(--gold);text-shadow:0 0 8px rgba(255,215,0,.5)}
 .badge-common{background:rgba(170,170,170,.15);color:#ccc;border:1px solid rgba(170,170,170,.3)}
 .badge-rare{background:rgba(93,173,226,.15);color:#5dade2;border:1px solid rgba(93,173,226,.3)}
 .badge-epic{background:rgba(165,105,189,.15);color:#b97dd4;border:1px solid rgba(165,105,189,.3)}
 .badge-legendary{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.4)}
 
-/* ===== CARD ELEM ===== */
+/* ===================== CARD ELEMENTS ===================== */
 .card-elem-fire{background:linear-gradient(145deg,#1a0800,#2a1200);border-color:rgba(255,69,0,.35)!important}
 .card-elem-water{background:linear-gradient(145deg,#00091a,#001428);border-color:rgba(0,191,255,.35)!important}
 .card-elem-nature{background:linear-gradient(145deg,#001a00,#001e00);border-color:rgba(50,205,50,.35)!important}
@@ -124,7 +346,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .card-elem-buff{background:linear-gradient(145deg,#001616,#001e1e);border-color:rgba(255,215,0,.35)!important}
 .card-elem-neutral{background:linear-gradient(145deg,#101020,#181830);border-color:rgba(200,200,200,.2)!important}
 
-/* ===== INVENTORY / COLLECTION ===== */
+/* ===================== INVENTORY ===================== */
 #inv-screen{overflow-y:auto}
 .page-wrap{max-width:1100px;margin:0 auto;width:100%;padding:1rem}
 .page-header{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap}
@@ -161,7 +383,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .deck-num{position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:.58rem;font-weight:700;padding:1px 4px;border-radius:3px;font-family:'Cinzel',serif}
 .unlock-tag{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:var(--text2);font-size:.55rem;padding:1px 4px;border-radius:3px}
 
-/* ===== SHOP ===== */
+/* ===================== SHOP ===================== */
 #shop-screen{overflow-y:auto}
 .shop-banner{text-align:center;margin-bottom:1.5rem;padding:1.5rem;background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(155,89,182,.05));border:1px solid rgba(255,215,0,.15);border-radius:12px}
 .shop-banner h3{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--gold);margin-bottom:.4rem}
@@ -174,7 +396,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .rate-table{font-size:.72rem;color:var(--text2);text-align:left;display:flex;flex-direction:column;gap:.12rem;margin-bottom:.8rem}
 .rate-table span{display:flex;justify-content:space-between}
 
-/* Gacha overlay */
+/* ===================== GACHA OVERLAY ===================== */
 #gacha-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300;backdrop-filter:blur(8px);padding:1rem}
 #gacha-overlay.show{display:flex}
 .gacha-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(155,89,182,.15),transparent 70%);animation:pulseglow 2s ease infinite}
@@ -188,7 +410,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .gacha-result-msg{font-size:.85rem;color:var(--text2);margin-top:.8rem;position:relative;z-index:1;text-align:center}
 .gacha-btns{display:flex;gap:.8rem;margin-top:1rem;position:relative;z-index:1}
 
-/* ===== QUESTS ===== */
+/* ===================== QUESTS ===================== */
 #quest-screen{overflow-y:auto}
 .quest-section{margin-bottom:1.5rem}
 .quest-section h3{font-family:'Cinzel',serif;color:var(--gold);font-size:1.1rem;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
@@ -202,7 +424,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .claim-btn:disabled{opacity:.35;cursor:not-allowed;background:var(--panel)}
 .claim-btn.claimed{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text2)}
 
-/* ===== LOGIN REWARDS ===== */
+/* ===================== LOGIN REWARDS ===================== */
 #login-screen{overflow-y:auto}
 .login-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.7rem;margin-bottom:1.5rem}
 .login-day{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:.7rem;text-align:center;transition:all .2s}
@@ -215,7 +437,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .day-reward{font-size:.65rem;color:var(--text);line-height:1.3}
 .day-check{font-size:1rem;color:var(--green)}
 
-/* ===== HOW TO PLAY ===== */
+/* ===================== HOW TO PLAY ===================== */
 #howto-screen{overflow-y:auto;align-items:center;padding:1rem}
 .howto-box{max-width:700px;width:100%;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:auto}
 .howto-box h2{font-family:'Cinzel',serif;color:var(--gold);font-size:1.4rem;text-align:center;margin-bottom:1rem}
@@ -230,7 +452,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .ei-nature{background:rgba(50,205,50,.1);border:1px solid rgba(50,205,50,.25);color:var(--nature)}
 .ei-ground{background:rgba(205,133,63,.1);border:1px solid rgba(205,133,63,.25);color:var(--ground)}
 
-/* ===== SETTINGS SCREEN ===== */
+/* ===================== SETTINGS SCREEN (legacy, now unused for menu) ===================== */
 #settings-screen{overflow-y:auto}
 .settings-box{max-width:480px;width:100%;margin:0 auto;padding:1rem}
 .settings-section{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem}
@@ -238,7 +460,7 @@ body::before{content:'';position:fixed;inset:0;background:
 .setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;font-size:.88rem}
 .setting-row label{color:var(--text2)}
 
-/* ===== GAME SCREEN ===== */
+/* ===================== GAME SCREEN ===================== */
 #game-screen{padding:.4rem;gap:.4rem;max-width:920px;margin:0 auto;width:100%}
 .game-topbar{display:flex;align-items:center;justify-content:space-between;padding:.35rem .5rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px}
 .topbar-item{display:flex;align-items:center;gap:.25rem;font-size:.75rem;color:var(--text2)}
@@ -265,7 +487,6 @@ body::before{content:'';position:fixed;inset:0;background:
 .stat-row b{color:var(--text)}
 .deck-circle{width:46px;height:46px;border-radius:50%;background:var(--panel2);border:2px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;color:var(--red)}
 .deck-circle small{font-size:.4rem;color:var(--text2);font-family:'Rajdhani',sans-serif}
-/* Arena */
 #battle-arena{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;position:relative}
 .arena-side{border-radius:8px;padding:.6rem;text-align:center;min-height:145px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .arena-side.fire{background:radial-gradient(ellipse,rgba(255,69,0,.12),transparent 70%);border:1px solid rgba(255,69,0,.25)}
@@ -288,16 +509,13 @@ body::before{content:'';position:fixed;inset:0;background:
 .chip-stun{background:rgba(243,156,18,.2);color:#f0b429;border:1px solid rgba(243,156,18,.4)}
 .chip-dodge{background:rgba(46,204,113,.2);color:#2ecc71;border:1px solid rgba(46,204,113,.4)}
 .chip-buff{background:rgba(255,215,0,.2);color:var(--gold);border:1px solid rgba(255,215,0,.4)}
-/* Round bar */
 #round-bar{display:flex;justify-content:space-between;align-items:center;padding:.4rem .8rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px}
 .round-badge{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--gold)}
 .turn-tag{font-size:.72rem;font-weight:600;padding:.18rem .6rem;border-radius:10px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);color:var(--gold)}
 .rps-txt{font-size:.72rem;color:var(--text2)}
-/* Battle log */
 #log-wrap{height:100px;overflow-y:auto;padding:.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-size:.75rem;line-height:1.6;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .ll{color:var(--text2)}.ll.rh{color:var(--gold);font-family:'Cinzel',serif;font-weight:700;border-top:1px solid var(--border);padding-top:2px;margin-top:2px}
 .ll.atk{color:#ff7043}.ll.heal{color:var(--nature)}.ll.skill{color:#b97dd4}.ll.info{color:var(--water)}.ll.win{color:var(--gold);font-weight:700}
-/* Player area */
 #player-zone{display:flex;flex-direction:column;gap:.45rem}
 .player-hand{display:flex;gap:.35rem;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .hand-card{min-width:82px;width:82px;flex-shrink:0;border-radius:8px;padding:.4rem;border:2px solid transparent;cursor:pointer;transition:all .2s;position:relative}
@@ -319,12 +537,14 @@ body::before{content:'';position:fixed;inset:0;background:
 .act-btn:hover:not(:disabled){border-color:rgba(255,215,0,.4);color:var(--gold)}
 .act-btn:disabled{opacity:.3;cursor:not-allowed}
 .passive-chips{display:flex;gap:.3rem;flex-wrap:wrap;min-height:16px}
-/* ===== MODALS ===== */
+
+/* ===================== MODALS ===================== */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
 .modal-ov.hidden{display:none}
 .modal-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.2rem;max-width:520px;width:94%;max-height:82vh;overflow-y:auto}
 .modal-box h3{font-family:'Cinzel',serif;color:var(--gold);font-size:1.1rem;margin-bottom:.8rem;text-align:center}
-/* ===== RPS ===== */
+
+/* ===================== RPS ===================== */
 #rps-ov{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:400;backdrop-filter:blur(6px)}
 #rps-ov.show{display:flex}
 .rps-title{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--text2);margin-bottom:.25rem;text-align:center}
@@ -338,7 +558,8 @@ body::before{content:'';position:fixed;inset:0;background:
 .rps-res{margin-top:1.2rem;font-family:'Cinzel',serif;font-size:1rem;text-align:center;min-height:1.6rem}
 .rps-res.win{color:var(--gold)}.rps-res.lose{color:var(--red)}.rps-res.tie{color:var(--text2)}
 .rps-note{margin-top:.6rem;font-size:.75rem;color:var(--text2);text-align:center}
-/* ===== GAME OVER ===== */
+
+/* ===================== GAME OVER ===================== */
 #gameover-screen{align-items:center;justify-content:center;padding:1.5rem}
 .go-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem;max-width:420px;width:92%;text-align:center}
 .go-title{font-family:'Cinzel',serif;font-size:2.5rem;font-weight:900;margin-bottom:.35rem}
@@ -351,7 +572,8 @@ body::before{content:'';position:fixed;inset:0;background:
 .stat-box .sv{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;color:var(--gold)}
 .stat-box .sl{font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
 .go-btns{display:flex;flex-direction:column;gap:.5rem}
-/* ===== ANIMATIONS ===== */
+
+/* ===================== ANIMATIONS ===================== */
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 @keyframes hitFlash{0%,100%{opacity:1}50%{opacity:.25;background:rgba(231,76,60,.4)!important}}
 @keyframes healGlow{0%,100%{box-shadow:0 0 8px rgba(46,204,113,.2)}50%{box-shadow:0 0 30px rgba(46,204,113,.8)}}
@@ -362,20 +584,38 @@ body::before{content:'';position:fixed;inset:0;background:
 .anim-heal{animation:healGlow .6s ease 2}
 .anim-skill{animation:skillGlow .6s ease 2}
 .fade-in{animation:fadeUp .4s ease}
-/* ===== SCROLLBAR ===== */
+
+/* ===================== SCROLLBAR ===================== */
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-/* ===== RESPONSIVE ===== */
+
+/* ===================== RESPONSIVE ===================== */
 @media(max-width:600px){
   #battle-arena{grid-template-columns:1fr}
   .arena-vs{display:none}
   .active-mini{flex-direction:column}
   .mini-card{width:100%}
   .act-btns{grid-template-columns:1fr 1fr}
+  #menu-bottom-nav{gap:.35rem;padding:.6rem .6rem .9rem;}
+  .menu-nav-btn{font-size:.72rem;padding:.55rem .3rem;}
+  #btn-start-battle{font-size:1rem;}
+}
+@media(max-width:360px){
+  .menu-nav-btn{font-size:.65rem;padding:.5rem .2rem;min-height:46px;}
+  #menu-bottom-nav{gap:.25rem;}
 }
 .hidden{display:none!important}
+
 /* Notification toast */
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:.85rem;padding:.6rem 1.4rem;border-radius:20px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
+
+/* BGM state synced via JS, not a visible bar anymore */
+#bgm-vol, #settings-bgm-vol {
+  -webkit-appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;
+}
+#bgm-vol::-webkit-slider-thumb,#settings-bgm-vol::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--fire);cursor:pointer
+}
 </style>
 </head>
 <body>
@@ -393,7 +633,6 @@ body::before{content:'';position:fixed;inset:0;background:
       <button class="auth-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">Login</button>
       <button class="auth-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">Register</button>
     </div>
-    <!-- Login form -->
     <div id="login-form">
       <div class="auth-field"><label>Email</label><input id="login-user" type="email" placeholder="your@email.com" autocomplete="email"></div>
       <div class="auth-field"><label>Password</label><input id="login-pass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
@@ -402,7 +641,6 @@ body::before{content:'';position:fixed;inset:0;background:
       <button class="btn btn-primary" style="width:100%;margin-bottom:.6rem" onclick="doLogin()">⚔️ Login</button>
       <div class="accounts-list" id="saved-accounts-list"></div>
     </div>
-    <!-- Register form -->
     <div id="register-form" style="display:none">
       <div class="auth-field"><label>Email</label><input id="reg-email" type="email" placeholder="your@email.com" autocomplete="email"></div>
       <div class="auth-field"><label>Choose Username</label><input id="reg-user" type="text" placeholder="e.g. FireMaster123" maxlength="20"></div>
@@ -414,47 +652,71 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
-<!-- MENU -->
+<!-- ======================= NEW MAIN MENU ======================= -->
 <div id="menu-screen" class="screen">
-  <div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
-  <div class="menu-wrap fade-in">
-    <div class="game-title">Trackcard</div>
-    <div class="game-sub">Elemental Battle Arena</div>
-    <!-- User bar -->
-    <div class="user-bar">
-      <div class="user-bar-left">👤 <b id="menu-username">Player</b></div>
-      <div style="display:flex;gap:.4rem">
-        <button class="btn btn-secondary btn-sm" onclick="showScreen('settings-screen')">⚙️</button>
-        <button class="btn btn-secondary btn-sm" onclick="doLogout()">↩ Logout</button>
-      </div>
+
+  <!-- Video background -->
+  <video id="menu-video-bg" autoplay muted loop playsinline preload="auto" poster="">
+    <source src="bg.mp4" type="video/mp4">
+  </video>
+  <div id="menu-video-overlay"></div>
+
+  <!-- Top bar -->
+  <div id="menu-topbar">
+    <div id="menu-welcome">
+      <span id="menu-welcome-label">Welcome back</span>
+      <span id="menu-welcome-name" id="menu-username">Player</span>
     </div>
-    <!-- BGM bar -->
-    <div class="bgm-bar">
-      <span>🎵</span>
-      <button class="bgm-toggle" id="bgm-toggle" onclick="toggleBGM()"></button>
-      <label>Vol</label>
-      <input type="range" class="bgm-vol" id="bgm-vol" min="0" max="100" value="40" oninput="setBGMVol(this.value)">
-      <span class="bgm-track" id="bgm-track-name">Menu Theme</span>
+    <button id="menu-settings-btn" onclick="openSettingsPanel()">Settings</button>
+  </div>
+
+  <!-- Stats row -->
+  <div id="menu-stats-row">
+    <div class="ms-pill gold">🪙 <span id="menu-coins">0</span></div>
+    <div class="ms-pill green">🏆 <span id="menu-wins">0</span> Wins</div>
+    <div class="ms-pill orange">🔥 Day <span id="menu-streak">1</span></div>
+  </div>
+
+  <!-- Center: Logo + Start Battle -->
+  <div id="menu-center">
+    <div id="menu-game-logo">
+      <div class="logo-text">Trackcard</div>
+      <div class="logo-sub">Elemental Battle Arena</div>
     </div>
-    <div class="menu-stats">
-      <div class="menu-stat ms-coins">🪙 <span id="menu-coins">0</span></div>
-      <div class="menu-stat ms-wins">🏆 <span id="menu-wins">0</span> Wins</div>
-      <div class="menu-stat ms-streak">🔥 Day <span id="menu-streak">1</span></div>
+
+    <button id="btn-start-battle" onclick="goToBattle()">
+      ⚔ &nbsp;START BATTLE
+    </button>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div id="menu-bottom-nav">
+    <button class="menu-nav-btn" onclick="showScreen('inv-screen');renderInventory('deck')">Inventory</button>
+    <button class="menu-nav-btn" onclick="showScreen('shop-screen');initShop()">Shop</button>
+    <button class="menu-nav-btn" onclick="showScreen('login-screen');renderLoginRewards()">Rewards</button>
+    <button class="menu-nav-btn" onclick="showScreen('quest-screen');renderQuests()">Quest</button>
+  </div>
+
+</div>
+
+<!-- ======================= SETTINGS PANEL (overlay, from menu) ======================= -->
+<div id="settings-overlay" onclick="closeSettingsPanelOutside(event)">
+  <div id="settings-panel">
+    <h3>⚙ Settings</h3>
+    <div class="sp-row">
+      <span class="sp-label">Music</span>
+      <button class="sp-toggle" id="sp-bgm-toggle" onclick="toggleBGM()"></button>
     </div>
-    <div class="preview-row">
-      <div class="prev-card fire">🐯<small>Fire</small></div>
-      <div class="prev-card water">🐍<small>Water</small></div>
-      <div class="prev-card nature">🌿<small>Nature</small></div>
-      <div class="prev-card ground">🪨<small>Ground</small></div>
+    <div class="sp-row">
+      <span class="sp-label">Volume</span>
+      <input type="range" class="sp-vol" id="sp-bgm-vol" min="0" max="100" value="40" oninput="setBGMVol(this.value)">
     </div>
-    <div class="menu-btns">
-      <button class="btn btn-primary btn-wide" onclick="goToBattle()">⚔️ Start Battle</button>
-      <button class="btn btn-secondary" onclick="showScreen('inv-screen');renderInventory('deck')">🎒 Inventory</button>
-      <button class="btn btn-gold" onclick="showScreen('shop-screen')">🎰 Shop</button>
-      <button class="btn btn-blue" onclick="showScreen('quest-screen');renderQuests()">📋 Quests</button>
-      <button class="btn btn-green" onclick="showScreen('login-screen');renderLoginRewards()">🎁 Rewards</button>
-      <button class="btn btn-secondary" onclick="showScreen('howto-screen')">📖 How To Play</button>
+    <div class="sp-btns">
+      <button class="sp-btn primary" onclick="closeSettingsPanel();showScreen('howto-screen')">📖 How To Play</button>
+      <button class="sp-btn danger" onclick="resetAccount()">🗑 Reset Account Data</button>
+      <button class="sp-btn" onclick="doLogout()">↩ Logout</button>
     </div>
+    <button class="sp-close-btn" onclick="closeSettingsPanel()">✕ Close</button>
   </div>
 </div>
 
@@ -601,42 +863,8 @@ body::before{content:'';position:fixed;inset:0;background:
   </div>
 </div>
 
-<!-- SETTINGS -->
-<div id="settings-screen" class="screen">
-  <div class="settings-box">
-    <div class="page-header">
-      <h2>⚙️ Settings</h2>
-      <button class="btn btn-secondary btn-sm" onclick="showScreen('menu-screen')">← Back</button>
-    </div>
-    <div class="settings-section">
-      <h3>🎵 Music</h3>
-      <div class="setting-row">
-        <label>Background Music</label>
-        <button class="bgm-toggle" id="settings-bgm-toggle" onclick="toggleBGM()"></button>
-      </div>
-      <div class="setting-row">
-        <label>Volume</label>
-        <input type="range" class="bgm-vol" id="settings-bgm-vol" min="0" max="100" value="40" oninput="setBGMVol(this.value)" style="max-width:140px;flex:unset">
-      </div>
-    </div>
-    <div class="settings-section">
-      <h3>👤 Account</h3>
-      <div class="setting-row">
-        <label>Logged in as</label>
-        <b id="settings-username" style="color:var(--gold)">—</b>
-      </div>
-      <div class="setting-row">
-        <label>Auto-login next time</label>
-        <input type="checkbox" id="settings-autologin" style="width:18px;height:18px;accent-color:var(--fire)" onchange="saveAutoLogin()">
-      </div>
-      <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:.4rem" onclick="doLogout()">↩ Logout</button>
-    </div>
-    <div class="settings-section">
-      <h3>⚠️ Danger Zone</h3>
-      <button class="btn btn-sm" style="background:rgba(231,76,60,.15);border:1px solid rgba(231,76,60,.4);color:var(--red);width:100%" onclick="resetAccount()">🗑 Reset This Account's Data</button>
-    </div>
-  </div>
-</div>
+<!-- SETTINGS SCREEN (legacy, kept for compatibility) -->
+<div id="settings-screen" class="screen" style="display:none!important"></div>
 
 <!-- GAME SCREEN -->
 <div id="game-screen" class="screen">
@@ -757,7 +985,7 @@ body::before{content:'';position:fixed;inset:0;background:
   <div class="rps-note" id="rps-note"></div>
 </div>
 
-<!-- Firebase SDK (CDN, no npm needed for HTML files) -->
+<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -777,7 +1005,6 @@ body::before{content:'';position:fixed;inset:0;background:
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Expose to global scope so non-module script can call them
   window._fbAuth = auth;
   window._fbDb = db;
   window._fbFns = {
@@ -787,7 +1014,6 @@ body::before{content:'';position:fixed;inset:0;background:
     updateProfile, doc, getDoc, setDoc
   };
 
-  // Listen for auth state changes (handles auto-login via Firebase persistence)
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       window.currentUser = user.displayName || user.email;
@@ -803,7 +1029,6 @@ body::before{content:'';position:fixed;inset:0;background:
       window.currentUser = null;
       window.SD = null;
       window._fbUid = null;
-      // Only redirect to auth screen if not already there
       const authScreen = document.getElementById('auth-screen');
       if (authScreen && !authScreen.classList.contains('active')) {
         window.showScreen('auth-screen');
@@ -814,9 +1039,8 @@ body::before{content:'';position:fixed;inset:0;background:
 
 <script>
 // ═══════════════════════════════════════════
-// ── ACCOUNT / SAVE SYSTEM (Firebase) ──
+// ACCOUNT / SAVE SYSTEM (Firebase)
 // ═══════════════════════════════════════════
-
 const DEFAULT_PROFILE = () => ({
   coins:150, ownedIds:[1,2,4,7,3], deck:[1,2,4,7,3],
   deckMode:5, wins:0, summons:0,
@@ -828,7 +1052,6 @@ const DEFAULT_PROFILE = () => ({
 let currentUser = null;
 let SD = null;
 
-// Load profile data from Firestore
 window._loadProfileFromFirestore = async function(uid) {
   const { doc, getDoc } = window._fbFns;
   try {
@@ -853,9 +1076,7 @@ async function _saveProfileToFirestore(uid, data) {
   try {
     const ref = doc(window._fbDb, 'players', uid);
     await setDoc(ref, data);
-  } catch(e) {
-    console.error('Failed to save profile:', e);
-  }
+  } catch(e) { console.error('Failed to save profile:', e); }
 }
 
 function saveProfile() {
@@ -870,21 +1091,17 @@ async function doRegister() {
   const pass2 = document.getElementById('reg-pass2').value;
   const err = document.getElementById('reg-err');
   err.textContent = '';
-
   if (!email || !email.includes('@')) { err.textContent = 'Please enter a valid email'; return; }
   if (!user || user.length < 2) { err.textContent = 'Username must be 2+ chars'; return; }
   if (pass.length < 6) { err.textContent = 'Password must be 6+ chars'; return; }
   if (pass !== pass2) { err.textContent = 'Passwords do not match'; return; }
-
   const regBtn = document.querySelector('#register-form .btn-gold');
   if (regBtn) { regBtn.disabled = true; regBtn.textContent = '⏳ Creating...'; }
-
   try {
     const { createUserWithEmailAndPassword, updateProfile } = window._fbFns;
     const cred = await createUserWithEmailAndPassword(window._fbAuth, email, pass);
     await updateProfile(cred.user, { displayName: user });
     showToast('Account created! Welcome, ' + user + '!');
-    // onAuthStateChanged will handle the rest
   } catch(e) {
     const msgs = {
       'auth/email-already-in-use': 'This email is already registered',
@@ -903,15 +1120,12 @@ async function doLogin() {
   const remember = document.getElementById('remember-me').checked;
   const err = document.getElementById('login-err');
   err.textContent = '';
-
   const loginBtn = document.querySelector('#login-form .btn-primary');
   if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = '⏳ Logging in...'; }
-
   try {
     const { setPersistence, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword } = window._fbFns;
     await setPersistence(window._fbAuth, remember ? browserLocalPersistence : browserSessionPersistence);
     await signInWithEmailAndPassword(window._fbAuth, email, pass);
-    // onAuthStateChanged handles the rest
   } catch(e) {
     const msgs = {
       'auth/user-not-found': 'No account found with this email',
@@ -927,6 +1141,7 @@ async function doLogin() {
 }
 
 async function doLogout() {
+  closeSettingsPanel();
   const { signOut } = window._fbFns;
   await signOut(window._fbAuth);
   currentUser = null; SD = null;
@@ -937,9 +1152,6 @@ async function doLogout() {
 }
 
 function checkAutoLogin() {
-  // Firebase handles this automatically via onAuthStateChanged + persistence
-  // Just show auth screen — if user is logged in, onAuthStateChanged fires immediately
-  // Show a loading state
   const authBox = document.querySelector('.auth-box');
   if (authBox) {
     authBox.style.opacity = '0.5';
@@ -948,14 +1160,17 @@ function checkAutoLogin() {
 }
 
 function renderSavedAccounts() {
-  // With Firebase, we don't show saved accounts list (accounts are online)
   const el = document.getElementById('saved-accounts-list');
   if (el) el.innerHTML = '';
 }
 
 function updateMenuUsername() {
-  const el = document.getElementById('menu-username');
-  if (el) el.textContent = (window.currentUser || currentUser) || 'Player';
+  const name = (window.currentUser || currentUser) || 'Player';
+  const el = document.getElementById('menu-welcome-name');
+  if (el) el.textContent = name;
+  // Also update the legacy menu-username id if somewhere referenced
+  const el2 = document.getElementById('menu-username');
+  if (el2) el2.textContent = name;
 }
 
 async function resetAccount() {
@@ -965,20 +1180,15 @@ async function resetAccount() {
   window.SD = SD;
   await _saveProfileToFirestore(window._fbUid, SD);
   updateAllCoins();
+  closeSettingsPanel();
   showToast('Account reset!');
 }
 
-function saveAutoLogin() {
-  // Firebase persistence is controlled at login time (remember-me checkbox)
-  // This setting is not meaningful with Firebase; it's handled by setPersistence
-}
+function saveAutoLogin() {}
 
 function updateSettingsUI() {
-  const su = document.getElementById('settings-username');
-  const name = (window.currentUser || currentUser) || '—';
-  if (su) su.textContent = name;
-  const sal = document.getElementById('settings-autologin');
-  if (sal) sal.checked = true; // Firebase handles this via persistence
+  // New panel uses sp-bgm-toggle
+  syncBGMUI();
 }
 
 function switchAuthTab(tab) {
@@ -992,9 +1202,24 @@ function switchAuthTab(tab) {
 }
 
 // ═══════════════════════════════════════════
-// ── BGM SYSTEM ──
+// SETTINGS PANEL (new overlay)
 // ═══════════════════════════════════════════
-// Uses a tone-generating Web Audio oscillator as fallback — royalty-free simple tones
+function openSettingsPanel() {
+  const overlay = document.getElementById('settings-overlay');
+  if (overlay) overlay.classList.add('show');
+  syncBGMUI();
+}
+function closeSettingsPanel() {
+  const overlay = document.getElementById('settings-overlay');
+  if (overlay) overlay.classList.remove('show');
+}
+function closeSettingsPanelOutside(e) {
+  if (e.target === document.getElementById('settings-overlay')) closeSettingsPanel();
+}
+
+// ═══════════════════════════════════════════
+// BGM SYSTEM
+// ═══════════════════════════════════════════
 let audioCtx = null, bgmNode = null, bgmGain = null;
 let bgmOn = false;
 let bgmVolume = 0.4;
@@ -1026,7 +1251,6 @@ function startBGM() {
   if (!audioCtx) initAudio();
   if (!audioCtx) return;
   stopBGMNode();
-  // Simple ambient tone loop using oscillators (royalty-free, generated)
   const notes = [220, 277, 330, 370, 440, 370, 330, 277];
   let idx = 0;
   function playNext() {
@@ -1075,16 +1299,16 @@ function setBGMVol(val) {
 }
 
 function syncBGMUI() {
+  // New settings panel toggle
+  const spToggle = document.getElementById('sp-bgm-toggle');
+  if (spToggle) spToggle.classList.toggle('on', bgmOn);
+  const spVol = document.getElementById('sp-bgm-vol');
+  if (spVol) spVol.value = Math.round(bgmVolume * 100);
+  // Legacy toggles kept for compatibility (hidden but functional)
   ['bgm-toggle','settings-bgm-toggle'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('on', bgmOn);
   });
-  const vol = Math.round(bgmVolume * 100);
-  ['bgm-vol','settings-bgm-vol'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = vol;
-  });
-  const tn = document.getElementById('bgm-track-name');
-  if (tn) tn.textContent = bgmOn ? '♪ Ambient Arena' : '— Muted';
 }
 
 // ═══════════════════════════════════════════
@@ -1223,7 +1447,6 @@ function showScreen(id){
     const el=document.getElementById(id);
     if(el) el.classList.add('active');
     if(id==='menu-screen') updateMenuUsername();
-    if(id==='settings-screen') updateSettingsUI();
   }catch(e){}
 }
 
@@ -1547,7 +1770,6 @@ function goToBattle(){
     stats:{dmg:0,skills:0,kills:0},gameOver:false,mode};
   GS.playerActiveIdx=playerCards.findIndex(c=>c.type==='active');
   botPickCard();clearLog();
-  // Switch to battle BGM feel (same tone engine, faster tempo)
   showScreen('game-screen');updateAllCoins();updateUI();
   log('⚔️ Battle begins! RPS decides who acts each turn.','info');
   logPassives(playerCards);
@@ -1617,9 +1839,7 @@ function botSwitch(){
 }
 
 // ═══════════════════════════════════════════
-// ── REVISED RPS TURN SYSTEM ──
-// Winner-only acts. Loser does nothing.
-// After winner acts → immediately new RPS.
+// RPS TURN SYSTEM
 // ═══════════════════════════════════════════
 async function startRound(){
   if(!GS||GS.gameOver)return;
@@ -1629,8 +1849,6 @@ async function startRound(){
     log(`— Round ${GS.round} —`,'rh');
     tickPoisons();
     if(GS.gameOver)return;
-
-    // Check stun on player's active card BEFORE showing RPS
     const pc=GS.playerCards[GS.playerActiveIdx];
     if(pc&&pc.buffs&&pc.buffs.some(b=>b.type==='stun')){
       removeBuff(pc.buffs,'stun');
@@ -1640,16 +1858,13 @@ async function startRound(){
       await botActOnce();
       return;
     }
-
     setButtons(false);
     document.getElementById('turn-tag').textContent='Choose RPS...';
     const winner=await doRPS();
-
     if(winner==='player'){
       log('🏆 You won RPS — your turn!','info');
       document.getElementById('turn-tag').textContent='⚡ YOUR TURN — Act Now!';
       setButtons(true);
-      // Player acts via button click → then nextRound() is called
     } else {
       log('🤖 Bot won RPS — bot acts!','info');
       document.getElementById('turn-tag').textContent='🤖 Bot Acts...';
@@ -1660,7 +1875,6 @@ async function startRound(){
   }catch(e){console.error(e);}
 }
 
-// Bot acts once then advances round
 async function botActOnce(){
   if(!GS||GS.gameOver)return;
   try{
@@ -1681,7 +1895,6 @@ async function botActOnce(){
   }catch(e){console.error(e);await advanceRound();}
 }
 
-// Player acts via button → then advance round
 async function playerAct(type){
   if(!GS||GS.gameOver)return;
   setButtons(false);
@@ -1728,8 +1941,7 @@ function tickPoisons(){
 }
 
 // ═══════════════════════════════════════════
-// ── REVISED RPS ──
-// Tie = keep rolling until someone wins
+// RPS
 // ═══════════════════════════════════════════
 async function doRPS(){
   return new Promise(res=>{
@@ -1755,14 +1967,11 @@ function playRPS(choice){
   const el=document.getElementById('rps-res-txt');
   const tag=document.getElementById('rps-winner-tag');
   const rpsInfo=document.getElementById('rps-txt');
-
   if(!winner){
-    // Tie — show result and immediately re-show buttons for re-roll
     el.className='rps-res tie';
     el.textContent=`${icons[choice]} vs ${icons[bot]} — Tie! Re-rolling...`;
     rpsInfo.textContent='Tie!';
     tag.style.display='none';
-    // Block buttons briefly then let player re-roll
     document.getElementById('rps-buttons').style.opacity='0.4';
     document.getElementById('rps-buttons').style.pointerEvents='none';
     setTimeout(()=>{
@@ -1838,7 +2047,6 @@ function attachBuff(cardId){
   if(!GS.usedBuffs)GS.usedBuffs=[];GS.usedBuffs.push(cardId);
   document.getElementById('buff-modal').classList.add('hidden');
   GS.stats.skills++;updateUI();
-  // Using buff counts as your action for this round
   setTimeout(()=>{if(!GS.gameOver)advanceRound();},600);
 }
 function closeBuff(){document.getElementById('buff-modal').classList.add('hidden');}
@@ -2046,7 +2254,7 @@ function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 loadBGMSettings();
 syncBGMUI();
 initShop();
-checkAutoLogin(); // This will either auto-login or show auth screen
+checkAutoLogin();
 </script>
 </body>
 </html>
