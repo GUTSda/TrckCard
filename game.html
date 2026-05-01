@@ -395,7 +395,7 @@ body::before{content:'';position:fixed;inset:0;background:
     </div>
     <!-- Login form -->
     <div id="login-form">
-      <div class="auth-field"><label>Username</label><input id="login-user" type="text" placeholder="Enter username" autocomplete="username"></div>
+      <div class="auth-field"><label>Email</label><input id="login-user" type="email" placeholder="your@email.com" autocomplete="email"></div>
       <div class="auth-field"><label>Password</label><input id="login-pass" type="password" placeholder="Enter password" autocomplete="current-password"></div>
       <label class="auth-check"><input type="checkbox" id="remember-me" checked> Remember me (auto-login)</label>
       <div class="auth-err" id="login-err"></div>
@@ -404,9 +404,10 @@ body::before{content:'';position:fixed;inset:0;background:
     </div>
     <!-- Register form -->
     <div id="register-form" style="display:none">
+      <div class="auth-field"><label>Email</label><input id="reg-email" type="email" placeholder="your@email.com" autocomplete="email"></div>
       <div class="auth-field"><label>Choose Username</label><input id="reg-user" type="text" placeholder="e.g. FireMaster123" maxlength="20"></div>
-      <div class="auth-field"><label>Choose Password</label><input id="reg-pass" type="password" placeholder="At least 3 characters" maxlength="30"></div>
-      <div class="auth-field"><label>Confirm Password</label><input id="reg-pass2" type="password" placeholder="Repeat password"></div>
+      <div class="auth-field"><label>Choose Password</label><input id="reg-pass" type="password" placeholder="At least 6 characters" maxlength="30" autocomplete="new-password"></div>
+      <div class="auth-field"><label>Confirm Password</label><input id="reg-pass2" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
       <div class="auth-err" id="reg-err"></div>
       <button class="btn btn-gold" style="width:100%" onclick="doRegister()">✨ Create Account</button>
     </div>
@@ -756,21 +757,65 @@ body::before{content:'';position:fixed;inset:0;background:
   <div class="rps-note" id="rps-note"></div>
 </div>
 
+<!-- Firebase SDK (CDN, no npm needed for HTML files) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVVIVVNmmK_iPEgD0CCPPzb4DkGsGP6wE",
+    authDomain: "trackcard-2245c.firebaseapp.com",
+    projectId: "trackcard-2245c",
+    storageBucket: "trackcard-2245c.firebasestorage.app",
+    messagingSenderId: "36213642449",
+    appId: "1:36213642449:web:6fecef376d539d061ca1f0",
+    measurementId: "G-KJYQW9983Z"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Expose to global scope so non-module script can call them
+  window._fbAuth = auth;
+  window._fbDb = db;
+  window._fbFns = {
+    createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, setPersistence,
+    browserLocalPersistence, browserSessionPersistence,
+    updateProfile, doc, getDoc, setDoc
+  };
+
+  // Listen for auth state changes (handles auto-login via Firebase persistence)
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      window.currentUser = user.displayName || user.email;
+      window._fbUid = user.uid;
+      await window._loadProfileFromFirestore(user.uid);
+      window.checkDailyLogin();
+      window.showScreen('menu-screen');
+      window.updateAllCoins();
+      window.updateMenuUsername();
+      window.renderSavedAccounts();
+      window.updateSettingsUI();
+    } else {
+      window.currentUser = null;
+      window.SD = null;
+      window._fbUid = null;
+      // Only redirect to auth screen if not already there
+      const authScreen = document.getElementById('auth-screen');
+      if (authScreen && !authScreen.classList.contains('active')) {
+        window.showScreen('auth-screen');
+      }
+    }
+  });
+</script>
+
 <script>
 // ═══════════════════════════════════════════
-// ── ACCOUNT / SAVE SYSTEM ──
+// ── ACCOUNT / SAVE SYSTEM (Firebase) ──
 // ═══════════════════════════════════════════
-const ACCOUNTS_KEY = 'tc_accounts_v1';
-const AUTOLOGIN_KEY = 'tc_autologin';
-
-function getAccounts() {
-  try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || {}; }
-  catch(e) { return {}; }
-}
-function saveAccounts(accs) {
-  try { localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accs)); }
-  catch(e) { showToast('Storage full!'); }
-}
 
 const DEFAULT_PROFILE = () => ({
   coins:150, ownedIds:[1,2,4,7,3], deck:[1,2,4,7,3],
@@ -780,155 +825,160 @@ const DEFAULT_PROFILE = () => ({
   weeklyDate:'', weeklyQ:{q1:0,q2:0,q3:0,q1c:false,q2c:false,q3c:false},
 });
 
-let currentUser = null; // logged in username
-let SD = null;           // active save data
+let currentUser = null;
+let SD = null;
 
-function loadProfile(username) {
-  const accs = getAccounts();
-  if (!accs[username]) return false;
+// Load profile data from Firestore
+window._loadProfileFromFirestore = async function(uid) {
+  const { doc, getDoc } = window._fbFns;
   try {
-    SD = { ...DEFAULT_PROFILE(), ...accs[username].data };
+    const ref = doc(window._fbDb, 'players', uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      SD = { ...DEFAULT_PROFILE(), ...snap.data() };
+    } else {
+      SD = DEFAULT_PROFILE();
+      await _saveProfileToFirestore(uid, SD);
+    }
+    window.SD = SD;
   } catch(e) {
+    console.error('Failed to load profile:', e);
     SD = DEFAULT_PROFILE();
+    window.SD = SD;
   }
-  return true;
+};
+
+async function _saveProfileToFirestore(uid, data) {
+  const { doc, setDoc } = window._fbFns;
+  try {
+    const ref = doc(window._fbDb, 'players', uid);
+    await setDoc(ref, data);
+  } catch(e) {
+    console.error('Failed to save profile:', e);
+  }
 }
 
 function saveProfile() {
-  if (!currentUser) return;
-  const accs = getAccounts();
-  if (!accs[currentUser]) return;
-  accs[currentUser].data = SD;
-  saveAccounts(accs);
+  if (!window._fbUid || !SD) return;
+  _saveProfileToFirestore(window._fbUid, SD);
 }
 
-function doRegister() {
+async function doRegister() {
+  const email = document.getElementById('reg-email').value.trim();
   const user = document.getElementById('reg-user').value.trim();
   const pass = document.getElementById('reg-pass').value;
   const pass2 = document.getElementById('reg-pass2').value;
   const err = document.getElementById('reg-err');
   err.textContent = '';
+
+  if (!email || !email.includes('@')) { err.textContent = 'Please enter a valid email'; return; }
   if (!user || user.length < 2) { err.textContent = 'Username must be 2+ chars'; return; }
-  if (pass.length < 3) { err.textContent = 'Password must be 3+ chars'; return; }
+  if (pass.length < 6) { err.textContent = 'Password must be 6+ chars'; return; }
   if (pass !== pass2) { err.textContent = 'Passwords do not match'; return; }
-  const accs = getAccounts();
-  if (accs[user]) { err.textContent = 'Username already taken'; return; }
-  accs[user] = { password: pass, data: DEFAULT_PROFILE() };
-  saveAccounts(accs);
-  showToast('Account created! Please login.');
-  switchAuthTab('login');
-  document.getElementById('login-user').value = user;
+
+  const regBtn = document.querySelector('#register-form .btn-gold');
+  if (regBtn) { regBtn.disabled = true; regBtn.textContent = '⏳ Creating...'; }
+
+  try {
+    const { createUserWithEmailAndPassword, updateProfile } = window._fbFns;
+    const cred = await createUserWithEmailAndPassword(window._fbAuth, email, pass);
+    await updateProfile(cred.user, { displayName: user });
+    showToast('Account created! Welcome, ' + user + '!');
+    // onAuthStateChanged will handle the rest
+  } catch(e) {
+    const msgs = {
+      'auth/email-already-in-use': 'This email is already registered',
+      'auth/invalid-email': 'Invalid email address',
+      'auth/weak-password': 'Password is too weak (min 6 chars)',
+      'auth/network-request-failed': 'Network error — check your connection'
+    };
+    err.textContent = msgs[e.code] || (e.message || 'Registration failed');
+    if (regBtn) { regBtn.disabled = false; regBtn.textContent = '✨ Create Account'; }
+  }
 }
 
-function doLogin() {
-  const user = document.getElementById('login-user').value.trim();
+async function doLogin() {
+  const email = document.getElementById('login-user').value.trim();
   const pass = document.getElementById('login-pass').value;
   const remember = document.getElementById('remember-me').checked;
   const err = document.getElementById('login-err');
   err.textContent = '';
-  const accs = getAccounts();
-  if (!accs[user]) { err.textContent = 'Account not found'; return; }
-  if (accs[user].password !== pass) { err.textContent = 'Wrong password'; return; }
-  loginAs(user, remember);
-}
 
-function loginAs(username, remember = false) {
-  currentUser = username;
-  loadProfile(username);
-  if (remember) {
-    localStorage.setItem(AUTOLOGIN_KEY, JSON.stringify({ user: username }));
-  } else {
-    localStorage.removeItem(AUTOLOGIN_KEY);
+  const loginBtn = document.querySelector('#login-form .btn-primary');
+  if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = '⏳ Logging in...'; }
+
+  try {
+    const { setPersistence, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword } = window._fbFns;
+    await setPersistence(window._fbAuth, remember ? browserLocalPersistence : browserSessionPersistence);
+    await signInWithEmailAndPassword(window._fbAuth, email, pass);
+    // onAuthStateChanged handles the rest
+  } catch(e) {
+    const msgs = {
+      'auth/user-not-found': 'No account found with this email',
+      'auth/wrong-password': 'Wrong password',
+      'auth/invalid-credential': 'Wrong email or password',
+      'auth/invalid-email': 'Invalid email address',
+      'auth/too-many-requests': 'Too many attempts — try again later',
+      'auth/network-request-failed': 'Network error — check your connection'
+    };
+    err.textContent = msgs[e.code] || (e.message || 'Login failed');
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '⚔️ Login'; }
   }
-  checkDailyLogin();
-  showScreen('menu-screen');
-  updateAllCoins();
-  updateMenuUsername();
-  renderSavedAccounts();
-  updateSettingsUI();
 }
 
-function doLogout() {
-  localStorage.removeItem(AUTOLOGIN_KEY);
+async function doLogout() {
+  const { signOut } = window._fbFns;
+  await signOut(window._fbAuth);
   currentUser = null; SD = null;
+  window.currentUser = null; window.SD = null;
   showScreen('auth-screen');
-  renderSavedAccounts();
   document.getElementById('login-pass').value = '';
   document.getElementById('login-err').textContent = '';
 }
 
 function checkAutoLogin() {
-  try {
-    const al = JSON.parse(localStorage.getItem(AUTOLOGIN_KEY));
-    if (al && al.user) {
-      const accs = getAccounts();
-      if (accs[al.user]) { loginAs(al.user, true); return; }
-    }
-  } catch(e) {}
-  renderSavedAccounts();
+  // Firebase handles this automatically via onAuthStateChanged + persistence
+  // Just show auth screen — if user is logged in, onAuthStateChanged fires immediately
+  // Show a loading state
+  const authBox = document.querySelector('.auth-box');
+  if (authBox) {
+    authBox.style.opacity = '0.5';
+    setTimeout(() => { if (authBox) authBox.style.opacity = '1'; }, 1500);
+  }
 }
 
 function renderSavedAccounts() {
+  // With Firebase, we don't show saved accounts list (accounts are online)
   const el = document.getElementById('saved-accounts-list');
-  if (!el) return;
-  const accs = getAccounts();
-  const keys = Object.keys(accs);
-  if (!keys.length) { el.innerHTML = ''; return; }
-  el.innerHTML = `<h4>Saved Accounts</h4>` + keys.map(u =>
-    `<div class="acc-item" onclick="quickLogin('${u}')">
-      <span>👤 ${u}</span>
-      <button class="acc-del" onclick="event.stopPropagation();deleteAccount('${u}')">✕</button>
-    </div>`
-  ).join('');
-}
-
-function quickLogin(username) {
-  document.getElementById('login-user').value = username;
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-pass').focus();
-}
-
-function deleteAccount(username) {
-  if (!confirm(`Delete account "${username}"? This cannot be undone.`)) return;
-  const accs = getAccounts();
-  delete accs[username];
-  saveAccounts(accs);
-  if (currentUser === username) doLogout();
-  else renderSavedAccounts();
-  showToast('Account deleted.');
+  if (el) el.innerHTML = '';
 }
 
 function updateMenuUsername() {
   const el = document.getElementById('menu-username');
-  if (el) el.textContent = currentUser || 'Player';
+  if (el) el.textContent = (window.currentUser || currentUser) || 'Player';
 }
 
-function resetAccount() {
-  if (!currentUser) return;
+async function resetAccount() {
+  if (!window._fbUid) return;
   if (!confirm('Reset all data for this account? Cannot undo!')) return;
   SD = DEFAULT_PROFILE();
-  saveProfile();
+  window.SD = SD;
+  await _saveProfileToFirestore(window._fbUid, SD);
   updateAllCoins();
   showToast('Account reset!');
 }
 
 function saveAutoLogin() {
-  const checked = document.getElementById('settings-autologin').checked;
-  if (checked && currentUser) {
-    localStorage.setItem(AUTOLOGIN_KEY, JSON.stringify({ user: currentUser }));
-  } else {
-    localStorage.removeItem(AUTOLOGIN_KEY);
-  }
+  // Firebase persistence is controlled at login time (remember-me checkbox)
+  // This setting is not meaningful with Firebase; it's handled by setPersistence
 }
 
 function updateSettingsUI() {
   const su = document.getElementById('settings-username');
-  if (su) su.textContent = currentUser || '—';
+  const name = (window.currentUser || currentUser) || '—';
+  if (su) su.textContent = name;
   const sal = document.getElementById('settings-autologin');
-  if (sal) {
-    try { const al = JSON.parse(localStorage.getItem(AUTOLOGIN_KEY)); sal.checked = !!(al && al.user === currentUser); }
-    catch(e) { sal.checked = false; }
-  }
+  if (sal) sal.checked = true; // Firebase handles this via persistence
 }
 
 function switchAuthTab(tab) {
