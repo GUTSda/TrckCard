@@ -973,6 +973,425 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
   .cards-grid { grid-template-columns:repeat(3,1fr); }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CINEMATIC BATTLE TRANSITION — golden slash + gold wave fill
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Overlay container ── */
+#cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  pointer-events: none;
+  display: none;
+}
+#cinematic-overlay.active {
+  display: block;
+  pointer-events: all;
+}
+
+/* ── Stage 1: Button flash ring ── */
+#cinematic-btn-flash {
+  position: fixed;
+  border-radius: 14px;
+  background: transparent;
+  border: 2px solid rgba(255,215,0,0.9);
+  box-shadow:
+    0 0 0 0 rgba(255,215,0,0.7),
+    inset 0 0 20px rgba(255,200,0,0.4);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 99991;
+  transition: none;
+}
+#cinematic-btn-flash.flash-go {
+  animation: btnFlashRing 0.28s ease-out forwards;
+}
+@keyframes btnFlashRing {
+  0%   { opacity:1; box-shadow: 0 0 0 0 rgba(255,215,0,0.9), 0 0 30px rgba(255,200,0,0.6); }
+  60%  { opacity:1; box-shadow: 0 0 0 16px rgba(255,215,0,0), 0 0 55px rgba(255,200,0,0); }
+  100% { opacity:0; }
+}
+
+/* ── Gold wave trail — covers entire screen after slash ── */
+#cinematic-gold-wave {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99993;
+  overflow: hidden;
+  opacity: 0;
+}
+#cinematic-gold-wave.wave-go {
+  animation: goldWaveFadeIn 0.05s ease forwards;
+}
+@keyframes goldWaveFadeIn { to { opacity:1; } }
+
+#cinematic-gold-wave::before {
+  content: '';
+  position: absolute;
+  /* start off-screen bottom-left, sweep to top-right */
+  bottom: -150%;
+  left: -80%;
+  width: 280%;
+  height: 280%;
+  background: linear-gradient(
+    135deg,
+    #b8860b 0%,
+    #ffd700 25%,
+    #fff8d0 45%,
+    #ffd700 60%,
+    #ff9500 80%,
+    #b8860b 100%
+  );
+  transform: scaleX(0);
+  transform-origin: bottom left;
+  opacity: 0;
+}
+#cinematic-gold-wave.wave-go::before {
+  animation: goldWaveExpand 0.72s cubic-bezier(0.22, 0.8, 0.32, 1) forwards;
+}
+@keyframes goldWaveExpand {
+  0%   { transform: scaleX(0) scaleY(0); opacity: 0.85; }
+  40%  { transform: scaleX(0.6) scaleY(0.5); opacity: 1; }
+  100% { transform: scaleX(1) scaleY(1); opacity: 1; }
+}
+
+/* Shimmer overlay on the gold wave */
+#cinematic-gold-wave::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 30%,
+    rgba(255,255,255,0.35) 50%,
+    transparent 70%
+  );
+  animation: goldShimmer 0.9s ease 0.1s forwards;
+  opacity: 0;
+}
+@keyframes goldShimmer {
+  0%   { opacity:0; transform: translateX(-100%) skewX(-20deg); }
+  30%  { opacity:1; }
+  100% { opacity:0; transform: translateX(120%)  skewX(-20deg); }
+}
+
+/* ── Stage 2: Golden slash sweep (diagonal wipe) ── */
+#cinematic-slash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  z-index: 99992;
+}
+#cinematic-slash.slash-go {
+  animation: slashFadeIn 0.08s ease forwards;
+}
+
+/* The actual sweep shape — diagonal bar that flies across */
+#cinematic-slash::before {
+  content: '';
+  position: absolute;
+  /* tall rotated rectangle, wider than screen to cover corners */
+  width: 180%;
+  height: 100%;
+  top: 0;
+  left: -180%;
+  transform: skewX(-18deg);
+  transform-origin: top left;
+  background: linear-gradient(
+    105deg,
+    transparent            0%,
+    rgba(255,200,0,0.08)  12%,
+    rgba(255,215,0,0.55)  28%,
+    rgba(255,255,200,0.92) 44%,
+    rgba(255,240,120,1)   50%,
+    rgba(255,255,200,0.92) 56%,
+    rgba(255,215,0,0.55)  70%,
+    rgba(255,180,0,0.08)  86%,
+    transparent            100%
+  );
+  filter: blur(1px);
+}
+#cinematic-slash.slash-go::before {
+  animation: slashSweep 0.55s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+}
+
+/* secondary thinner streak — metallic accent */
+#cinematic-slash::after {
+  content: '';
+  position: absolute;
+  width: 180%;
+  height: 100%;
+  top: 0;
+  left: -180%;
+  transform: skewX(-18deg);
+  transform-origin: top left;
+  background: linear-gradient(
+    105deg,
+    transparent           0%,
+    transparent          38%,
+    rgba(255,255,255,0)  44%,
+    rgba(255,255,255,0.7) 48%,
+    rgba(255,255,255,0)  52%,
+    transparent          58%,
+    transparent          100%
+  );
+  filter: blur(0.5px);
+}
+#cinematic-slash.slash-go::after {
+  animation: slashSweep 0.55s cubic-bezier(0.2, 0, 0.4, 1) 0.04s forwards;
+}
+
+@keyframes slashFadeIn { to { opacity:1; } }
+@keyframes slashSweep {
+  0%   { left: -180%; }
+  100% { left: 160%; }
+}
+
+/* ── Stage 3: Dark fill after gold wave ── */
+#cinematic-fill {
+  position: fixed;
+  inset: 0;
+  background: #07070f;
+  z-index: 99995;
+  opacity: 0;
+  pointer-events: none;
+}
+#cinematic-fill.fill-go {
+  animation: fillIn 0.22s ease forwards;
+}
+@keyframes fillIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* ── Stage 4: Loading screen ── */
+#cinematic-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99996;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  opacity: 0;
+  pointer-events: none;
+  background: #07070f;
+}
+#cinematic-loader.loader-show {
+  animation: loaderFadeIn 0.3s ease 0.72s forwards;
+}
+@keyframes loaderFadeIn {
+  0%   { opacity:0; }
+  100% { opacity:1; }
+}
+
+/* Logo in loader */
+.cine-loader-logo {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  font-weight: 900;
+  letter-spacing: .06em;
+  background: linear-gradient(135deg, #ffffff 0%, #ffd700 40%, #ff8c00 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 24px rgba(255,165,0,0.55));
+  animation: logoPulse 1.4s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%,100% { filter: drop-shadow(0 0 18px rgba(255,165,0,0.45)); }
+  50%      { filter: drop-shadow(0 0 38px rgba(255,200,0,0.75)); }
+}
+
+/* Gold decorative line */
+.cine-loader-divider {
+  width: clamp(80px,30vw,160px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.7), transparent);
+  margin: -.4rem 0;
+}
+
+/* Loading text + animated dots */
+.cine-loader-text {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(.78rem,2.5vw,1rem);
+  font-weight: 600;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: rgba(255,215,0,0.65);
+}
+
+/* Progress bar */
+.cine-loader-bar-wrap {
+  width: clamp(120px, 38vw, 220px);
+  height: 3px;
+  background: rgba(255,215,0,0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cine-loader-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff8800, #ffd700, #fff8b0);
+  border-radius: 2px;
+  animation: barFill 1.1s cubic-bezier(0.4,0,0.6,1) 0.72s forwards;
+}
+@keyframes barFill {
+  0%   { width: 0%; opacity:.6; }
+  70%  { width: 82%; opacity:1; }
+  90%  { width: 94%; }
+  100% { width: 100%; }
+}
+
+/* ── Button locked state during transition ── */
+#btn-start-battle.cine-locked {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEGENDARY GACHA ANIMATION + RARITY GLOW EFFECTS
+   ═══════════════════════════════════════════════════════════ */
+#legendary-reveal {
+  position:fixed;inset:0;z-index:99980;display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0);cursor:pointer;
+}
+#legendary-reveal.active {
+  display:flex;
+  animation:legBgDarken 0.5s ease forwards;
+}
+@keyframes legBgDarken { 0%{background:rgba(0,0,0,0)}100%{background:rgba(0,0,0,0.88)} }
+
+#leg-skip-hint {
+  position:absolute;bottom:2rem;
+  font-family:'Rajdhani',sans-serif;font-size:.78rem;
+  color:rgba(255,215,0,0.45);letter-spacing:.18em;text-transform:uppercase;
+  opacity:0;animation:legHintFade 0.5s ease 2.2s forwards;pointer-events:none;
+}
+@keyframes legHintFade { to{opacity:1} }
+
+#leg-starburst {
+  position:absolute;left:50%;top:50%;
+  width:0;height:0;border-radius:50%;
+  background:radial-gradient(circle,#fff 0%,#ffd700 30%,#ff8800 65%,transparent 100%);
+  opacity:0;pointer-events:none;transform:translate(-50%,-50%);
+  animation:legBurst 0.65s cubic-bezier(0.2,0,0.3,1) 0.3s forwards;
+}
+@keyframes legBurst {
+  0%  {width:0;height:0;opacity:0;}
+  40% {width:240px;height:240px;opacity:1;}
+  70% {opacity:0.85;}
+  100%{width:240px;height:240px;opacity:0.25;}
+}
+#leg-rays {
+  position:absolute;left:50%;top:50%;
+  width:380px;height:380px;transform:translate(-50%,-50%);
+  opacity:0;pointer-events:none;
+  animation:legRaysIn 0.4s ease 0.5s forwards;
+}
+@keyframes legRaysIn{to{opacity:1}}
+#leg-rays svg {
+  width:100%;height:100%;
+  animation:legRaysSpin 10s linear infinite;transform-origin:center;
+}
+@keyframes legRaysSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.leg-sparkle {
+  position:absolute;border-radius:50%;pointer-events:none;opacity:0;
+}
+#leg-card-wrap {
+  position:relative;z-index:5;
+  display:flex;flex-direction:column;align-items:center;gap:.6rem;
+  opacity:0;transform:scale(0.4) translateY(40px);
+  animation:legCardEmerge 0.65s cubic-bezier(0.15,0.9,0.35,1.1) 1.05s forwards;
+}
+@keyframes legCardEmerge {
+  0%  {opacity:0;transform:scale(0.4) translateY(40px);}
+  60% {opacity:1;transform:scale(1.08) translateY(-6px);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+#leg-card-inner {
+  width:120px;height:160px;border-radius:14px;
+  border:2px solid rgba(255,215,0,0.6);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;
+  position:relative;overflow:hidden;
+  background:linear-gradient(145deg,#1a1200,#261e00);
+  box-shadow:0 0 30px rgba(255,200,0,0.65),0 0 70px rgba(255,150,0,0.3);
+  animation:legCardGlow 1.4s ease-in-out 1.7s infinite;
+}
+@keyframes legCardGlow {
+  0%,100%{box-shadow:0 0 30px rgba(255,200,0,0.65),0 0 70px rgba(255,150,0,0.3);}
+  50%    {box-shadow:0 0 55px rgba(255,220,0,0.95),0 0 110px rgba(255,180,0,0.55);}
+}
+#leg-card-inner::after {
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,0.18) 50%,transparent 70%);
+  animation:legCardShine 2.5s ease-in-out 1.7s infinite;
+}
+@keyframes legCardShine {
+  0%,100%{transform:translateX(-120%) skewX(-15deg);}
+  45%    {transform:translateX(220%)  skewX(-15deg);}
+}
+#leg-card-icon{font-size:2.8rem;line-height:1;filter:drop-shadow(0 0 12px rgba(255,200,0,0.9));}
+#leg-card-name{
+  font-family:'Cinzel',serif;font-size:.7rem;font-weight:900;
+  color:#fff;text-align:center;text-shadow:0 0 12px rgba(255,200,0,0.8);
+  padding:0 4px;line-height:1.3;
+}
+#leg-rarity-badge{
+  font-family:'Cinzel',serif;font-size:.82rem;font-weight:900;
+  color:var(--gold);letter-spacing:.18em;text-transform:uppercase;
+  text-shadow:0 0 16px rgba(255,215,0,0.9);
+  animation:legBadgePulse 0.9s ease-in-out 1.7s infinite;
+}
+@keyframes legBadgePulse {
+  0%,100%{text-shadow:0 0 12px rgba(255,215,0,0.8);opacity:1;}
+  50%    {text-shadow:0 0 28px rgba(255,235,0,1);  opacity:.85;}
+}
+#leg-dupe-badge{
+  font-size:.7rem;color:#aaa;background:rgba(0,0,0,0.5);
+  border:1px solid rgba(255,255,255,0.1);border-radius:10px;
+  padding:.18rem .55rem;display:none;
+}
+#leg-collect-btn{
+  opacity:0;transform:translateY(10px);
+  animation:legBtnIn 0.4s ease 1.85s forwards;
+  font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;
+  padding:.6rem 1.6rem;border-radius:8px;
+  border:1px solid rgba(255,215,0,0.5);
+  background:rgba(255,215,0,0.12);color:var(--gold);
+  cursor:pointer;letter-spacing:.08em;transition:all .2s;
+}
+#leg-collect-btn:hover{background:rgba(255,215,0,0.24);}
+@keyframes legBtnIn{to{opacity:1;transform:translateY(0)}}
+
+/* Epic glow */
+.gacha-card-reveal.epic-glow {
+  box-shadow:0 0 18px rgba(165,105,189,0.85),0 0 40px rgba(155,89,182,0.4)!important;
+  border-color:rgba(165,105,189,0.85)!important;
+  animation:epicGlowPulse 1.2s ease-in-out infinite!important;
+}
+@keyframes epicGlowPulse {
+  0%,100%{box-shadow:0 0 14px rgba(165,105,189,0.7),0 0 30px rgba(155,89,182,0.3);}
+  50%    {box-shadow:0 0 28px rgba(185,125,212,1.0),0 0 58px rgba(155,89,182,0.6);}
+}
+/* Rare glow */
+.gacha-card-reveal.rare-glow {
+  box-shadow:0 0 14px rgba(52,152,219,0.8),0 0 30px rgba(52,152,219,0.3)!important;
+  border-color:rgba(93,173,226,0.9)!important;
+  animation:rareGlowFlash 1.6s ease-in-out infinite!important;
+}
+@keyframes rareGlowFlash {
+  0%,100%{box-shadow:0 0 10px rgba(52,152,219,0.6),0 0 22px rgba(52,152,219,0.2);}
+  50%    {box-shadow:0 0 22px rgba(93,173,226,1.0),0 0 44px rgba(52,152,219,0.5);}
+}
+
 /* ── Tap-select deck builder: mobile-specific UI ── */
 .deck-tap-hint {
   font-size:.72rem;color:var(--water);text-align:center;
@@ -997,6 +1416,223 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 .gcard.tap-add-target {
   box-shadow:0 0 0 2px var(--water),0 0 12px rgba(0,191,255,.3);
 }
+
+/* ════════════════════════════════════════════════
+   PROFILE PANEL — top-left clickable card
+   ════════════════════════════════════════════════ */
+#profile-btn {
+  display:flex;align-items:center;gap:.5rem;
+  background:rgba(0,0,0,0.35);
+  border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-radius:10px;padding:.38rem .65rem;
+  cursor:pointer;transition:all .2s;min-height:44px;
+}
+#profile-btn:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,215,0,0.35); }
+#profile-avatar {
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,#ff4500,#ffd700);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;flex-shrink:0;
+  box-shadow:0 0 10px rgba(255,100,0,0.4);
+}
+#profile-info { display:flex;flex-direction:column;line-height:1.2; }
+#profile-name-display {
+  font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;color:#fff;
+}
+#profile-title-display {
+  font-size:.6rem;font-weight:600;letter-spacing:.06em;margin-top:.05rem;
+}
+
+/* Title colors */
+.title-white  { color:#eeeeff; }
+.title-blue   { color:#5dade2; }
+.title-purple { color:#b97dd4; }
+.title-red    { color:#e74c3c; }
+.title-gold   { color:var(--gold);
+  animation:titleShimmer 1.8s ease-in-out infinite;
+  text-shadow:0 0 8px rgba(255,215,0,0.6);
+}
+@keyframes titleShimmer {
+  0%,100%{opacity:1;text-shadow:0 0 6px rgba(255,215,0,0.5);}
+  50%    {opacity:.75;text-shadow:0 0 16px rgba(255,235,0,0.95);}
+}
+
+/* ── Profile Modal ── */
+#profile-modal {
+  position:fixed;inset:0;z-index:8000;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:1rem;
+}
+#profile-modal.show { display:flex; }
+#profile-modal-box {
+  background:rgba(10,10,25,0.96);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;width:100%;max-width:420px;
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  box-shadow:0 0 60px rgba(0,0,0,0.7);
+  animation:slideUp .2s ease;
+}
+.pmod-header {
+  display:flex;align-items:center;gap:.8rem;
+  padding:1.2rem 1.2rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.pmod-avatar-big {
+  width:54px;height:54px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#ff4500,#ffd700);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.7rem;box-shadow:0 0 20px rgba(255,100,0,0.4);
+}
+.pmod-name { font-family:'Cinzel',serif;font-size:1.05rem;font-weight:700;color:#fff; }
+.pmod-title-tag { font-size:.7rem;font-weight:600;margin-top:.15rem;letter-spacing:.05em; }
+.pmod-tabs {
+  display:flex;gap:.3rem;padding:.65rem .9rem .3rem;
+  overflow-x:auto;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.pmod-tab {
+  flex-shrink:0;padding:.4rem .85rem;border-radius:6px;
+  border:1px solid rgba(255,255,255,0.08);background:transparent;
+  color:rgba(255,255,255,0.5);font-family:'Cinzel',serif;font-size:.72rem;
+  cursor:pointer;transition:all .2s;
+}
+.pmod-tab.active {
+  background:rgba(255,215,0,0.15);border-color:rgba(255,215,0,0.4);color:var(--gold);
+}
+.pmod-body { padding:.9rem 1.1rem 1.2rem; }
+.pmod-section { margin-bottom:1rem; }
+.pmod-section h4 {
+  font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);
+  margin-bottom:.55rem;letter-spacing:.08em;
+}
+.pmod-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.pmod-label { font-size:.82rem;color:rgba(255,255,255,0.6); }
+.pmod-val   { font-size:.88rem;font-weight:700;color:#fff; }
+.pmod-btn {
+  padding:.42rem 1rem;border-radius:7px;font-family:'Cinzel',serif;font-size:.72rem;
+  font-weight:700;cursor:pointer;transition:all .2s;border:none;
+}
+.pmod-btn-gold {
+  background:linear-gradient(135deg,#b8860b,#ffd700);color:#000;
+}
+.pmod-btn-gold:hover { box-shadow:0 0 18px rgba(255,215,0,0.5); }
+.pmod-close-btn {
+  width:100%;margin-top:.5rem;padding:.65rem;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.45);font-family:'Rajdhani',sans-serif;
+  font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.pmod-close-btn:hover { background:rgba(255,255,255,0.09);color:#fff; }
+
+/* Title list */
+.title-list { display:flex;flex-direction:column;gap:.35rem;margin-top:.5rem; }
+.title-item {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.45rem .65rem;border-radius:7px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);
+}
+.title-item.locked { opacity:.45; }
+.title-item.equipped {
+  background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.35);
+}
+.title-equip-btn {
+  padding:.25rem .6rem;border-radius:5px;font-size:.65rem;font-weight:700;
+  border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.1);
+  color:var(--gold);cursor:pointer;transition:all .2s;
+}
+.title-equip-btn:hover { background:rgba(255,215,0,0.2); }
+.title-equip-btn:disabled { opacity:.3;cursor:not-allowed; }
+
+/* History & stats */
+.history-item {
+  display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;
+  border-radius:7px;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.04);margin-bottom:.3rem;font-size:.78rem;
+}
+.history-win  { border-left:3px solid var(--green)!important; }
+.history-lose { border-left:3px solid var(--red)!important;   }
+.hist-result  { font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;min-width:30px; }
+.hist-detail  { flex:1;color:rgba(255,255,255,0.65);font-size:.72rem;line-height:1.4; }
+.hist-coins   { color:var(--gold);font-size:.72rem;font-weight:700; }
+
+.stat-grid2 {
+  display:grid;grid-template-columns:1fr 1fr;gap:.5rem;
+}
+.stat-card2 {
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+  border-radius:9px;padding:.6rem .7rem;text-align:center;
+}
+.stat-card2 .sv2 { font-family:'Cinzel',serif;font-size:1.1rem;font-weight:900;color:var(--gold); }
+.stat-card2 .sl2 { font-size:.65rem;color:rgba(255,255,255,0.5);margin-top:.15rem; }
+
+/* ════════════════════════════════════════════════
+   LEADERBOARD PANEL
+   ════════════════════════════════════════════════ */
+#lb-dots-btn {
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  border-radius:6px;padding:.22rem .55rem;color:rgba(255,255,255,0.7);
+  cursor:pointer;font-size:.9rem;transition:all .2s;
+}
+#lb-dots-btn:hover { background:rgba(255,255,255,0.15);color:#fff; }
+
+#leaderboard-modal {
+  position:fixed;inset:0;z-index:8500;
+  background:rgba(0,0,0,0.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:1rem;
+}
+#leaderboard-modal.show { display:flex; }
+#leaderboard-box {
+  background:rgba(10,10,25,0.97);
+  border:1px solid rgba(255,215,0,0.2);
+  border-radius:16px;width:100%;max-width:400px;
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  box-shadow:0 0 60px rgba(255,150,0,0.1);
+  animation:slideUp .22s ease;
+}
+.lb-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.2rem .7rem;
+  border-bottom:1px solid rgba(255,215,0,0.1);
+}
+.lb-header h3 {
+  font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);
+}
+.lb-body { padding:.7rem 1rem 1.2rem; }
+.lb-row {
+  display:flex;align-items:center;gap:.55rem;
+  padding:.5rem .55rem;border-radius:7px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);
+  margin-bottom:.3rem;
+}
+.lb-row.lb-top1 { background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3); }
+.lb-row.lb-top2 { background:rgba(200,200,220,0.08);border-color:rgba(200,200,200,0.2); }
+.lb-row.lb-top3 { background:rgba(205,127,50,0.1);border-color:rgba(205,127,50,0.3); }
+.lb-rank  { font-family:'Cinzel',serif;font-size:.85rem;font-weight:900;color:var(--gold);min-width:22px;text-align:center; }
+.lb-info  { flex:1; }
+.lb-uname { font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:#fff; }
+.lb-utitle{ font-size:.6rem;margin-top:.07rem; }
+.lb-stats { text-align:right; }
+.lb-wins  { font-size:.78rem;font-weight:700;color:var(--gold); }
+.lb-today { font-size:.62rem;color:rgba(255,255,255,0.45); }
+.lb-note  { text-align:center;font-size:.72rem;color:rgba(255,255,255,0.3);margin-top:.7rem; }
+.lb-daily-badge {
+  background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.15);
+  border-radius:7px;padding:.4rem .7rem;margin-bottom:.7rem;
+  font-size:.72rem;color:rgba(255,215,0,0.7);text-align:center;
+}
+
+/* ════════════════════════════════════════════════
+   MOBILE PROFILE / LEADERBOARD responsive
+   ════════════════════════════════════════════════ */
+@media (max-width:600px) {
+  #profile-btn { padding:.3rem .5rem;min-height:40px; }
+  #profile-avatar { width:30px;height:30px;font-size:.85rem; }
+  #profile-name-display { font-size:.75rem; }
+  #profile-title-display { font-size:.55rem; }
+}
 </style>
 </head>
 <body>
@@ -1009,6 +1645,84 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 
 <!-- TOUCH DRAG GHOST -->
 <div id="touch-drag-ghost"></div>
+
+<!-- ═══════════════════ CINEMATIC BATTLE TRANSITION ═══════════════════ -->
+<div id="cinematic-overlay">
+  <!-- Stage 1: Button flash ring (positioned by JS) -->
+  <div id="cinematic-btn-flash"></div>
+
+  <!-- Stage 2: Diagonal golden slash sweep -->
+  <div id="cinematic-slash"></div>
+
+  <!-- Stage 2b: Gold wave expansion trail -->
+  <div id="cinematic-gold-wave"></div>
+
+  <!-- Stage 3: Dark fill -->
+  <div id="cinematic-fill"></div>
+
+  <!-- Stage 4: Loading screen -->
+  <div id="cinematic-loader">
+    <div class="cine-loader-logo">Trackcard</div>
+    <div class="cine-loader-divider"></div>
+    <div class="cine-loader-text" id="cine-loader-txt">Loading</div>
+    <div class="cine-loader-bar-wrap">
+      <div class="cine-loader-bar-fill" id="cine-bar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LEGENDARY GACHA REVEAL ═══════════════════ -->
+<div id="legendary-reveal" onclick="skipLegendaryReveal()">
+  <!-- Starburst core -->
+  <div id="leg-starburst"></div>
+
+  <!-- Rotating rays (SVG) -->
+  <div id="leg-rays">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(100,100)">
+        <!-- 12 rays radiating outward -->
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(30)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(60)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(90)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(120)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(150)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(180)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(210)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(240)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(270)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(300)"/>
+        <line x1="0" y1="-20" x2="0" y2="-95" stroke="rgba(255,215,0,0.35)" stroke-width="3" stroke-linecap="round" transform="rotate(330)"/>
+        <!-- Thin accent rays between main ones -->
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(15)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(45)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(75)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(105)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(135)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(165)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(195)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(225)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(255)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(285)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(315)"/>
+        <line x1="0" y1="-25" x2="0" y2="-80" stroke="rgba(255,255,200,0.2)" stroke-width="1.5" stroke-linecap="round" transform="rotate(345)"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Card emerge -->
+  <div id="leg-card-wrap">
+    <div id="leg-card-inner">
+      <div id="leg-card-icon">⭐</div>
+      <div id="leg-card-name">Card</div>
+    </div>
+    <div id="leg-rarity-badge">✦ LEGENDARY ✦</div>
+    <div id="leg-dupe-badge">Duplicate +20 🪙</div>
+    <button id="leg-collect-btn" onclick="event.stopPropagation();collectLegendary()">✓ Collect</button>
+  </div>
+
+  <div id="leg-skip-hint">Tap anywhere to skip</div>
+</div>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -1053,17 +1767,24 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 
   <!-- Top bar -->
   <div id="menu-topbar">
-    <div id="menu-welcome">
-      <span id="menu-welcome-label">Welcome back</span>
-      <span id="menu-welcome-name" id="menu-username">Player</span>
-    </div>
+    <!-- Profile button (replaces old welcome text) -->
+    <button id="profile-btn" onclick="openProfileModal()">
+      <div id="profile-avatar">⚔️</div>
+      <div id="profile-info">
+        <span id="profile-name-display">Player</span>
+        <span id="profile-title-display" class="title-white">Beginner</span>
+      </div>
+    </button>
     <button id="menu-settings-btn" onclick="openSettingsPanel()">Settings</button>
   </div>
 
   <!-- Stats row -->
   <div id="menu-stats-row">
     <div class="ms-pill gold">🪙 <span id="menu-coins">0</span></div>
-    <div class="ms-pill green">🏆 <span id="menu-wins">0</span> Wins</div>
+    <div class="ms-pill green" style="display:flex;align-items:center;gap:.3rem;">
+      🏆 <span id="menu-wins">0</span> Wins
+      <button id="lb-dots-btn" onclick="openLeaderboard()" title="Leaderboard">•••</button>
+    </div>
     <div class="ms-pill orange">🔥 Day <span id="menu-streak">1</span></div>
   </div>
 
@@ -1101,12 +1822,52 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
       <span class="sp-label">Volume</span>
       <input type="range" class="sp-vol" id="sp-bgm-vol" min="0" max="100" value="40" oninput="setBGMVol(this.value)">
     </div>
+    <div class="sp-row">
+      <span class="sp-label">Sound FX</span>
+      <button class="sp-toggle" id="sp-sfx-toggle" onclick="toggleSFX()"></button>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">FX Volume</span>
+      <input type="range" class="sp-vol" id="sp-sfx-vol" min="0" max="100" value="60" oninput="setSFXVol(this.value)">
+    </div>
     <div class="sp-btns">
       <button class="sp-btn primary" onclick="closeSettingsPanel();showScreen('howto-screen')">📖 How To Play</button>
       <button class="sp-btn danger" onclick="resetAccount()">🗑 Reset Account Data</button>
       <button class="sp-btn" onclick="doLogout()">↩ Logout</button>
     </div>
     <button class="sp-close-btn" onclick="closeSettingsPanel()">✕ Close</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ PROFILE MODAL ═══════════════════ -->
+<div id="profile-modal" onclick="closeProfileModalOutside(event)">
+  <div id="profile-modal-box">
+    <div class="pmod-header">
+      <div class="pmod-avatar-big">⚔️</div>
+      <div>
+        <div class="pmod-name" id="pmod-name">Player</div>
+        <div class="pmod-title-tag title-white" id="pmod-title-tag">Beginner</div>
+      </div>
+    </div>
+    <div class="pmod-tabs">
+      <button class="pmod-tab active" onclick="switchProfileTab('identity')">Identity</button>
+      <button class="pmod-tab" onclick="switchProfileTab('history')">History</button>
+      <button class="pmod-tab" onclick="switchProfileTab('stats')">Stats</button>
+    </div>
+    <div class="pmod-body" id="pmod-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LEADERBOARD MODAL ═══════════════════ -->
+<div id="leaderboard-modal" onclick="closeLeaderboardOutside(event)">
+  <div id="leaderboard-box">
+    <div class="lb-header">
+      <h3>🏆 Global Leaderboard</h3>
+      <button class="pmod-close-btn" style="width:auto;padding:.3rem .7rem;margin:0" onclick="closeLeaderboard()">✕</button>
+    </div>
+    <div class="lb-body" id="lb-body">
+      <div style="text-align:center;color:rgba(255,255,255,.4);font-size:.82rem;padding:2rem 0">Loading...</div>
+    </div>
   </div>
 </div>
 
@@ -1437,6 +2198,14 @@ const DEFAULT_PROFILE = () => ({
   loginStreak:0, lastLoginDate:'', loginClaimedToday:false,
   dailyDate:'', dailyQ:{q1:0,q2:0,q3:0,q1c:false,q2c:false,q3c:false},
   weeklyDate:'', weeklyQ:{q1:0,q2:0,q3:0,q1c:false,q2c:false,q3c:false},
+  // Profile expansion
+  equippedTitle:'Beginner',
+  nickname:'',
+  matchHistory:[],
+  totalMatches:0, totalWins:0, totalDmg:0, totalSummons:0,
+  totalKills:0,
+  dailyWins:0, dailyWinsDate:'',
+  dailyLeaderboardClaimed:false, dailyLeaderboardDate:'',
 });
 
 let currentUser = null;
@@ -1556,11 +2325,14 @@ function renderSavedAccounts() {
 
 function updateMenuUsername() {
   const name = (window.currentUser || currentUser) || 'Player';
-  const el = document.getElementById('menu-welcome-name');
-  if (el) el.textContent = name;
+  // Profile button
+  const pname = document.getElementById('profile-name-display');
+  if(pname) pname.textContent = SD ? (SD.nickname || name) : name;
+  // Update title
+  updateProfileTitleDisplay();
   // Also update the legacy menu-username id if somewhere referenced
   const el2 = document.getElementById('menu-username');
-  if (el2) el2.textContent = name;
+  if(el2) el2.textContent = name;
 }
 
 async function resetAccount() {
@@ -2301,7 +3073,7 @@ function renderShopCollection(){
 
 function doSummon(cost,count){
   if(!SD||SD.coins<cost){showToast('Not enough coins!');return;}
-  SD.coins-=cost;SD.summons+=count;addQuestProgress('summons',null,count);
+  SD.coins-=cost;SD.summons+=count;SD.totalSummons=(SD.totalSummons||0)+count;addQuestProgress('summons',null,count);
   const results=[];let dupes=0;
   for(let i=0;i<count;i++){
     const roll=Math.random()*100;let rarity='common',acc=0;
@@ -2703,8 +3475,34 @@ function endGame(won){
   if(!GS||!SD)return;GS.gameOver=true;setButtons(false);
   let coinsEarned=0;
   if(won){const alive=GS.playerCards.filter(c=>c&&c.type==='active'&&c.hp>0).length;
-    coinsEarned=Math.min(300,Math.max(40,alive*40+GS.stats.kills*20));SD.coins+=coinsEarned;SD.wins++;addQuestProgress('wins',null,1);saveProfile();
-  }else{coinsEarned=40;SD.coins+=coinsEarned;saveProfile();}
+    coinsEarned=Math.min(300,Math.max(40,alive*40+GS.stats.kills*20));SD.coins+=coinsEarned;SD.wins++;addQuestProgress('wins',null,1);
+  }else{coinsEarned=40;SD.coins+=coinsEarned;}
+
+  // ── Update persistent stats ──
+  SD.totalMatches=(SD.totalMatches||0)+1;
+  if(won)SD.totalWins=(SD.totalWins||0)+1;
+  SD.totalDmg=(SD.totalDmg||0)+GS.stats.dmg;
+  SD.totalKills=(SD.totalKills||0)+GS.stats.kills;
+
+  // ── Daily wins tracking for leaderboard ──
+  const today=todayStr();
+  if(SD.dailyWinsDate!==today){SD.dailyWinsDate=today;SD.dailyWins=0;}
+  if(won)SD.dailyWins=(SD.dailyWins||0)+1;
+
+  // ── Save match history (keep last 20) ──
+  if(!SD.matchHistory)SD.matchHistory=[];
+  const botCard=GS.botCards[GS.botActiveIdx];
+  SD.matchHistory.unshift({
+    result:won?'Win':'Lose',
+    opponent:botCard?botCard.name:'Shadow Bot',
+    coins:coinsEarned,
+    time:new Date().toLocaleString(),
+    cardsLeft:GS.playerCards.filter(c=>c&&c.type==='active'&&c.hp>0).length
+  });
+  if(SD.matchHistory.length>20)SD.matchHistory=SD.matchHistory.slice(0,20);
+
+  saveProfile();
+
   document.getElementById('go-title').textContent=won?'Victory!':'Defeat!';
   document.getElementById('go-title').className=`go-title ${won?'win':'lose'}`;
   document.getElementById('go-sub').textContent=won?'🏆 All enemy cards defeated!':'💀 All your cards were defeated.';
@@ -2881,6 +3679,688 @@ loadBGMSettings();
 syncBGMUI();
 initShop();
 checkAutoLogin();
+
+// ═══════════════════════════════════════════════════════════════
+// SFX ENGINE — Web Audio synthesized sounds, no files needed
+// ═══════════════════════════════════════════════════════════════
+(function initSFX(){
+  const SFX_KEY = 'tc_sfx';
+  let sfxOn = true;
+  let sfxVol = 0.6;
+  let sfxCtx = null;
+
+  // ── Load/save SFX settings ──
+  function loadSFXSettings(){
+    try {
+      const s = JSON.parse(localStorage.getItem(SFX_KEY));
+      if(s){ sfxOn = s.on !== false; sfxVol = typeof s.vol==='number' ? s.vol : 0.6; }
+    } catch(e){}
+  }
+  function saveSFXSettings(){
+    try { localStorage.setItem(SFX_KEY, JSON.stringify({on:sfxOn, vol:sfxVol})); } catch(e){}
+  }
+  loadSFXSettings();
+
+  // ── Init audio context on first user gesture ──
+  function getCtx(){
+    if(!sfxCtx){
+      try { sfxCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
+    }
+    if(sfxCtx && sfxCtx.state==='suspended') sfxCtx.resume().catch(()=>{});
+    return sfxCtx;
+  }
+  document.addEventListener('touchstart', getCtx, {once:true, passive:true});
+  document.addEventListener('click',      getCtx, {once:true, passive:true});
+
+  // ── Core synth helper ──
+  function playSynth(fn){
+    if(!sfxOn) return;
+    const ctx = getCtx();
+    if(!ctx) return;
+    try { fn(ctx, sfxVol); } catch(e){}
+  }
+
+  // ── Individual sounds ──
+  // Hit / attack slash
+  window.sfxHit = function(){
+    playSynth((ctx, vol)=>{
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(vol*0.55, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.18);
+      g.connect(ctx.destination);
+
+      // Noise burst
+      const buf = ctx.createBuffer(1,ctx.sampleRate*0.18,ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+
+      // Band-pass filter — mid punch
+      const bpf = ctx.createBiquadFilter();
+      bpf.type = 'bandpass';
+      bpf.frequency.value = 900;
+      bpf.Q.value = 0.8;
+
+      src.connect(bpf); bpf.connect(g);
+      src.start();
+
+      // Tonal thud underneath
+      const osc = ctx.createOscillator();
+      const og  = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime+0.12);
+      og.gain.setValueAtTime(vol*0.35, ctx.currentTime);
+      og.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.14);
+      osc.connect(og); og.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime+0.15);
+    });
+  };
+
+  // Heal chime
+  window.sfxHeal = function(){
+    playSynth((ctx, vol)=>{
+      [523.25, 659.25, 783.99].forEach((freq, i)=>{
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + i*0.09;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol*0.32, t+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, t+0.45);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t); osc.stop(t+0.48);
+      });
+    });
+  };
+
+  // Skill / special move
+  window.sfxSkill = function(){
+    playSynth((ctx, vol)=>{
+      // Rising sweep
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime+0.22);
+      g.gain.setValueAtTime(vol*0.28, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.28);
+      const flt = ctx.createBiquadFilter();
+      flt.type='lowpass'; flt.frequency.value=1200;
+      osc.connect(flt); flt.connect(g); g.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime+0.3);
+    });
+  };
+
+  // Victory fanfare
+  window.sfxVictory = function(){
+    playSynth((ctx, vol)=>{
+      const melody = [523.25,659.25,783.99,1046.5];
+      melody.forEach((freq, i)=>{
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + i*0.14;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol*0.38, t+0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t); osc.stop(t+0.55);
+      });
+    });
+  };
+
+  // Defeat / lose sound
+  window.sfxDefeat = function(){
+    playSynth((ctx, vol)=>{
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime+0.5);
+      g.gain.setValueAtTime(vol*0.3, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.55);
+      const flt = ctx.createBiquadFilter();
+      flt.type='lowpass'; flt.frequency.value=600;
+      osc.connect(flt); flt.connect(g); g.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime+0.6);
+    });
+  };
+
+  // Button click (subtle)
+  window.sfxClick = function(){
+    playSynth((ctx, vol)=>{
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime+0.06);
+      g.gain.setValueAtTime(vol*0.18, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.07);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime+0.08);
+    });
+  };
+
+  // Legendary summon chime — multi-layered shimmer
+  window.sfxLegendary = function(){
+    playSynth((ctx, vol)=>{
+      // Shimmering bell sequence
+      const bells = [
+        {freq:523.25,t:0},{freq:783.99,t:0.12},{freq:1046.5,t:0.22},
+        {freq:1318.5,t:0.34},{freq:1568,t:0.44},{freq:2093,t:0.56}
+      ];
+      bells.forEach(({freq,t})=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.type='sine';
+        osc.frequency.value=freq;
+        g.gain.setValueAtTime(0,ctx.currentTime+t);
+        g.gain.linearRampToValueAtTime(vol*0.42,ctx.currentTime+t+0.06);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.9);
+        osc.connect(g);g.connect(ctx.destination);
+        osc.start(ctx.currentTime+t);osc.stop(ctx.currentTime+t+1);
+      });
+      // Low bass boom at start
+      const boom=ctx.createOscillator(),bg=ctx.createGain();
+      boom.type='sine';
+      boom.frequency.setValueAtTime(80,ctx.currentTime);
+      boom.frequency.exponentialRampToValueAtTime(40,ctx.currentTime+0.4);
+      bg.gain.setValueAtTime(vol*0.5,ctx.currentTime);
+      bg.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.45);
+      boom.connect(bg);bg.connect(ctx.destination);
+      boom.start();boom.stop(ctx.currentTime+0.5);
+    });
+  };
+
+  // Epic summon chime
+  window.sfxEpic = function(){
+    playSynth((ctx,vol)=>{
+      [392,493.88,587.33].forEach((freq,i)=>{
+        const osc=ctx.createOscillator(),g=ctx.createGain();
+        osc.type='triangle';
+        osc.frequency.value=freq;
+        const t=ctx.currentTime+i*0.1;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(vol*0.3,t+0.05);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
+        osc.connect(g);g.connect(ctx.destination);
+        osc.start(t);osc.stop(t+0.6);
+      });
+    });
+  };
+
+  // Rare summon
+  window.sfxRare = function(){
+    playSynth((ctx,vol)=>{
+      const osc=ctx.createOscillator(),g=ctx.createGain();
+      osc.type='sine';
+      osc.frequency.setValueAtTime(440,ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(660,ctx.currentTime+0.15);
+      g.gain.setValueAtTime(vol*0.28,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+      osc.connect(g);g.connect(ctx.destination);
+      osc.start();osc.stop(ctx.currentTime+0.32);
+    });
+  };
+
+  // ── Settings panel controls ──
+  window.toggleSFX = function(){
+    sfxOn = !sfxOn;
+    saveSFXSettings();
+    syncSFXUI();
+    if(sfxOn) sfxClick();
+  };
+  window.setSFXVol = function(val){
+    sfxVol = val/100;
+    saveSFXSettings();
+  };
+  window.syncSFXUI = function(){
+    const tog = document.getElementById('sp-sfx-toggle');
+    const vol = document.getElementById('sp-sfx-vol');
+    if(tog) tog.classList.toggle('on', sfxOn);
+    if(vol) vol.value = Math.round(sfxVol*100);
+  };
+
+  // Expose sfxOn check for external use
+  window._sfxOn = ()=>sfxOn;
+
+  // Sync UI on load
+  setTimeout(syncSFXUI, 300);
+
+  // Patch openSettingsPanel to also sync SFX UI
+  const _origOpen = window.openSettingsPanel;
+  window.openSettingsPanel = function(){
+    if(_origOpen) _origOpen();
+    syncSFXUI();
+  };
+
+})(); // end initSFX
+
+// ═══════════════════════════════════════════════════════════════
+// LEGENDARY GACHA REVEAL ANIMATION
+// ═══════════════════════════════════════════════════════════════
+(function initLegendaryReveal(){
+  let _legCallback = null;
+  let _sparkleTimers = [];
+  let _legSkipped = false;
+
+  // Spawn animated sparkle dots around the card
+  function spawnSparkles(){
+    const overlay = document.getElementById('legendary-reveal');
+    if(!overlay) return;
+    const W = window.innerWidth, H = window.innerHeight;
+    const cx = W/2, cy = H/2;
+
+    for(let i=0;i<18;i++){
+      const sp = document.createElement('div');
+      sp.className = 'leg-sparkle';
+      const size = 4 + Math.random()*8;
+      const angle = Math.random()*Math.PI*2;
+      const radius = 80 + Math.random()*160;
+      const x = cx + Math.cos(angle)*radius;
+      const y = cy + Math.sin(angle)*radius;
+      const colors = ['#ffd700','#fff8a0','#ffffff','#ffdd55','#ffbb00'];
+      sp.style.cssText = `
+        left:${x-size/2}px;top:${y-size/2}px;
+        width:${size}px;height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        box-shadow:0 0 ${size*2}px currentColor;
+      `;
+      overlay.appendChild(sp);
+
+      const delay = 0.8 + Math.random()*0.8;
+      const dur   = 0.4 + Math.random()*0.5;
+      sp.animate([
+        {opacity:0, transform:`scale(0) translate(0,0)`},
+        {opacity:1, transform:`scale(1) translate(${(Math.random()-0.5)*20}px,${(Math.random()-0.5)*20}px)`, offset:0.4},
+        {opacity:0, transform:`scale(0.3) translate(${(Math.random()-0.5)*40}px,${-20-Math.random()*30}px)`}
+      ],{duration:dur*1000, delay:delay*1000, fill:'forwards', easing:'ease-out'});
+
+      const t = setTimeout(()=>sp.remove(), (delay+dur+0.1)*1000);
+      _sparkleTimers.push(t);
+    }
+    // Repeat sparkles
+    const loop = setTimeout(spawnSparkles, 1800);
+    _sparkleTimers.push(loop);
+  }
+
+  // Open the legendary reveal for a single card
+  window.showLegendaryReveal = function(card, isDupe, onCollect){
+    _legCallback = onCollect;
+    _legSkipped  = false;
+    _sparkleTimers = [];
+
+    const overlay = document.getElementById('legendary-reveal');
+    const icon    = document.getElementById('leg-card-icon');
+    const name    = document.getElementById('leg-card-name');
+    const badge   = document.getElementById('leg-rarity-badge');
+    const dupe    = document.getElementById('leg-dupe-badge');
+
+    if(icon)  icon.textContent  = card.icon;
+    if(name)  name.textContent  = card.name;
+    if(badge) badge.textContent = '✦ LEGENDARY ✦';
+    if(dupe){ dupe.style.display = isDupe ? 'block' : 'none'; }
+
+    // Style card inner by element
+    const inner = document.getElementById('leg-card-inner');
+    if(inner){
+      const elemGrads = {
+        fire:   'linear-gradient(145deg,#1a0800,#2a1000)',
+        water:  'linear-gradient(145deg,#00091a,#001428)',
+        nature: 'linear-gradient(145deg,#001a00,#001e00)',
+        ground: 'linear-gradient(145deg,#120800,#1e0e00)',
+      };
+      inner.style.background = elemGrads[card.element] || 'linear-gradient(145deg,#1a1200,#261e00)';
+    }
+
+    overlay.classList.add('active');
+    setTimeout(spawnSparkles, 900);
+
+    // Play legendary chime
+    if(typeof sfxLegendary==='function') sfxLegendary();
+  };
+
+  window.collectLegendary = function(){
+    if(_legSkipped) return;
+    _legSkipped = true;
+    _sparkleTimers.forEach(t=>clearTimeout(t));
+    _sparkleTimers = [];
+    const overlay = document.getElementById('legendary-reveal');
+    if(overlay){
+      overlay.style.transition = 'opacity 0.3s ease';
+      overlay.style.opacity = '0';
+      setTimeout(()=>{
+        overlay.classList.remove('active');
+        overlay.style.opacity = '';
+        overlay.style.transition = '';
+        // Remove any spawned sparkles
+        overlay.querySelectorAll('.leg-sparkle').forEach(s=>s.remove());
+        if(_legCallback) { _legCallback(); _legCallback=null; }
+      }, 320);
+    }
+  };
+
+  window.skipLegendaryReveal = function(){
+    collectLegendary();
+  };
+
+})(); // end initLegendaryReveal
+
+// ═══════════════════════════════════════════════════════════════
+// PATCH showGacha — legendary intercept + rarity glows
+// ═══════════════════════════════════════════════════════════════
+(function patchGacha(){
+  const _origShowGacha = window.showGacha;
+
+  window.showGacha = function(results, dupes){
+    // Check for legendary in results
+    const legResults = results.filter(r=>r.card.rarity==='legendary');
+
+    if(legResults.length > 0){
+      // Show legendary reveal for first legendary, then continue with normal gacha
+      const firstLeg = legResults[0];
+      showLegendaryReveal(firstLeg.card, firstLeg.isDupe, ()=>{
+        // After legendary reveal, show full gacha overlay normally
+        _showGachaWithGlows(results, dupes);
+      });
+    } else {
+      _showGachaWithGlows(results, dupes);
+    }
+  };
+
+  function _showGachaWithGlows(results, dupes){
+    const overlay = document.getElementById('gacha-overlay');
+    const grid    = document.getElementById('gacha-results-grid');
+    grid.innerHTML = '';
+
+    results.forEach((res, idx)=>{
+      const {card, isDupe} = res;
+      const elClass = card.type==='passive' ? 'card-elem-passive'
+                    : card.type==='buff'    ? 'card-elem-buff'
+                    : `card-elem-${card.element}`;
+      const div = document.createElement('div');
+      div.className = `gacha-card-reveal ${elClass}`;
+      div.innerHTML = `<div class="gacha-icon">${card.icon}</div>
+        <div class="gacha-name">${card.name}</div>
+        <div class="gacha-rar-tag rarity-${card.rarity}">${card.rarity.toUpperCase()}</div>
+        ${isDupe?'<div style="font-size:.55rem;color:#aaa">+20🪙</div>':''}`;
+
+      // Rarity glow classes
+      if(card.rarity==='legendary') div.classList.add('epic-glow'); // reuse gold-ish glow via border
+      else if(card.rarity==='epic') div.classList.add('epic-glow');
+      else if(card.rarity==='rare') div.classList.add('rare-glow');
+
+      grid.appendChild(div);
+      setTimeout(()=>{
+        div.classList.add('show');
+        // Play SFX per card on reveal
+        setTimeout(()=>{
+          if(card.rarity==='legendary' && typeof sfxLegendary==='function') sfxLegendary();
+          else if(card.rarity==='epic'  && typeof sfxEpic==='function')      sfxEpic();
+          else if(card.rarity==='rare'  && typeof sfxRare==='function')       sfxRare();
+        }, 40);
+      }, idx*120 + 100);
+    });
+
+    document.getElementById('gacha-msg').textContent =
+      dupes > 0 ? `${dupes} duplicate(s) → +${dupes*20} 🪙 coins` : 'All new cards!';
+    overlay.classList.add('show');
+  }
+})(); // end patchGacha
+
+// ═══════════════════════════════════════════════════════════════
+// PATCH BATTLE FUNCTIONS — inject SFX at key moments
+// ═══════════════════════════════════════════════════════════════
+(function patchBattle(){
+
+  // Patch applyDmg — play hit sound when damage lands
+  const _origApplyDmg = window.applyDmg;
+  window.applyDmg = function(target, raw, isPlayerTarget, gs){
+    const dmg = _origApplyDmg(target, raw, isPlayerTarget, gs);
+    if(dmg > 0 && typeof sfxHit === 'function') sfxHit();
+    return dmg;
+  };
+
+  // Patch healCard — play heal sound
+  const _origHealCard = window.healCard;
+  window.healCard = function(card, amt, gs){
+    _origHealCard(card, amt, gs);
+    if(amt > 0 && typeof sfxHeal === 'function') sfxHeal();
+  };
+
+  // Patch playerAct — play skill SFX on skill use
+  const _origPlayerAct = window.playerAct;
+  window.playerAct = async function(type){
+    if(type==='skill' && typeof sfxSkill==='function') sfxSkill();
+    await _origPlayerAct(type);
+  };
+
+  // Patch endGame — play victory/defeat SFX
+  const _origEndGame = window.endGame;
+  window.endGame = function(win){
+    if(win && typeof sfxVictory==='function')      setTimeout(sfxVictory, 300);
+    else if(!win && typeof sfxDefeat==='function')  setTimeout(sfxDefeat,  300);
+    _origEndGame(win);
+  };
+
+  // Patch playRPS buttons — subtle click sound
+  const _origPlayRPS = window.playRPS;
+  window.playRPS = function(choice){
+    if(typeof sfxClick==='function') sfxClick();
+    _origPlayRPS(choice);
+  };
+
+})(); // end patchBattle
+
+// ═══════════════════════════════════════════════════════════════
+// CINEMATIC BATTLE TRANSITION — golden slash + loading screen
+// ═══════════════════════════════════════════════════════════════
+(function initCinematic(){
+  let _cineActive = false;
+
+  // Animated loading dot cycle: "Loading." → "Loading.." → "Loading..."
+  let _dotTimer = null;
+  function startDotAnim(){
+    let n = 0;
+    const el = document.getElementById('cine-loader-txt');
+    const dots = ['Loading.','Loading..','Loading...'];
+    _dotTimer = setInterval(()=>{
+      if(el) el.textContent = dots[n++ % 3];
+    }, 320);
+  }
+  function stopDotAnim(){
+    clearInterval(_dotTimer);
+    _dotTimer = null;
+  }
+
+  // Reset all cinematic elements to idle state
+  function resetCinematic(){
+    const overlay   = document.getElementById('cinematic-overlay');
+    const flash     = document.getElementById('cinematic-btn-flash');
+    const slash     = document.getElementById('cinematic-slash');
+    const wave      = document.getElementById('cinematic-gold-wave');
+    const fill      = document.getElementById('cinematic-fill');
+    const loader    = document.getElementById('cinematic-loader');
+    const bar       = document.getElementById('cine-bar');
+    const btn       = document.getElementById('btn-start-battle');
+
+    if(overlay)  { overlay.classList.remove('active'); }
+    if(flash)    { flash.className = ''; flash.style.cssText = ''; }
+    if(slash)    { slash.classList.remove('slash-go'); }
+    if(wave)     { wave.classList.remove('wave-go'); }
+    if(fill)     { fill.classList.remove('fill-go'); }
+    if(loader)   { loader.classList.remove('loader-show'); }
+    // Reset bar by cloning (removes animation)
+    if(bar){
+      const nb = bar.cloneNode(true);
+      bar.parentNode.replaceChild(nb, bar);
+    }
+    if(btn) btn.classList.remove('cine-locked');
+    stopDotAnim();
+    _cineActive = false;
+  }
+
+  // Main cinematic runner — accepts a callback to execute after animation
+  window.runBattleCinematic = function(callback){
+    if(_cineActive) return;
+    _cineActive = true;
+
+    const btn     = document.getElementById('btn-start-battle');
+    const overlay = document.getElementById('cinematic-overlay');
+    const flash   = document.getElementById('cinematic-btn-flash');
+    const slash   = document.getElementById('cinematic-slash');
+    const wave    = document.getElementById('cinematic-gold-wave');
+    const fill    = document.getElementById('cinematic-fill');
+    const loader  = document.getElementById('cinematic-loader');
+
+    // Lock button
+    if(btn) btn.classList.add('cine-locked');
+
+    // ── STAGE 1: position flash ring over the button ──
+    requestAnimationFrame(()=>{
+      if(overlay) overlay.classList.add('active');
+
+      if(btn && flash){
+        const r = btn.getBoundingClientRect();
+        flash.style.cssText = `
+          position:fixed;
+          left:${r.left - 4}px;
+          top:${r.top - 4}px;
+          width:${r.width + 8}px;
+          height:${r.height + 8}px;
+          border-radius:14px;
+          border:2px solid rgba(255,215,0,0.95);
+          box-shadow:0 0 0 0 rgba(255,215,0,0.8),inset 0 0 20px rgba(255,200,0,0.4);
+          opacity:0;
+          pointer-events:none;
+          z-index:99991;
+        `;
+        requestAnimationFrame(()=>{ flash.classList.add('flash-go'); });
+      }
+
+      // ── STAGE 2: slash starts at ~100ms ──
+      setTimeout(()=>{
+        if(slash) slash.classList.add('slash-go');
+      }, 100);
+
+      // ── STAGE 2b: gold wave starts just after slash at ~250ms ──
+      setTimeout(()=>{
+        if(wave) wave.classList.add('wave-go');
+      }, 250);
+
+      // ── STAGE 3: dark fill at ~920ms (after wave covers screen) ──
+      setTimeout(()=>{
+        if(fill) fill.classList.add('fill-go');
+      }, 920);
+
+      // ── STAGE 4: loader appears at ~1050ms ──
+      setTimeout(()=>{
+        if(loader) loader.classList.add('loader-show');
+        startDotAnim();
+      }, 1050);
+
+      // ── STAGE 5: execute battle logic at ~1150ms (screen is dark) ──
+      setTimeout(()=>{
+        try { callback(); } catch(e){ console.error(e); }
+      }, 1150);
+
+      // ── STAGE 6: fade out loader, reveal game screen at ~1900ms ──
+      setTimeout(()=>{
+        stopDotAnim();
+        if(loader){
+          loader.style.transition = 'opacity 0.28s ease';
+          loader.style.opacity = '0';
+        }
+        setTimeout(()=>{
+          resetCinematic();
+        }, 300);
+      }, 1900);
+    });
+  };
+
+  // ── Patch goToBattle to intercept the Start Battle button only ──
+  // We keep full validation logic and only wrap the screen-switch part
+  const _origGoToBattle = window.goToBattle;
+  window.goToBattle = function(){
+    if(!SD){ showToast('Please login first!'); return; }
+
+    // Run validation first (same as original)
+    checkQuestReset();
+    const deckIds = SD.deck;
+    const mode = SD.deckMode || 5;
+    const minActive = mode === 5 ? 2 : 6;
+    if(deckIds.length !== mode){
+      showToast(`Need exactly ${mode} cards!`);
+      showScreen('inv-screen');
+      renderInventory('deck');
+      return;
+    }
+    const actives = deckIds.filter(id=>{
+      const c = CARD_DB.find(x=>x.id===id);
+      return c && c.type==='active';
+    });
+    if(actives.length < minActive){
+      showToast(`Need at least ${minActive} active cards!`);
+      showScreen('inv-screen');
+      renderInventory('deck');
+      return;
+    }
+
+    // Deck is valid — determine caller context
+    // If cinematic is already running (called recursively from timer), run original
+    if(_cineActive){
+      _origGoToBattle();
+      return;
+    }
+
+    // Check if call comes from the Start Battle button (menu-screen is active)
+    const menuActive = document.getElementById('menu-screen') &&
+                       document.getElementById('menu-screen').classList.contains('active');
+
+    if(menuActive){
+      // Build game state NOW (before the delay) so battle is ready instantly
+      const playerCards = deckIds.map(id=>cloneCard(CARD_DB.find(c=>c.id===id))).filter(Boolean);
+      const allActives  = CARD_DB.filter(c=>c.type==='active');
+      const allPassives = CARD_DB.filter(c=>c.type==='passive');
+      let botCards = [];
+      const botActiveCount = minActive + Math.floor(Math.random()*(mode - minActive + 1));
+      botCards = [...shuffle(allActives).slice(0, botActiveCount)];
+      const passivesNeeded = mode - botCards.length;
+      if(passivesNeeded > 0) botCards = [...botCards, ...shuffle(allPassives).slice(0, passivesNeeded)];
+      while(botCards.length < mode) botCards.push(cloneCard(allActives[Math.floor(Math.random()*allActives.length)]));
+      botCards = botCards.slice(0, mode).map(c=>cloneCard(c));
+      applyPassives(playerCards);
+      applyPassives(botCards);
+      GS = {
+        playerCards, botCards,
+        playerActiveIdx: null, botActiveIdx: null,
+        round: 1, playerTurn: false,
+        stats: {dmg:0, skills:0, kills:0},
+        gameOver: false, mode
+      };
+      GS.playerActiveIdx = playerCards.findIndex(c=>c.type==='active');
+      botPickCard();
+      clearLog();
+
+      // Fire cinematic — actual screen transition happens inside callback
+      runBattleCinematic(()=>{
+        showScreen('game-screen');
+        updateAllCoins();
+        updateUI();
+        log('⚔️ Battle begins! RPS decides who acts each turn.','info');
+        logPassives(playerCards);
+        setTimeout(()=>startRound(), 400);
+      });
+    } else {
+      // Called from deck builder "Battle!" button or Play Again — skip cinematic
+      _origGoToBattle();
+    }
+  };
+
+})(); // end initCinematic
 
 // ═══════════════════════════════════════════════════════════════
 // MOBILE PATCH — tap-based deck builder + orientation + fixes
@@ -3089,6 +4569,2203 @@ document.querySelectorAll('#inv-screen,#shop-screen,#quest-screen,#login-screen,
   s.style.webkitOverflowScrolling = 'touch';
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// TITLE SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+const TITLES = [
+  {id:'Beginner',      label:'Beginner',           color:'white',  unlock:'default',    desc:'Everyone starts here'},
+  {id:'NewbieCollector',label:'Newbie Collector',   color:'white',  unlock:'cards20',    desc:'Own 20 cards'},
+  {id:'Collector',     label:'Collector',           color:'blue',   unlock:'cards30',    desc:'Own 30 cards'},
+  {id:'ExcellentCollector',label:'Excellent Collector',color:'purple',unlock:'cards50', desc:'Own 50 cards'},
+  {id:'Slayer',        label:'Slayer',              color:'red',    unlock:'kills30',    desc:'Defeat 30 enemy cards total'},
+  {id:'Owner',         label:'Owner',               color:'gold',   unlock:'owner_email',desc:'Special'},
+];
+
+const OWNER_EMAIL = 'febrianlangit16@gmail.com';
+
+function getTitleColor(titleId){
+  const t = TITLES.find(x=>x.id===titleId);
+  return t ? t.color : 'white';
+}
+
+function getUnlockedTitles(){
+  if(!SD) return ['Beginner'];
+  const unlocked = ['Beginner'];
+  const owned = (SD.ownedIds||[]).length;
+  const kills  = SD.totalKills||0;
+  // Check email for Owner
+  const user = window._fbAuth && window._fbAuth.currentUser;
+  const isOwner = user && user.email && user.email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+
+  if(owned>=20) unlocked.push('NewbieCollector');
+  if(owned>=30) unlocked.push('Collector');
+  if(owned>=50) unlocked.push('ExcellentCollector');
+  if(kills>=30) unlocked.push('Slayer');
+  if(isOwner)   unlocked.push('Owner');
+  return unlocked;
+}
+
+function getEquippedTitle(){
+  if(!SD) return 'Beginner';
+  const unlocked = getUnlockedTitles();
+  // If equipped title is still unlocked use it, else fallback
+  if(SD.equippedTitle && unlocked.includes(SD.equippedTitle)) return SD.equippedTitle;
+  return 'Beginner';
+}
+
+function getTitleLabel(titleId){
+  const t = TITLES.find(x=>x.id===titleId);
+  return t ? t.label : 'Beginner';
+}
+
+function updateProfileTitleDisplay(){
+  if(!SD) return;
+  const titleId = getEquippedTitle();
+  const color   = getTitleColor(titleId);
+  const label   = getTitleLabel(titleId);
+  // Profile button
+  const pd = document.getElementById('profile-title-display');
+  if(pd){ pd.textContent=label; pd.className=`title-${color}`; }
+  // Profile modal header
+  const pmt = document.getElementById('pmod-title-tag');
+  if(pmt){ pmt.textContent=label; pmt.className=`pmod-title-tag title-${color}`; }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PROFILE MODAL
+// ═══════════════════════════════════════════════════════════════════
+let _profileTab = 'identity';
+
+function openProfileModal(){
+  if(!SD) return;
+  const modal = document.getElementById('profile-modal');
+  if(!modal) return;
+  // Update header
+  const name = SD.nickname || window.currentUser || 'Player';
+  const pn = document.getElementById('pmod-name'); if(pn) pn.textContent=name;
+  updateProfileTitleDisplay();
+  modal.classList.add('show');
+  switchProfileTab(_profileTab);
+  if(typeof sfxClick==='function') sfxClick();
+}
+
+function closeProfileModal(){
+  const m = document.getElementById('profile-modal');
+  if(m) m.classList.remove('show');
+}
+
+function closeProfileModalOutside(e){
+  if(e.target === document.getElementById('profile-modal')) closeProfileModal();
+}
+
+function switchProfileTab(tab){
+  _profileTab = tab;
+  document.querySelectorAll('.pmod-tab').forEach((b,i)=>{
+    b.classList.toggle('active',['identity','history','stats'][i]===tab);
+  });
+  const body = document.getElementById('pmod-body');
+  if(!body) return;
+  if(tab==='identity') renderProfileIdentity(body);
+  else if(tab==='history') renderProfileHistory(body);
+  else renderProfileStats(body);
+}
+
+function renderProfileIdentity(body){
+  if(!SD) return;
+  const name = SD.nickname || window.currentUser || 'Player';
+  const unlocked = getUnlockedTitles();
+  const equipped = getEquippedTitle();
+
+  let titlesHtml = TITLES.map(t=>{
+    const isUnlocked = unlocked.includes(t.id);
+    const isEquipped = t.id === equipped;
+    return `<div class="title-item${isUnlocked?'':' locked'}${isEquipped?' equipped':''}">
+      <div>
+        <div class="title-${t.color}" style="font-size:.82rem;font-weight:700">${t.label}</div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,0.4)">${isUnlocked?'Unlocked':'🔒 '+t.desc}</div>
+      </div>
+      <button class="title-equip-btn" onclick="equipTitle('${t.id}')"
+        ${!isUnlocked||isEquipped?'disabled':''}>${isEquipped?'✓ Equipped':'Equip'}</button>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="pmod-section">
+      <h4>👤 Identity</h4>
+      <div class="pmod-row">
+        <span class="pmod-label">Username</span>
+        <span class="pmod-val">${name}</span>
+      </div>
+      <div class="pmod-row" style="margin-top:.5rem">
+        <span class="pmod-label" style="font-size:.72rem;color:rgba(255,255,255,.4)">Rename costs 🪙 1000</span>
+        <button class="pmod-btn pmod-btn-gold" onclick="promptRename()">✏ Rename</button>
+      </div>
+    </div>
+    <div class="pmod-section">
+      <h4>🏷 Titles</h4>
+      <div class="title-list">${titlesHtml}</div>
+    </div>
+    <button class="pmod-close-btn" onclick="closeProfileModal()">✕ Close</button>`;
+}
+
+function equipTitle(titleId){
+  if(!SD) return;
+  const unlocked = getUnlockedTitles();
+  if(!unlocked.includes(titleId)) return;
+  SD.equippedTitle = titleId;
+  saveProfile();
+  updateProfileTitleDisplay();
+  updateMenuUsername();
+  switchProfileTab('identity');
+  showToast('Title equipped!');
+  if(typeof sfxClick==='function') sfxClick();
+}
+
+function promptRename(){
+  if(!SD) return;
+  if(SD.coins < 1000){ showToast('Need 1000 🪙 to rename!'); return; }
+  const current = SD.nickname || window.currentUser || 'Player';
+  const newName = prompt(`Rename costs 1000 🪙. Current: "${current}"\nEnter new nickname:`, current);
+  if(!newName || !newName.trim()) return;
+  if(newName.trim().length < 2){ showToast('Name too short! (min 2 chars)'); return; }
+  if(newName.trim().length > 20){ showToast('Name too long! (max 20 chars)'); return; }
+  if(!confirm(`Rename to "${newName.trim()}" for 1000 🪙?`)) return;
+  SD.coins -= 1000;
+  SD.nickname = newName.trim();
+  saveProfile();
+  updateAllCoins();
+  updateMenuUsername();
+  closeProfileModal();
+  showToast(`Name changed to "${SD.nickname}"!`);
+}
+
+function renderProfileHistory(body){
+  if(!SD){ body.innerHTML=''; return; }
+  const hist = SD.matchHistory||[];
+  if(!hist.length){
+    body.innerHTML=`<div style="text-align:center;color:rgba(255,255,255,.35);padding:2rem 0;font-size:.82rem">No matches yet. Play a battle!</div>
+    <button class="pmod-close-btn" onclick="closeProfileModal()">✕ Close</button>`;
+    return;
+  }
+  const rows = hist.map(m=>`
+    <div class="history-item ${m.result==='Win'?'history-win':'history-lose'}">
+      <div class="hist-result" style="color:${m.result==='Win'?'var(--green)':'var(--red)'}">${m.result==='Win'?'W':'L'}</div>
+      <div class="hist-detail">
+        <div style="color:#fff;font-size:.78rem">vs ${m.opponent||'Shadow Bot'}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:.65rem">${m.time||''} • ${m.cardsLeft||0} cards left</div>
+      </div>
+      <div class="hist-coins">+${m.coins||0}🪙</div>
+    </div>`).join('');
+  body.innerHTML = `<div class="pmod-section">
+    <h4>📜 Recent Matches (last 20)</h4>
+    <div>${rows}</div>
+  </div>
+  <button class="pmod-close-btn" onclick="closeProfileModal()">✕ Close</button>`;
+}
+
+function renderProfileStats(body){
+  if(!SD){ body.innerHTML=''; return; }
+  const matches = SD.totalMatches||0;
+  const wins    = SD.totalWins||0;
+  const rate    = matches>0?Math.round((wins/matches)*100):0;
+  const owned   = (SD.ownedIds||[]).length;
+  const summons = SD.summons||0;
+  const kills   = SD.totalKills||0;
+  const dmg     = SD.totalDmg||0;
+
+  body.innerHTML = `<div class="pmod-section">
+    <h4>📊 Your Stats</h4>
+    <div class="stat-grid2">
+      <div class="stat-card2"><div class="sv2">${matches}</div><div class="sl2">Total Matches</div></div>
+      <div class="stat-card2"><div class="sv2">${wins}</div><div class="sl2">Total Wins</div></div>
+      <div class="stat-card2"><div class="sv2">${rate}%</div><div class="sl2">Win Rate</div></div>
+      <div class="stat-card2"><div class="sv2">${Math.round(matches>0?dmg/matches:0)}</div><div class="sl2">Avg Damage</div></div>
+      <div class="stat-card2"><div class="sv2">${owned}</div><div class="sl2">Cards Owned</div></div>
+      <div class="stat-card2"><div class="sv2">${kills}</div><div class="sl2">Total Kills</div></div>
+      <div class="stat-card2"><div class="sv2">${summons}</div><div class="sl2">Total Summons</div></div>
+      <div class="stat-card2"><div class="sv2">${dmg}</div><div class="sl2">Total Damage</div></div>
+    </div>
+  </div>
+  <button class="pmod-close-btn" onclick="closeProfileModal()">✕ Close</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEADERBOARD SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+async function openLeaderboard(){
+  const modal = document.getElementById('leaderboard-modal');
+  if(!modal) return;
+  modal.classList.add('show');
+  if(typeof sfxClick==='function') sfxClick();
+  await renderLeaderboard();
+}
+
+function closeLeaderboard(){
+  const m = document.getElementById('leaderboard-modal');
+  if(m) m.classList.remove('show');
+}
+
+function closeLeaderboardOutside(e){
+  if(e.target === document.getElementById('leaderboard-modal')) closeLeaderboard();
+}
+
+async function renderLeaderboard(){
+  const body = document.getElementById('lb-body');
+  if(!body) return;
+  body.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.4);padding:2rem 0;font-size:.82rem">Loading rankings...</div>';
+
+  // Push current user's data to Firestore leaderboard collection
+  if(window._fbUid && window._fbFns && SD){
+    try {
+      const { doc, setDoc } = window._fbFns;
+      const today = todayStr();
+      const titleLabel = getTitleLabel(getEquippedTitle());
+      const name = SD.nickname || window.currentUser || 'Player';
+      const lbRef = doc(window._fbDb, 'leaderboard', window._fbUid);
+      await setDoc(lbRef, {
+        uid: window._fbUid,
+        name,
+        title: titleLabel,
+        wins: SD.wins||0,
+        dailyWins: SD.dailyWinsDate===today?(SD.dailyWins||0):0,
+        dailyWinsDate: today,
+        updatedAt: Date.now()
+      });
+    } catch(e){ console.warn('LB write error', e); }
+  }
+
+  // Read leaderboard
+  try {
+    // Firestore doesn't have a simple "get all" without a query; use getDocs
+    const { collection, getDocs, query, orderBy, limit } = await importFirestoreExtra();
+    if(!collection){
+      // Fallback: show just current user
+      renderLeaderboardFallback(body);
+      return;
+    }
+    const q = query(collection(window._fbDb,'leaderboard'), orderBy('wins','desc'), limit(20));
+    const snap = await getDocs(q);
+    const rows = [];
+    snap.forEach(d=>rows.push(d.data()));
+    displayLeaderboard(body, rows);
+  } catch(e){
+    console.warn('LB read error:', e);
+    renderLeaderboardFallback(body);
+  }
+}
+
+async function importFirestoreExtra(){
+  try {
+    const mod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    return { collection: mod.collection, getDocs: mod.getDocs, query: mod.query, orderBy: mod.orderBy, limit: mod.limit };
+  } catch(e){ return {}; }
+}
+
+function renderLeaderboardFallback(body){
+  if(!SD) return;
+  const name = SD.nickname || window.currentUser || 'Player';
+  const title = getTitleLabel(getEquippedTitle());
+  const rows = [{ name, title, wins: SD.wins||0, dailyWins: SD.dailyWins||0, uid: window._fbUid }];
+  displayLeaderboard(body, rows, true);
+}
+
+function displayLeaderboard(body, rows, offline=false){
+  if(!rows.length){
+    body.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.4);padding:1.5rem 0;font-size:.82rem">No players yet. Be the first!</div>';
+    return;
+  }
+  // Sort by wins desc
+  rows.sort((a,b)=>(b.wins||0)-(a.wins||0));
+  const today = todayStr();
+  const medals = ['🥇','🥈','🥉'];
+  const topClasses = ['lb-top1','lb-top2','lb-top3'];
+
+  let html = `<div class="lb-daily-badge">🏆 Top players earn daily gold rewards at midnight</div>`;
+
+  // Check if current user can claim daily reward
+  if(SD && !SD.dailyLeaderboardClaimed && SD.dailyLeaderboardDate !== today){
+    const myRank = rows.findIndex(r=>r.uid===window._fbUid);
+    if(myRank>=0 && myRank<10){
+      const rewards = [500,250,100,0,0,0,0,0,0,0];
+      const rew = rewards[myRank];
+      if(rew>0){
+        html += `<div style="text-align:center;margin-bottom:.7rem">
+          <button class="pmod-btn pmod-btn-gold" onclick="claimLeaderboardReward(${rew})">🎁 Claim Rank ${myRank+1} Reward: +${rew} 🪙</button>
+        </div>`;
+      }
+    }
+  }
+
+  rows.slice(0,20).forEach((r,i)=>{
+    const rank    = i+1;
+    const medal   = medals[i]||rank;
+    const cls     = topClasses[i]||'';
+    const isMe    = r.uid && r.uid===window._fbUid;
+    const daily   = r.dailyWinsDate===today?(r.dailyWins||0):0;
+    const titleC  = getTitleColorByLabel(r.title||'');
+    html += `<div class="lb-row ${cls}" style="${isMe?'border-color:rgba(255,215,0,0.5)':''}" >
+      <div class="lb-rank">${medal}</div>
+      <div class="lb-info">
+        <div class="lb-uname">${escHtml(r.name||'Player')}${isMe?' (You)':''}</div>
+        <div class="lb-utitle title-${titleC}">${escHtml(r.title||'Beginner')}</div>
+      </div>
+      <div class="lb-stats">
+        <div class="lb-wins">${r.wins||0} Wins</div>
+        <div class="lb-today">+${daily} today</div>
+      </div>
+    </div>`;
+  });
+
+  if(offline) html += `<div class="lb-note">Offline — showing local data only</div>`;
+
+  html += `<div style="text-align:center;margin-top:.7rem">
+    <button class="pmod-close-btn" onclick="closeLeaderboard()">✕ Close</button>
+  </div>`;
+  body.innerHTML = html;
+}
+
+function getTitleColorByLabel(label){
+  const t = TITLES.find(x=>x.label===label);
+  return t ? t.color : 'white';
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function claimLeaderboardReward(amount){
+  if(!SD) return;
+  const today = todayStr();
+  if(SD.dailyLeaderboardClaimed || SD.dailyLeaderboardDate===today){ showToast('Already claimed today!'); return; }
+  SD.coins += amount;
+  SD.dailyLeaderboardClaimed = true;
+  SD.dailyLeaderboardDate = today;
+  saveProfile();
+  updateAllCoins();
+  showToast(`+${amount} 🪙 Leaderboard reward!`);
+  renderLeaderboard();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// IMPROVED SFX — Upgrade battle sounds
+// ═══════════════════════════════════════════════════════════════════
+(function upgradesSFX(){
+
+  // Wait until sfxCtx is available (initSFX runs first)
+  function getCtx2(){
+    // Re-use existing ctx from sfxCtx if accessible; otherwise create a parallel one
+    try {
+      if(!window._sfxCtx2) window._sfxCtx2 = new (window.AudioContext||window.webkitAudioContext)();
+      if(window._sfxCtx2.state==='suspended') window._sfxCtx2.resume();
+      return window._sfxCtx2;
+    } catch(e){ return null; }
+  }
+
+  function synth2(fn){
+    if(typeof window._sfxOn==='function' && !window._sfxOn()) return;
+    const ctx = getCtx2();
+    if(!ctx) return;
+    const vol = 0.6; // default
+    try{ fn(ctx, vol); }catch(e){}
+  }
+
+  // ── Upgraded: Sharp slash + metallic crack on attack ──
+  window.sfxHit = function(){
+    synth2((ctx, vol)=>{
+      const now = ctx.currentTime;
+      // Sharp noise crack
+      const buf = ctx.createBuffer(1, ctx.sampleRate*0.12, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/d.length, 2.5);
+      const src = ctx.createBufferSource(); src.buffer=buf;
+      const hpf = ctx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=2000;
+      const lpf = ctx.createBiquadFilter(); lpf.type='lowpass';  lpf.frequency.value=8000;
+      const g1  = ctx.createGain();
+      g1.gain.setValueAtTime(vol*0.9, now);
+      g1.gain.exponentialRampToValueAtTime(0.001, now+0.1);
+      src.connect(hpf); hpf.connect(lpf); lpf.connect(g1); g1.connect(ctx.destination);
+      src.start();
+      // Metallic ring (short)
+      const ring = ctx.createOscillator(); const rg = ctx.createGain();
+      ring.type='square'; ring.frequency.setValueAtTime(880,now); ring.frequency.exponentialRampToValueAtTime(220,now+0.08);
+      rg.gain.setValueAtTime(vol*0.22,now); rg.gain.exponentialRampToValueAtTime(0.001,now+0.09);
+      ring.connect(rg); rg.connect(ctx.destination);
+      ring.start(); ring.stop(now+0.1);
+      // Low thud
+      const thud = ctx.createOscillator(); const tg = ctx.createGain();
+      thud.type='triangle'; thud.frequency.setValueAtTime(140,now); thud.frequency.exponentialRampToValueAtTime(50,now+0.1);
+      tg.gain.setValueAtTime(vol*0.5,now); tg.gain.exponentialRampToValueAtTime(0.001,now+0.12);
+      thud.connect(tg); tg.connect(ctx.destination);
+      thud.start(); thud.stop(now+0.14);
+    });
+  };
+
+  // ── Upgraded: Magical sparkle heal ──
+  window.sfxHeal = function(){
+    synth2((ctx, vol)=>{
+      const now = ctx.currentTime;
+      const freqs = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+      freqs.forEach((f,i)=>{
+        const t = now + i*0.07;
+        const osc=ctx.createOscillator(); const g=ctx.createGain();
+        osc.type='sine'; osc.frequency.value=f;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(vol*0.28,t+0.03);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t); osc.stop(t+0.6);
+        // Slight vibrato
+        const lfo=ctx.createOscillator(); const lg=ctx.createGain();
+        lfo.type='sine'; lfo.frequency.value=6+i*2;
+        lg.gain.value=4;
+        lfo.connect(lg); lg.connect(osc.frequency);
+        lfo.start(t); lfo.stop(t+0.6);
+      });
+    });
+  };
+
+  // ── Upgraded: Grand victory fanfare ──
+  window.sfxVictory = function(){
+    synth2((ctx, vol)=>{
+      const now = ctx.currentTime;
+      // Heroic chord progression: C-E-G + octave
+      const chords = [
+        [261.63, 329.63, 392.00],   // C major
+        [349.23, 440.00, 523.25],   // F major
+        [392.00, 493.88, 587.33],   // G major
+        [523.25, 659.25, 783.99, 1046.5], // C major high
+      ];
+      chords.forEach((chord, ci)=>{
+        chord.forEach((freq,fi)=>{
+          const t  = now + ci*0.22;
+          const osc= ctx.createOscillator(); const g=ctx.createGain();
+          osc.type = ci===3 ? 'triangle' : 'sawtooth';
+          osc.frequency.value=freq;
+          const lpf = ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=2400;
+          g.gain.setValueAtTime(0,t);
+          g.gain.linearRampToValueAtTime(vol*(ci===3?0.28:0.18), t+0.04);
+          g.gain.exponentialRampToValueAtTime(0.001,t+(ci===3?0.8:0.5));
+          osc.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
+          osc.start(t); osc.stop(t+(ci===3?0.85:0.55));
+        });
+      });
+      // Triumphant brass stab at the end
+      const t2 = now + 0.85;
+      [261.63,392,523.25].forEach((freq)=>{
+        const osc=ctx.createOscillator(); const g=ctx.createGain();
+        osc.type='sawtooth'; osc.frequency.value=freq;
+        const lpf=ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=1800;
+        g.gain.setValueAtTime(0,t2); g.gain.linearRampToValueAtTime(vol*0.32,t2+0.06);
+        g.gain.exponentialRampToValueAtTime(0.001,t2+0.9);
+        osc.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
+        osc.start(t2); osc.stop(t2+1.0);
+      });
+    });
+  };
+
+  // ── Upgraded: RPS click — satisfying clash ──
+  window.sfxClick = function(){
+    synth2((ctx, vol)=>{
+      const now = ctx.currentTime;
+      const osc=ctx.createOscillator(); const g=ctx.createGain();
+      osc.type='triangle';
+      osc.frequency.setValueAtTime(1200,now); osc.frequency.exponentialRampToValueAtTime(600,now+0.04);
+      g.gain.setValueAtTime(vol*0.35,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.06);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(); osc.stop(now+0.07);
+    });
+  };
+
+  // ── Upgraded: RPS reveal clash sound ──
+  window.sfxRPSReveal = function(){
+    synth2((ctx, vol)=>{
+      const now = ctx.currentTime;
+      // Clash burst
+      const buf=ctx.createBuffer(1,ctx.sampleRate*0.08,ctx.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.2);
+      const src=ctx.createBufferSource(); src.buffer=buf;
+      const bpf=ctx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=2500; bpf.Q.value=1.2;
+      const g1=ctx.createGain(); g1.gain.setValueAtTime(vol*0.6,now); g1.gain.exponentialRampToValueAtTime(0.001,now+0.1);
+      src.connect(bpf); bpf.connect(g1); g1.connect(ctx.destination);
+      src.start();
+      // Tonal pop
+      const osc=ctx.createOscillator(); const g2=ctx.createGain();
+      osc.type='sine'; osc.frequency.setValueAtTime(600,now); osc.frequency.exponentialRampToValueAtTime(300,now+0.07);
+      g2.gain.setValueAtTime(vol*0.4,now); g2.gain.exponentialRampToValueAtTime(0.001,now+0.09);
+      osc.connect(g2); g2.connect(ctx.destination);
+      osc.start(); osc.stop(now+0.1);
+    });
+  };
+
+})(); // end upgradesSFX
+
+// Patch playRPS to use the new reveal SFX
+(function patchRPSSFX(){
+  const _orig = window.playRPS;
+  window.playRPS = function(choice){
+    if(typeof sfxRPSReveal==='function') sfxRPSReveal();
+    else if(typeof sfxClick==='function') sfxClick();
+    _orig(choice);
+  };
+})();
+
+</script>
+<!-- ═══════════════════════════════════════════════════════════════
+  TRACKCARD V5 PATCH — Balance + Polish + Profile Expansion
+  Patches: 1(Gold Dir) 2(Avatar) 3(Bot Scale) 4(Dodge Nerf)
+           5(Overheal) 6(Stat Rebalance) 7(Card Detail)
+           8(Legendary Cutscene) 9(Featured Cards) 10-11(Lucky Title)
+═══════════════════════════════════════════════════════════════ -->
+<style>
+/* ── PATCH 2: Avatar Customization Styles ── */
+.avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin:.6rem 0}
+.av-btn{background:rgba(255,255,255,.06);border:2px solid transparent;border-radius:8px;font-size:1.6rem;
+  padding:.4rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.av-btn.selected{border-color:var(--gold);background:rgba(255,215,0,.15);}
+.av-btn:hover{border-color:rgba(255,215,0,.5);}
+#avatar-upload{display:none}
+.av-custom-img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.pmod-avatar-big-img{width:54px;height:54px;border-radius:50%;object-fit:cover;flex-shrink:0;
+  box-shadow:0 0 20px rgba(255,100,0,0.4);}
+
+/* ── PATCH 7: Card Detail Modal ── */
+#card-detail-modal{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:1rem;}
+#card-detail-modal.show{display:flex;}
+#card-detail-box{background:rgba(10,10,25,.97);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;width:100%;max-width:340px;max-height:88vh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;box-shadow:0 0 60px rgba(0,0,0,.7);animation:slideUp .2s ease;}
+.cd-header{display:flex;align-items:center;gap:.9rem;padding:1.1rem 1.2rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,.07);}
+.cd-icon{font-size:2.4rem;line-height:1;}
+.cd-body{padding:.9rem 1.2rem 1.2rem;}
+.cd-row{display:flex;justify-content:space-between;padding:.38rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem;}
+.cd-row:last-child{border-bottom:none;}
+.cd-lbl{color:rgba(255,255,255,.55);}
+.cd-val{font-weight:700;color:#fff;}
+.cd-skill-box{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);
+  border-radius:8px;padding:.55rem .7rem;margin-top:.5rem;}
+.cd-skill-name{font-family:'Cinzel',serif;font-size:.82rem;color:var(--gold);margin-bottom:.25rem;}
+.cd-skill-desc{font-size:.78rem;color:rgba(255,255,255,.7);}
+
+/* ── PATCH 8: Legendary Cutscene Overlay ── */
+#legendary-cutscene{position:fixed;inset:0;z-index:99997;background:#000;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:.8rem;}
+#legendary-cutscene.show{display:flex;}
+#cutscene-video{width:100%;max-width:600px;max-height:80vh;object-fit:contain;}
+#cutscene-skip{position:absolute;bottom:2rem;right:2rem;font-family:'Rajdhani',sans-serif;
+  font-size:.78rem;color:rgba(255,215,0,.65);letter-spacing:.15em;cursor:pointer;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,215,0,.3);border-radius:6px;
+  padding:.35rem .75rem;}
+
+/* ── PATCH 9: Featured Cards Styles ── */
+.featured-grid{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;}
+.featured-slot{width:60px;min-height:80px;border-radius:8px;border:2px dashed rgba(255,215,0,.35);
+  background:rgba(255,215,0,.04);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;font-size:.52rem;color:var(--text2);cursor:pointer;transition:all .2s;
+  text-align:center;gap:.1rem;position:relative;}
+.featured-slot.filled{border-style:solid;border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.07);}
+.featured-slot .fs-icon{font-size:1.3rem;}
+.featured-slot .fs-name{font-size:.5rem;font-family:'Cinzel',serif;line-height:1.2;padding:0 2px;}
+.featured-slot .fs-remove{position:absolute;top:1px;right:3px;font-size:.55rem;color:var(--red);cursor:pointer;
+  background:rgba(0,0,0,.6);border-radius:50%;width:12px;height:12px;
+  display:flex;align-items:center;justify-content:center;}
+#featured-pick-modal{position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:1rem;}
+#featured-pick-modal.show{display:flex;}
+#featured-pick-box{background:rgba(10,10,25,.97);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto;padding:1rem;}
+#featured-pick-box h4{font-family:'Cinzel',serif;font-size:.92rem;color:var(--gold);margin-bottom:.7rem;}
+
+/* ── PATCH 10-11: Lucky Title ── */
+.title-lucky{color:#ffe600;animation:luckySparkle 1.5s ease-in-out infinite;
+  text-shadow:0 0 10px rgba(255,230,0,.7);}
+@keyframes luckySparkle{0%,100%{text-shadow:0 0 8px rgba(255,230,0,.6);opacity:1;}
+  50%{text-shadow:0 0 22px rgba(255,255,80,1);opacity:.8;}}
+</style>
+
+<script>
+// ═══════════════════════════════════════════
+// V5 PATCH BLOCK
+// ═══════════════════════════════════════════
+(function applyV5Patches(){
+
+// ── PATCH 1: Gold transition direction fix (bottom-left → top-right) ──
+// The wave's ::before pseudo already uses bottom-left origin in CSS.
+// The slash needs to start from bottom-left. We patch the CSS keyframes
+// by injecting a corrected style override.
+(function fixGoldDirection(){
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Slash now sweeps from bottom-left to top-right (like the shiny button) */
+    #cinematic-slash::before, #cinematic-slash::after {
+      bottom: -50%;
+      left: -180%;
+      top: auto;
+      transform: skewY(-25deg) skewX(-10deg);
+      transform-origin: bottom left;
+    }
+    @keyframes slashSweep {
+      0%   { left: -180%; bottom: -50%; }
+      100% { left: 120%;  bottom: 100%; }
+    }
+    /* Gold wave: confirm bottom-left origin (already set, reinforce) */
+    #cinematic-gold-wave::before {
+      transform-origin: bottom left;
+      bottom: -100%;
+      left: -60%;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ── PATCH 2: Custom Profile Avatar ──
+const PRESET_AVATARS = ['⚔️','🔥','🌊','🌿','⛰️','🐉','🌟','💎','🦁','🦊',
+                        '🐯','🐲','🦅','🌙','☀️','🏹','🛡️','💀','🌋','🧊'];
+
+window._getAvatarDisplay = function(){
+  if(!SD) return {type:'emoji',val:'⚔️'};
+  const av = SD.avatar || {type:'emoji',val:'⚔️'};
+  return av;
+};
+
+window._setAvatar = function(type, val){
+  if(!SD) return;
+  SD.avatar = {type, val};
+  saveProfile();
+  _updateAvatarUI();
+};
+
+window._updateAvatarUI = function(){
+  const av = window._getAvatarDisplay();
+  // Profile button avatar
+  const pav = document.getElementById('profile-avatar');
+  if(pav){
+    if(av.type==='image'){
+      pav.innerHTML=`<img class="av-custom-img" src="${av.val}" alt="avatar">`;
+      pav.style.background='none';
+    } else {
+      pav.innerHTML=av.val;
+      pav.style.background='linear-gradient(135deg,#ff4500,#ffd700)';
+    }
+  }
+  // Profile modal big avatar
+  const pbav = document.querySelector('.pmod-avatar-big');
+  if(pbav){
+    if(av.type==='image'){
+      pbav.innerHTML=`<img class="pmod-avatar-big-img" src="${av.val}" alt="avatar">`;
+      pbav.style.background='none';
+    } else {
+      pbav.innerHTML=av.val;
+      pbav.style.background='linear-gradient(135deg,#ff4500,#ffd700)';
+    }
+  }
+};
+
+// Render avatar picker section
+window._renderAvatarSection = function(){
+  const av = window._getAvatarDisplay();
+  const presets = PRESET_AVATARS.map(e=>`
+    <button class="av-btn${av.type==='emoji'&&av.val===e?' selected':''}"
+      onclick="window._setAvatar('emoji','${e}');document.querySelectorAll('.av-btn').forEach(b=>b.classList.remove('selected'));this.classList.add('selected');event.stopPropagation();"
+    >${e}</button>`).join('');
+  return `
+    <div class="pmod-section">
+      <h4>🖼 Avatar</h4>
+      <div class="avatar-grid">${presets}</div>
+      <div style="margin-top:.4rem">
+        <button class="pmod-btn" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:7px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;padding:.4rem"
+          onclick="document.getElementById('avatar-upload').click()">📷 Upload Image</button>
+        <input type="file" id="avatar-upload" accept="image/*"
+          onchange="window._handleAvatarUpload(this)">
+      </div>
+    </div>`;
+};
+
+window._handleAvatarUpload = function(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const dataUrl = e.target.result;
+    window._setAvatar('image', dataUrl);
+    // Refresh identity tab if open
+    const body = document.getElementById('pmod-body');
+    if(body && document.getElementById('profile-modal').classList.contains('show')){
+      switchProfileTab('identity');
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+// Patch openProfileModal to also update avatar
+const _origOpenProfile = window.openProfileModal;
+window.openProfileModal = function(){
+  _origOpenProfile && _origOpenProfile();
+  _updateAvatarUI();
+};
+
+// Patch renderProfileIdentity to include avatar section
+const _origRenderIdentity = window.renderProfileIdentity;
+window.renderProfileIdentity = function(body){
+  if(!SD) return;
+  const name = SD.nickname || window.currentUser || 'Player';
+  const unlocked = getUnlockedTitles();
+  const equipped = getEquippedTitle();
+
+  let titlesHtml = TITLES.map(t=>{
+    const isUnlocked = unlocked.includes(t.id);
+    const isEquipped = t.id === equipped;
+    return `<div class="title-item${isUnlocked?'':' locked'}${isEquipped?' equipped':''}">
+      <div>
+        <div class="title-${t.color||t.id.toLowerCase()===('lucky')?'lucky':t.color}" style="font-size:.82rem;font-weight:700">${t.label}</div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,0.4)">${isUnlocked?'Unlocked':'🔒 '+t.desc}</div>
+      </div>
+      <button class="title-equip-btn" onclick="equipTitle('${t.id}')"
+        ${!isUnlocked||isEquipped?'disabled':''}>${isEquipped?'✓ Equipped':'Equip'}</button>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = `
+    ${window._renderAvatarSection()}
+    <div class="pmod-section">
+      <h4>👤 Identity</h4>
+      <div class="pmod-row">
+        <span class="pmod-label">Username</span>
+        <span class="pmod-val">${name}</span>
+      </div>
+      <div class="pmod-row" style="margin-top:.5rem">
+        <span class="pmod-label" style="font-size:.72rem;color:rgba(255,255,255,.4)">Rename costs 🪙 1000</span>
+        <button class="pmod-btn pmod-btn-gold" onclick="promptRename()">✏ Rename</button>
+      </div>
+    </div>
+    <div class="pmod-section">
+      <h4>🏷 Titles</h4>
+      <div class="title-list">${titlesHtml}</div>
+    </div>
+    <button class="pmod-close-btn" onclick="closeProfileModal()">✕ Close</button>`;
+  _updateAvatarUI();
+};
+
+// Patch _loadProfileFromFirestore to initialize avatar
+const _origLoadProfile = window._loadProfileFromFirestore;
+window._loadProfileFromFirestore = async function(uid){
+  await _origLoadProfile(uid);
+  setTimeout(_updateAvatarUI, 200);
+};
+
+// ── PATCH 3: Bot Balance System ──
+const _origGoToBattleCine = window.goToBattle;
+window._buildScaledBotDeck = function(playerOwnedIds, mode, minActive){
+  const owned = playerOwnedIds || [];
+  // Assess player collection strength
+  const legendary = owned.filter(id=>{ const c=CARD_DB.find(x=>x.id===id); return c&&c.rarity==='legendary'; }).length;
+  const epic      = owned.filter(id=>{ const c=CARD_DB.find(x=>x.id===id); return c&&c.rarity==='epic'; }).length;
+
+  let allowedRarities;
+  if(legendary >= 3 || epic >= 6){
+    allowedRarities = ['common','rare','epic','legendary'];
+  } else if(epic >= 2 || legendary >= 1){
+    allowedRarities = ['common','rare','epic'];
+  } else {
+    allowedRarities = ['common','rare'];
+  }
+
+  const allActives  = CARD_DB.filter(c=>c.type==='active' && allowedRarities.includes(c.rarity));
+  const allPassives = CARD_DB.filter(c=>c.type==='passive');
+  // Fallback: if not enough actives, open to next tier
+  const safeActives = allActives.length >= minActive ? allActives : CARD_DB.filter(c=>c.type==='active');
+
+  let botCards = [...shuffle(safeActives).slice(0, minActive + Math.floor(Math.random()*(mode - minActive + 1)))];
+  const passivesNeeded = mode - botCards.length;
+  if(passivesNeeded > 0) botCards = [...botCards, ...shuffle(allPassives).slice(0, passivesNeeded)];
+  while(botCards.length < mode) botCards.push(safeActives[Math.floor(Math.random()*safeActives.length)]);
+  return botCards.slice(0, mode).map(c=>cloneCard(c));
+};
+
+// Override the cinematic goToBattle's bot building to use scaled version
+// We patch the GS construction inside initCinematic's goToBattle override
+// by intercepting at battle start instead (simpler: patch botPickCard context)
+// Since the cinematic already patches goToBattle, we patch one layer deeper:
+// override the allActives / botCards building when GS is set
+const _origGoToBattleBase = window.goToBattle;
+window.goToBattle = function(){
+  // Save reference to scaled builder for cinematic to pick up
+  window._useBotScaling = true;
+  _origGoToBattleBase && _origGoToBattleBase();
+};
+
+// Monkey-patch shuffle so cinematic uses scaled bot
+// More reliably: patch after GS init — override GS.botCards post-construction
+// We intercept showScreen('game-screen') which is called after GS is set
+const _origShowScreen2 = window.showScreen;
+window.showScreen = function(id){
+  if(id === 'game-screen' && window._useBotScaling && GS && SD){
+    window._useBotScaling = false;
+    const mode = GS.mode || 5;
+    const minActive = mode===5?2:6;
+    const scaledBot = window._buildScaledBotDeck(SD.ownedIds, mode, minActive);
+    applyPassives(scaledBot);
+    GS.botCards = scaledBot;
+    GS.botActiveIdx = null;
+    botPickCard();
+  }
+  _origShowScreen2 && _origShowScreen2(id);
+};
+
+// ── PATCH 4: Dodge/Shield Nerf — cooldown starts AFTER effect ends ──
+// Override addBuff to track when defensive effects expire before starting CD
+const _origPlayerAct2 = window.playerAct;
+window.playerAct = async function(type){
+  if(type === 'skill' && GS && GS.playerCards){
+    const pc = GS.playerCards[GS.playerActiveIdx];
+    if(pc && pc.skill && pc.currentCd === 0){
+      // We need to detect if skill grants dodge/shield/invuln
+      // Run skill, then check if buff was added — if so, delay CD until effect ends
+      const buffsBefore = (pc.buffs||[]).map(b=>({...b}));
+      await _origPlayerAct2(type);
+      // Check if a defensive buff was added
+      const hasNewDefensive = (pc.buffs||[]).some(b=>{
+        const wasPresent = buffsBefore.some(bb=>bb.type===b.type);
+        return !wasPresent && (b.type==='dodge'||b.type==='shield'||b.type==='invuln');
+      });
+      if(hasNewDefensive){
+        // Reset CD to 0 now; it will be set once the effect expires
+        const defensiveBuff = (pc.buffs||[]).find(b=>b.type==='dodge'||b.type==='shield'||b.type==='invuln');
+        if(defensiveBuff){
+          pc._pendingCd = pc.cooldown; // store intended CD
+          pc.currentCd = 0; // won't tick down until buff expires
+          pc._defenseActive = true;
+        }
+      }
+      return;
+    }
+  }
+  await _origPlayerAct2(type);
+};
+
+// Patch tickCDs to handle pending defensive CD
+const _origTickCDs = window.tickCDs;
+window.tickCDs = function(cards){
+  if(cards) cards.forEach(c=>{
+    if(c && c._defenseActive){
+      // Check if defensive buff still active
+      const stillActive = (c.buffs||[]).some(b=>b.type==='dodge'||b.type==='shield'||b.type==='invuln');
+      if(!stillActive){
+        // Effect ended — now start the cooldown
+        c.currentCd = c._pendingCd || c.cooldown;
+        c._pendingCd = 0;
+        c._defenseActive = false;
+      }
+      // Don't tick CD while defense is active
+    }
+  });
+  _origTickCDs && _origTickCDs(cards);
+};
+
+// ── PATCH 5: Overheal Nerf — reset overheal on kill ──
+const _origCheckDeaths = window.checkDeaths;
+window.checkDeaths = function(){
+  const hadKill = false; // we check after
+  const result = _origCheckDeaths();
+  // After any bot card death, check player's HP for overheal reset
+  if(GS && GS.playerCards){
+    const pc = GS.playerCards[GS.playerActiveIdx];
+    if(pc && pc.hp > pc.maxHp){
+      pc.hp = pc.maxHp; // reset to max on kill
+    }
+  }
+  return result;
+};
+
+// Also patch healCard to cap overheal at maxHp+20 (no infinite stacking)
+const _origHealCard2 = window.healCard;
+window.healCard = function(card, amt, gs){
+  if(!card) return;
+  const overhealCap = (card.maxHp||100) + 20;
+  card.hp = Math.min(overhealCap, card.hp + amt);
+  const side = gs && gs.playerCards && gs.playerCards.includes(card) ? 'player' : 'bot';
+  if(typeof anim==='function') anim(side,'heal');
+  if(typeof floatPopup==='function') floatPopup(side, `+${amt}`, 'heal');
+  if(amt > 0 && typeof sfxHeal==='function') sfxHeal();
+};
+
+// ── PATCH 6: Base stat rebalance validation (no-op patch — cards already follow rules) ──
+// The CARD_DB already has balanced stats. We apply a runtime normalization for any
+// extreme outliers to ensure tradeoffs exist. This is a soft enforcement.
+// We normalize at battle start via cloneCard override.
+const _origCloneCard = window.cloneCard;
+window.cloneCard = function(card){
+  if(!card) return null;
+  const c = _origCloneCard(card);
+  if(c && c.type==='active'){
+    // If HP > 150 and damage > 30, cap damage to 28 (tank tradeoff)
+    if(c.maxHp > 150 && c.baseDamage > 30) c.baseDamage = 28;
+    // If damage > 35 and HP < 100, ensure max HP is at least 80
+    if(c.baseDamage > 35 && c.maxHp < 100) c.maxHp = Math.max(80, c.maxHp);
+    c.hp = c.maxHp;
+  }
+  return c;
+};
+
+// ── PATCH 7: Card Detail View ──
+// Inject detail modal HTML
+(function injectCardDetailModal(){
+  const modal = document.createElement('div');
+  modal.id = 'card-detail-modal';
+  modal.onclick = function(e){ if(e.target===this) closeCardDetail(); };
+  modal.innerHTML = `<div id="card-detail-box">
+    <div class="cd-header" id="cd-header">
+      <div class="cd-icon" id="cd-icon">❓</div>
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:#fff" id="cd-name">Card</div>
+        <div style="font-size:.7rem;margin-top:.1rem" id="cd-rarity-badge"></div>
+      </div>
+      <button class="pmod-close-btn" style="width:auto;padding:.3rem .7rem;margin-left:auto" onclick="closeCardDetail()">✕</button>
+    </div>
+    <div class="cd-body" id="cd-body"></div>
+  </div>`;
+  document.body.appendChild(modal);
+})();
+
+window.openCardDetail = function(cardId){
+  const card = CARD_DB.find(c=>c.id===cardId);
+  if(!card) return;
+  const modal = document.getElementById('card-detail-modal');
+  const icon = document.getElementById('cd-icon');
+  const nameEl = document.getElementById('cd-name');
+  const rarEl = document.getElementById('cd-rarity-badge');
+  const body = document.getElementById('cd-body');
+  if(!modal) return;
+
+  icon.textContent = card.icon;
+  nameEl.textContent = card.name;
+  rarEl.innerHTML = `<span class="badge-${card.rarity}">${card.rarity.toUpperCase()}</span>`;
+
+  const elemLabel = card.element ? card.element.charAt(0).toUpperCase()+card.element.slice(1) : '—';
+  const typeLabel = card.type ? card.type.charAt(0).toUpperCase()+card.type.slice(1) : '—';
+
+  let statsHtml = `
+    <div class="cd-row"><span class="cd-lbl">Element</span><span class="cd-val">${elemLabel}</span></div>
+    <div class="cd-row"><span class="cd-lbl">Type</span><span class="cd-val">${typeLabel}</span></div>`;
+
+  if(card.type==='active'){
+    statsHtml += `
+      <div class="cd-row"><span class="cd-lbl">HP</span><span class="cd-val">${card.maxHp}</span></div>
+      <div class="cd-row"><span class="cd-lbl">Damage</span><span class="cd-val">${card.baseDamage}</span></div>
+      <div class="cd-row"><span class="cd-lbl">Cooldown</span><span class="cd-val">${card.cooldown} turns</span></div>`;
+    if(card.skillName){
+      statsHtml += `<div class="cd-skill-box">
+        <div class="cd-skill-name">⚡ ${card.skillName}</div>
+        <div class="cd-skill-desc">${card.skillDesc||'—'}</div>
+      </div>`;
+    }
+  } else if(card.type==='passive' && card.passive){
+    statsHtml += `<div class="cd-skill-box">
+      <div class="cd-skill-name">✨ Passive Effect</div>
+      <div class="cd-skill-desc">${card.skillDesc||'—'}</div>
+    </div>`;
+  } else if(card.type==='buff' && card.buffEffect){
+    statsHtml += `<div class="cd-skill-box">
+      <div class="cd-skill-name">🗡 Buff Effect</div>
+      <div class="cd-skill-desc">${card.skillDesc||'—'}</div>
+    </div>`;
+  }
+
+  statsHtml += `<button class="pmod-close-btn" style="margin-top:.7rem" onclick="closeCardDetail()">✕ Close</button>`;
+  body.innerHTML = statsHtml;
+
+  // Apply element border to header
+  const header = document.getElementById('cd-header');
+  if(header){
+    const elColors = {fire:'rgba(255,69,0,.4)',water:'rgba(0,191,255,.4)',nature:'rgba(50,205,50,.4)',ground:'rgba(205,133,63,.4)',passive:'rgba(155,89,182,.4)',buff:'rgba(255,215,0,.4)',neutral:'rgba(200,200,200,.2)'};
+    const col = elColors[card.type==='passive'?'passive':card.type==='buff'?'buff':(card.element||'neutral')] || elColors.neutral;
+    header.style.borderBottom = `1px solid ${col}`;
+  }
+
+  modal.classList.add('show');
+  if(typeof sfxClick==='function') sfxClick();
+};
+
+window.closeCardDetail = function(){
+  const m = document.getElementById('card-detail-modal');
+  if(m) m.classList.remove('show');
+};
+
+// Patch renderOwnedCards to make cards clickable
+const _origRenderOwned = window.renderOwnedCards;
+window.renderOwnedCards = function(el){
+  _origRenderOwned(el);
+  setTimeout(()=>{
+    const grid = document.getElementById('owned-grid');
+    if(!grid||!SD) return;
+    grid.querySelectorAll('.gcard').forEach((div,i)=>{
+      const owned = [...new Set(SD.ownedIds)];
+      const id = owned[i];
+      if(id) div.onclick = ()=>openCardDetail(id);
+      div.style.cursor = 'pointer';
+    });
+  }, 50);
+};
+
+// Also patch collection grid cards
+const _origRenderCollGrid = window.renderCollGrid;
+window.renderCollGrid = function(){
+  _origRenderCollGrid();
+  setTimeout(()=>{
+    const grid = document.getElementById('coll-grid');
+    if(!grid||!SD) return;
+    let i=0;
+    CARD_DB.filter(c=>{
+      if(window.collFilter==='all')return true;
+      if(window.collFilter==='legendary')return c.rarity==='legendary';
+      if(['fire','water','nature','ground'].includes(window.collFilter))return c.element===window.collFilter;
+      if(['active','passive','buff'].includes(window.collFilter))return c.type===window.collFilter;
+      return true;
+    }).forEach((card)=>{
+      const owned = SD.ownedIds.includes(card.id);
+      const div = grid.children[i];
+      if(div && owned){
+        div.onclick = ()=>openCardDetail(card.id);
+        div.style.cursor = 'pointer';
+      }
+      i++;
+    });
+  }, 50);
+};
+
+// ── PATCH 8: Legendary Attack Cutscene System ──
+const LEGENDARY_CUTSCENES = {
+  'Chaos Hydra':     'HydraCutscene.mp4',
+  'Gaia Guardian':   'GaiaCutscene.mp4',
+  'Infernal Phoenix':'PhoenixCutscene.mp4',
+  'Leviathan King':  'LeviathanCutscene.mp4',
+  'Quartz Golem':    'QuartzCutscene.mp4',
+  'Void Colossus':   'VoidCutscene.mp4',
+  'World Tree Spirit':'TreeCutscene.mp4',
+};
+
+// Inject cutscene overlay HTML
+(function injectCutsceneOverlay(){
+  const ov = document.createElement('div');
+  ov.id = 'legendary-cutscene';
+  ov.innerHTML = `<video id="cutscene-video" autoplay muted playsinline></video>
+    <div id="cutscene-skip" onclick="window._skipCutscene()">Tap to skip ▶</div>`;
+  document.body.appendChild(ov);
+})();
+
+window._cutsceneCallback = null;
+window._playCutscene = function(cardName, callback){
+  const file = LEGENDARY_CUTSCENES[cardName];
+  if(!file){ callback && callback(); return; }
+  const ov = document.getElementById('legendary-cutscene');
+  const vid = document.getElementById('cutscene-video');
+  if(!ov || !vid){ callback && callback(); return; }
+  window._cutsceneCallback = callback;
+  vid.src = file;
+  vid.muted = true;
+  ov.classList.add('show');
+  vid.play().catch(()=>{});
+  vid.onended = window._skipCutscene;
+};
+window._skipCutscene = function(){
+  const ov = document.getElementById('legendary-cutscene');
+  const vid = document.getElementById('cutscene-video');
+  if(ov) ov.classList.remove('show');
+  if(vid){ vid.pause(); vid.src=''; }
+  const cb = window._cutsceneCallback;
+  window._cutsceneCallback = null;
+  if(cb) cb();
+};
+
+// Patch playerAct to intercept legendary skill usage
+const _origPlayerActFinal = window.playerAct;
+window.playerAct = async function(type){
+  if(type==='skill' && GS && GS.playerCards){
+    const pc = GS.playerCards[GS.playerActiveIdx];
+    if(pc && pc.rarity==='legendary' && pc.currentCd===0 && pc.skill && LEGENDARY_CUTSCENES[pc.name]){
+      setButtons(false);
+      return new Promise(resolve=>{
+        window._playCutscene(pc.name, async ()=>{
+          await _origPlayerActFinal(type);
+          resolve();
+        });
+      });
+    }
+  }
+  await _origPlayerActFinal(type);
+};
+
+// ── PATCH 9: Profile Stats — Featured Cards ──
+const _origRenderStats = window.renderProfileStats;
+window.renderProfileStats = function(body){
+  _origRenderStats(body);
+  // Append featured cards section after existing stats
+  setTimeout(()=>{
+    const closeBtn = body.querySelector('.pmod-close-btn');
+    const section = document.createElement('div');
+    section.className = 'pmod-section';
+    section.innerHTML = `<h4>⭐ Featured Cards</h4>
+      <p style="font-size:.72rem;color:rgba(255,255,255,.45);margin-bottom:.5rem">Showcase 5 of your cards on your profile</p>
+      ${_renderFeaturedSlots()}
+      <button id="featured-pick-modal" style="display:none"></button>`;
+    if(closeBtn) body.insertBefore(section, closeBtn);
+    else body.appendChild(section);
+  }, 30);
+};
+
+window._renderFeaturedSlots = function(){
+  if(!SD) return '';
+  const featured = SD.featuredCards || [null,null,null,null,null];
+  let html = '<div class="featured-grid">';
+  for(let i=0;i<5;i++){
+    const id = featured[i];
+    const card = id ? CARD_DB.find(c=>c.id===id) : null;
+    if(card){
+      html += `<div class="featured-slot filled" onclick="window._openFeaturedPick(${i})">
+        <div class="fs-icon">${card.icon}</div>
+        <div class="fs-name">${card.name}</div>
+        <div class="fs-remove" onclick="event.stopPropagation();window._removeFeatured(${i})">✕</div>
+      </div>`;
+    } else {
+      html += `<div class="featured-slot" onclick="window._openFeaturedPick(${i})">
+        <div style="font-size:1.1rem;opacity:.4">＋</div>
+        <div style="opacity:.4;font-size:.5rem">Slot ${i+1}</div>
+      </div>`;
+    }
+  }
+  html += '</div>';
+  return html;
+};
+
+// Inject featured pick modal
+(function injectFeaturedModal(){
+  const m = document.createElement('div');
+  m.id = 'featured-pick-modal';
+  m.onclick = function(e){ if(e.target===this) this.classList.remove('show'); };
+  m.innerHTML = `<div id="featured-pick-box">
+    <h4>⭐ Pick a Featured Card</h4>
+    <div id="featured-pick-grid" class="cards-grid"></div>
+    <button class="pmod-close-btn" onclick="document.getElementById('featured-pick-modal').classList.remove('show')">Cancel</button>
+  </div>`;
+  document.body.appendChild(m);
+})();
+
+window._openFeaturedPick = function(slotIdx){
+  if(!SD) return;
+  const modal = document.getElementById('featured-pick-modal');
+  const grid = document.getElementById('featured-pick-grid');
+  grid.innerHTML = '';
+  const owned = [...new Set(SD.ownedIds)];
+  owned.forEach(id=>{
+    const card = CARD_DB.find(c=>c.id===id);
+    if(!card) return;
+    const elClass = card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`;
+    const div = document.createElement('div');
+    div.className = `gcard ${elClass}`;
+    div.style.cursor='pointer';
+    div.innerHTML = `<div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div>
+      <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>`;
+    div.onclick = ()=>{
+      if(!SD.featuredCards) SD.featuredCards = [null,null,null,null,null];
+      SD.featuredCards[slotIdx] = id;
+      saveProfile();
+      modal.classList.remove('show');
+      // Refresh stats tab
+      const body2 = document.getElementById('pmod-body');
+      if(body2) window.renderProfileStats(body2);
+    };
+    grid.appendChild(div);
+  });
+  modal.classList.add('show');
+};
+
+window._removeFeatured = function(idx){
+  if(!SD || !SD.featuredCards) return;
+  SD.featuredCards[idx] = null;
+  saveProfile();
+  const body2 = document.getElementById('pmod-body');
+  if(body2) window.renderProfileStats(body2);
+};
+
+// ── PATCH 10-11: Lucky Title ──
+// Add Lucky to TITLES array (already defined earlier, we push to it)
+if(typeof TITLES !== 'undefined' && !TITLES.find(t=>t.id==='Lucky')){
+  TITLES.push({
+    id:'Lucky',
+    label:'Lucky',
+    color:'lucky',
+    unlock:'lucky_summon',
+    desc:'Get a Legendary from 1x summon'
+  });
+}
+
+// Add Lucky title CSS class to title color map
+// (handled in CSS above as .title-lucky)
+
+// Patch getUnlockedTitles to include Lucky
+const _origGetUnlocked = window.getUnlockedTitles;
+window.getUnlockedTitles = function(){
+  const base = _origGetUnlocked();
+  if(SD && SD.luckyTitle && !base.includes('Lucky')) base.push('Lucky');
+  return base;
+};
+
+// Patch doSummon to track 1x legendary
+const _origDoSummon = window.doSummon;
+window.doSummon = function(cost, count){
+  // We need to intercept after summon to check for 1x legendary
+  _origDoSummon(cost, count);
+  // Check via SD — if single summon yielded a legendary just now
+  // We patch by wrapping showGacha instead
+};
+
+// Better approach: patch showGacha to detect 1x lucky legendary
+const _origShowGacha2 = window.showGacha;
+window.showGacha = function(results, dupes){
+  // Check if this was a 1x summon with a legendary
+  if(results && results.length === 1 && results[0].card && results[0].card.rarity === 'legendary'){
+    if(SD && !SD.luckyTitle){
+      SD.luckyTitle = true;
+      saveProfile();
+      setTimeout(()=>showToast('🍀 Lucky! You unlocked the "Lucky" title!'), 1500);
+    }
+  }
+  _origShowGacha2(results, dupes);
+};
+
+// ── PATCH 12: Save avatar and featuredCards in DEFAULT_PROFILE ──
+// Ensure loading old profiles gets new fields
+const _origLoad2 = window._loadProfileFromFirestore;
+window._loadProfileFromFirestore = async function(uid){
+  await _origLoad2(uid);
+  if(SD){
+    if(!SD.avatar) SD.avatar = {type:'emoji',val:'⚔️'};
+    if(!SD.featuredCards) SD.featuredCards = [null,null,null,null,null];
+    if(SD.luckyTitle === undefined) SD.luckyTitle = false;
+  }
+};
+
+// ── Leaderboard: show avatar in leaderboard ──
+// (avatars are emoji/image — just show emoji in leaderboard rows)
+// Already stored as SD.avatar; leaderboard push can include it
+
+// ── Update leaderboard push to include avatar emoji ──
+const _origRenderLB = window.renderLeaderboard;
+window.renderLeaderboard = async function(){
+  // Push avatar to leaderboard data
+  if(window._fbUid && window._fbFns && SD){
+    try {
+      const { doc, setDoc } = window._fbFns;
+      const today = todayStr();
+      const titleLabel = getTitleLabel(getEquippedTitle());
+      const name = SD.nickname || window.currentUser || 'Player';
+      const av = SD.avatar || {type:'emoji',val:'⚔️'};
+      const avatarEmoji = av.type==='emoji' ? av.val : '⚔️';
+      const lbRef = doc(window._fbDb, 'leaderboard', window._fbUid);
+      await setDoc(lbRef, {
+        uid: window._fbUid, name, title: titleLabel,
+        wins: SD.wins||0,
+        dailyWins: SD.dailyWinsDate===today?(SD.dailyWins||0):0,
+        dailyWinsDate: today,
+        avatar: avatarEmoji,
+        updatedAt: Date.now()
+      });
+    } catch(e){}
+  }
+  await _origRenderLB();
+};
+
+// ── Initialize avatar display on load ──
+setTimeout(()=>{
+  if(typeof _updateAvatarUI==='function') _updateAvatarUI();
+}, 800);
+
+})(); // end applyV5Patches
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  TRACKCARD V6 PATCH — Bug Fixes + Cutscene Audio + Music Upgrade
+  1. Button/click z-index fix
+  2. Card detail by ID (not index)
+  3. Section data isolation
+  4. Deck builder mobile fix
+  5. Cutscene video + separate MP3 audio
+  6. Improved BGM (menu + battle, synthesized)
+═══════════════════════════════════════════════════════════════ -->
+<style>
+/* ── V6: Fix z-index layering so nothing blocks clicks ── */
+#cinematic-overlay { pointer-events: none !important; }
+#cinematic-overlay.active { pointer-events: all !important; }
+#legendary-cutscene { pointer-events: none !important; }
+#legendary-cutscene.show { pointer-events: all !important; }
+/* Ensure modals sit above everything except cutscenes */
+.modal-ov { z-index: 600 !important; }
+#rps-ov   { z-index: 700 !important; }
+#gacha-overlay { z-index: 800 !important; }
+#legendary-reveal { z-index: 900 !important; }
+#settings-overlay { z-index: 1000 !important; }
+#profile-modal    { z-index: 1100 !important; }
+#leaderboard-modal{ z-index: 1100 !important; }
+#card-detail-modal{ z-index: 1200 !important; }
+#featured-pick-modal { z-index: 1300 !important; }
+#legendary-cutscene { z-index: 99997 !important; }
+/* Video overlay and cinematic above all except cutscene */
+#cinematic-overlay { z-index: 90000 !important; }
+/* Toast always on top */
+#toast { z-index: 99999 !important; }
+/* Rotate overlay */
+#rotate-overlay { z-index: 99998 !important; }
+
+/* Fix: card detail box must not be blocked */
+#card-detail-box { position: relative; z-index: 1; }
+
+/* Fix: featured pick modal display */
+#featured-pick-modal { display: none; }
+#featured-pick-modal.show { display: flex !important; }
+
+/* Fix: deck slots fully tappable */
+.deck-slot { -webkit-tap-highlight-color: rgba(255,215,0,0.2); cursor: pointer; }
+.deck-slot * { pointer-events: none; }
+.deck-slot .slot-remove { pointer-events: all !important; }
+.equip-btn { pointer-events: all !important; position: relative; z-index: 5; }
+
+/* V6: Cutscene audio indicator */
+#cutscene-audio-icon {
+  position: absolute; top: 1.5rem; left: 1.5rem;
+  font-size: 1.2rem; color: rgba(255,215,0,0.7);
+  animation: audioPulse 1s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes audioPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// V6 PATCH BLOCK — Bug Fixes + Audio Upgrade
+// ═══════════════════════════════════════════════════════════════
+(function applyV6Patches(){
+
+// ════════════════════════════════════════════════════════════
+// FIX 1 & 4: Button/click blocking — close stale overlays
+// ════════════════════════════════════════════════════════════
+(function fixClickBlocking(){
+  // Ensure cinematic overlay never blocks after animation finishes
+  // by forcing pointer-events:none when inactive
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      const el = m.target;
+      if(el.id === 'cinematic-overlay'){
+        const isActive = el.classList.contains('active');
+        el.style.pointerEvents = isActive ? 'all' : 'none';
+      }
+      if(el.id === 'legendary-cutscene'){
+        const isShow = el.classList.contains('show');
+        el.style.pointerEvents = isShow ? 'all' : 'none';
+      }
+    });
+  });
+  const cine = document.getElementById('cinematic-overlay');
+  const cuts = document.getElementById('legendary-cutscene');
+  if(cine) observer.observe(cine, { attributes: true, attributeFilter: ['class'] });
+  if(cuts) observer.observe(cuts, { attributes: true, attributeFilter: ['class'] });
+
+  // Safety: after any resetCinematic call, force pointer-events off
+  const _origReset = window.resetCinematic;
+  window.resetCinematic = function(){
+    if(_origReset) _origReset();
+    const ov = document.getElementById('cinematic-overlay');
+    if(ov) ov.style.pointerEvents = 'none';
+  };
+
+  // Fix: document-level escape key closes all modals
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      // Close topmost visible modal
+      ['featured-pick-modal','card-detail-modal','profile-modal',
+       'leaderboard-modal','settings-overlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el && (el.classList.contains('show') || el.classList.contains('active'))){
+          el.classList.remove('show','active');
+        }
+      });
+    }
+  });
+})();
+
+// ════════════════════════════════════════════════════════════
+// FIX 2 & 3: Card detail by card ID — section data isolation
+// ════════════════════════════════════════════════════════════
+(function fixCardDetails(){
+
+  // ── Completely rewrite renderOwnedCards to attach ID-based onclick ──
+  window.renderOwnedCards = function(el){
+    if(!SD) return;
+    const owned = sortCards([...new Set(SD.ownedIds)]);
+    el.innerHTML = `<p style="color:var(--text2);font-size:.82rem;margin-bottom:.7rem">You own <b style="color:var(--gold)">${owned.length}</b> / ${CARD_DB.length} cards</p>${renderSortRow('owned')}<div class="cards-grid" id="owned-grid"></div>`;
+    const grid = document.getElementById('owned-grid');
+    owned.forEach(cardId => {
+      const card = CARD_DB.find(c => c.id === cardId);
+      if(!card) return;
+      const elClass = card.type==='passive' ? 'card-elem-passive'
+                    : card.type==='buff'    ? 'card-elem-buff'
+                    : `card-elem-${card.element}`;
+      const div = document.createElement('div');
+      div.className = `gcard ${elClass}`;
+      div.style.cursor = 'pointer';
+      // Store ID directly on element
+      div.dataset.cardId = cardId;
+      div.innerHTML = `<div class="g-icon">${card.icon}</div>
+        <div class="g-name">${card.name}</div>
+        <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
+        <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
+        ${card.type==='active' ? `<div class="g-stat">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>` : ''}
+        <div class="g-desc">${card.skillDesc}</div>`;
+      // Use dataset ID — immune to sort/filter reordering
+      div.onclick = function(){ openCardDetail(parseInt(this.dataset.cardId)); };
+      grid.appendChild(div);
+    });
+  };
+
+  // ── Rewrite renderCollGrid to use card.id not index ──
+  window.renderCollGrid = function(){
+    const grid = document.getElementById('coll-grid');
+    if(!grid || !SD) return;
+    grid.innerHTML = '';
+    const filtered = CARD_DB.filter(c => {
+      if(collFilter==='all') return true;
+      if(collFilter==='legendary') return c.rarity==='legendary';
+      if(['fire','water','nature','ground'].includes(collFilter)) return c.element===collFilter;
+      if(['active','passive','buff'].includes(collFilter)) return c.type===collFilter;
+      return true;
+    });
+    filtered.forEach(card => {
+      const owned = SD.ownedIds.includes(card.id);
+      const elClass = card.type==='passive' ? 'card-elem-passive'
+                    : card.type==='buff'    ? 'card-elem-buff'
+                    : `card-elem-${card.element}`;
+      const div = document.createElement('div');
+      div.className = `gcard ${elClass}${!owned ? ' silhouette' : ''}`;
+      div.dataset.cardId = card.id;
+      div.innerHTML = `${!owned ? `<div class="unlock-tag">🔒</div>` : ''}
+        <div class="g-icon">${card.icon}</div>
+        <div class="g-name">${owned ? card.name : '???'}</div>
+        <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
+        <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
+        ${owned && card.type==='active' ? `<div class="g-stat">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>` : ''}
+        <div class="g-desc">${owned ? card.skillDesc : '???'}</div>`;
+      if(owned){
+        div.style.cursor = 'pointer';
+        div.onclick = function(){ openCardDetail(parseInt(this.dataset.cardId)); };
+      }
+      grid.appendChild(div);
+    });
+  };
+
+  // ── Rewrite renderDeckBuilder pool cards to use ID-based onclick ──
+  // Patch the equip button onclick in the pool grid (deck builder section)
+  // The original renderDeckBuilder uses toggleDeckPool(id) which is correct.
+  // Problem: V5 patch attached onclick by index. We override that cleanup:
+  const _origRenderDeck = window.renderDeckBuilder;
+  window.renderDeckBuilder = function(el){
+    _origRenderDeck(el);
+    // After render, re-attach pool cards with correct ID-based click
+    setTimeout(() => {
+      const poolGrid = document.getElementById('deck-pool-grid');
+      if(!poolGrid || !SD) return;
+      // Pool cards already have toggleDeckPool(id) via innerHTML — they're fine.
+      // Just ensure deck slot cards also open detail on long-press / double-tap
+      // (not interfering with drag/swap). No change needed to slots themselves.
+    }, 30);
+  };
+
+  // ── openCardDetail: robust version using CARD_DB lookup by ID ──
+  window.openCardDetail = function(cardId){
+    const card = CARD_DB.find(c => c.id === cardId);
+    if(!card) return;
+    const modal = document.getElementById('card-detail-modal');
+    const iconEl  = document.getElementById('cd-icon');
+    const nameEl  = document.getElementById('cd-name');
+    const rarEl   = document.getElementById('cd-rarity-badge');
+    const body    = document.getElementById('cd-body');
+    if(!modal || !body) return;
+
+    if(iconEl)  iconEl.textContent  = card.icon;
+    if(nameEl)  nameEl.textContent  = card.name;
+    if(rarEl)   rarEl.innerHTML     = `<span class="badge-${card.rarity}">${card.rarity.toUpperCase()}</span>`;
+
+    const elemLabel = card.element
+      ? card.element.charAt(0).toUpperCase() + card.element.slice(1) : '—';
+    const typeLabel = card.type
+      ? card.type.charAt(0).toUpperCase() + card.type.slice(1) : '—';
+
+    let statsHtml = `
+      <div class="cd-row"><span class="cd-lbl">Element</span><span class="cd-val">${elemLabel}</span></div>
+      <div class="cd-row"><span class="cd-lbl">Type</span><span class="cd-val">${typeLabel}</span></div>`;
+
+    if(card.type === 'active'){
+      statsHtml += `
+        <div class="cd-row"><span class="cd-lbl">Max HP</span><span class="cd-val">${card.maxHp}</span></div>
+        <div class="cd-row"><span class="cd-lbl">Damage</span><span class="cd-val">${card.baseDamage}</span></div>
+        <div class="cd-row"><span class="cd-lbl">Cooldown</span><span class="cd-val">${card.cooldown} turns</span></div>`;
+      if(card.skillName){
+        statsHtml += `<div class="cd-skill-box">
+          <div class="cd-skill-name">⚡ ${card.skillName}</div>
+          <div class="cd-skill-desc">${card.skillDesc || '—'}</div>
+        </div>`;
+      }
+    } else if(card.type === 'passive'){
+      statsHtml += `<div class="cd-skill-box">
+        <div class="cd-skill-name">✨ Passive Effect</div>
+        <div class="cd-skill-desc">${card.skillDesc || '—'}</div>
+      </div>`;
+    } else if(card.type === 'buff'){
+      statsHtml += `<div class="cd-skill-box">
+        <div class="cd-skill-name">🗡 Buff Effect</div>
+        <div class="cd-skill-desc">${card.skillDesc || '—'}</div>
+      </div>`;
+    }
+
+    statsHtml += `<button class="pmod-close-btn" style="margin-top:.7rem" onclick="closeCardDetail()">✕ Close</button>`;
+    body.innerHTML = statsHtml;
+
+    // Apply element tint to header border
+    const header = document.getElementById('cd-header');
+    if(header){
+      const elColors = {
+        fire:'rgba(255,69,0,.4)', water:'rgba(0,191,255,.4)',
+        nature:'rgba(50,205,50,.4)', ground:'rgba(205,133,63,.4)',
+        passive:'rgba(155,89,182,.4)', buff:'rgba(255,215,0,.4)',
+        neutral:'rgba(200,200,200,.2)'
+      };
+      const col = elColors[
+        card.type==='passive' ? 'passive'
+        : card.type==='buff' ? 'buff'
+        : (card.element || 'neutral')
+      ] || elColors.neutral;
+      header.style.borderBottom = `1px solid ${col}`;
+    }
+
+    modal.classList.add('show');
+    if(typeof sfxClick === 'function') sfxClick();
+  };
+
+  window.closeCardDetail = function(){
+    const m = document.getElementById('card-detail-modal');
+    if(m) m.classList.remove('show');
+  };
+
+  // Ensure card-detail-modal click-outside closes it
+  const cdModal = document.getElementById('card-detail-modal');
+  if(cdModal) cdModal.onclick = function(e){
+    if(e.target === cdModal) closeCardDetail();
+  };
+
+})();
+
+// ════════════════════════════════════════════════════════════
+// FIX 4: Deck Builder — mobile tap fully working
+// ════════════════════════════════════════════════════════════
+(function fixDeckBuilderTaps(){
+  // Patch slotClick to allow tapping empty slots more naturally
+  window.slotClick = function(i){
+    showToast('Tap a card below to add to deck');
+  };
+
+  // Ensure all buttons inside deck builder are pointer-events: all
+  const origRenderInv = window.renderInventory;
+  window.renderInventory = function(tab){
+    origRenderInv(tab);
+    setTimeout(() => {
+      // Fix all buttons in inv-content
+      const invContent = document.getElementById('inv-content');
+      if(!invContent) return;
+      invContent.querySelectorAll('button, .equip-btn, .mode-btn, .sort-btn, .filter-btn, .tab-btn').forEach(btn => {
+        btn.style.pointerEvents = 'all';
+        btn.style.position = 'relative';
+        btn.style.zIndex = '5';
+      });
+    }, 80);
+  };
+})();
+
+// ════════════════════════════════════════════════════════════
+// FIX 5: Cutscene — Video + Separate MP3 Audio
+// ════════════════════════════════════════════════════════════
+(function fixCutsceneAudio(){
+
+  const CUTSCENE_FILES = {
+    'Chaos Hydra':      { video: 'HydraCutscene.mp4',    audio: 'HydraCutscene.mp3'    },
+    'Gaia Guardian':    { video: 'GaiaCutscene.mp4',     audio: 'GaiaCutscene.mp3'     },
+    'Infernal Phoenix': { video: 'PhoenixCutscene.mp4',  audio: 'PhoenixCutscene.mp3'  },
+    'Leviathan King':   { video: 'LeviathanCutscene.mp4',audio: 'LeviathanCutscene.mp3'},
+    'Quartz Golem':     { video: 'QuartzCutscene.mp4',   audio: 'QuartzCutscene.mp3'   },
+    'Void Colossus':    { video: 'VoidCutscene.mp4',     audio: 'VoidCutscene.mp3'     },
+    'World Tree Spirit':{ video: 'TreeCutscene.mp4',     audio: 'TreeCutscene.mp3'     },
+  };
+
+  // Rebuild the cutscene overlay with audio support
+  let cutsceneAudio = null;
+  let _cutCb = null;
+
+  // Update the existing overlay to add audio icon
+  const existingOv = document.getElementById('legendary-cutscene');
+  if(existingOv){
+    // Add audio icon if not present
+    if(!existingOv.querySelector('#cutscene-audio-icon')){
+      const audioIcon = document.createElement('div');
+      audioIcon.id = 'cutscene-audio-icon';
+      audioIcon.textContent = '🔊';
+      existingOv.appendChild(audioIcon);
+    }
+  }
+
+  function pauseBattleBGM(){
+    // Pause current BGM while cutscene plays
+    if(typeof window._battleBGMNode === 'object' && window._battleBGMNode){
+      try { window._battleBGMGain && (window._battleBGMGain.gain.value = 0); } catch(e){}
+    }
+    if(typeof bgmGain !== 'undefined' && bgmGain){
+      try { bgmGain.gain.value = 0; } catch(e){}
+    }
+  }
+
+  function resumeBattleBGM(){
+    if(typeof window._battleBGMGain === 'object' && window._battleBGMGain){
+      try { window._battleBGMGain.gain.value = (bgmVolume||0.4) * 0.15; } catch(e){}
+    } else if(typeof bgmGain !== 'undefined' && bgmGain && bgmOn){
+      try { bgmGain.gain.value = (bgmVolume||0.4) * 0.15; } catch(e){}
+    }
+  }
+
+  window._playCutscene = function(cardName, callback){
+    const files = CUTSCENE_FILES[cardName];
+    if(!files){ callback && callback(); return; }
+
+    const ov  = document.getElementById('legendary-cutscene');
+    const vid = document.getElementById('cutscene-video');
+    if(!ov || !vid){ callback && callback(); return; }
+
+    _cutCb = callback;
+
+    // Pause BGM during cutscene
+    pauseBattleBGM();
+
+    // Setup video (muted — audio from separate <audio>)
+    vid.src = files.video;
+    vid.muted = true; // video track muted; audio comes from Audio element
+    vid.currentTime = 0;
+
+    // Setup separate audio element
+    if(cutsceneAudio){
+      cutsceneAudio.pause();
+      cutsceneAudio.src = '';
+    }
+    cutsceneAudio = new Audio(files.audio);
+    cutsceneAudio.volume = Math.min(1, (bgmVolume || 0.4) * 1.8);
+    cutsceneAudio.loop = false;
+
+    ov.style.pointerEvents = 'all';
+    ov.classList.add('show');
+
+    // Play video + audio simultaneously
+    const playPromise = vid.play();
+    const audioPromise = cutsceneAudio.play().catch(() => {
+      // Audio autoplay blocked — still show video
+    });
+
+    // End when video ends
+    vid.onended = window._skipCutscene;
+    // Also end if audio ends first (safety)
+    cutsceneAudio.onended = null; // let video control timing
+
+    window._cutsceneCallback = _cutCb;
+  };
+
+  window._skipCutscene = function(){
+    const ov  = document.getElementById('legendary-cutscene');
+    const vid = document.getElementById('cutscene-video');
+
+    if(vid){ try { vid.pause(); vid.src = ''; } catch(e){} }
+    if(cutsceneAudio){ try { cutsceneAudio.pause(); cutsceneAudio.src = ''; } catch(e){}  cutsceneAudio = null; }
+    if(ov){ ov.classList.remove('show'); ov.style.pointerEvents = 'none'; }
+
+    // Resume BGM
+    resumeBattleBGM();
+
+    const cb = window._cutsceneCallback;
+    window._cutsceneCallback = null;
+    if(cb) setTimeout(cb, 50); // slight delay for clean transition
+  };
+
+  // Replace skip button onclick
+  const skipBtn = document.getElementById('cutscene-skip');
+  if(skipBtn) skipBtn.onclick = window._skipCutscene;
+
+})();
+
+// ════════════════════════════════════════════════════════════
+// FIX 6: Improved BGM — Menu + Battle (Web Audio synthesized)
+// ════════════════════════════════════════════════════════════
+(function upgradeBGM(){
+
+  // ── State ──
+  let _menuBGMTimer  = null;
+  let _battleBGMTimer = null;
+  let _bgmCtx        = null;
+  let _menuGain      = null;
+  let _battleGain    = null;
+  let _currentBGM    = null; // 'menu' | 'battle' | null
+  let _bgmPhase      = 0;    // for melody progression
+
+  // Expose references for cutscene mute/resume
+  window._battleBGMGain = null;
+  window._battleBGMNode = null;
+
+  function getBGMCtx(){
+    if(!_bgmCtx){
+      try {
+        _bgmCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch(e){ return null; }
+    }
+    if(_bgmCtx.state === 'suspended') _bgmCtx.resume().catch(()=>{});
+    return _bgmCtx;
+  }
+
+  function getTargetVol(){
+    return (typeof bgmVolume !== 'undefined' ? bgmVolume : 0.4) * 0.18;
+  }
+
+  function stopAll(){
+    if(_menuBGMTimer)  { clearTimeout(_menuBGMTimer);  _menuBGMTimer  = null; }
+    if(_battleBGMTimer){ clearTimeout(_battleBGMTimer); _battleBGMTimer = null; }
+    // Fade out gains
+    const now = _bgmCtx ? _bgmCtx.currentTime : 0;
+    if(_menuGain)  { try { _menuGain.gain.setTargetAtTime(0, now, 0.3); }   catch(e){} }
+    if(_battleGain){ try { _battleGain.gain.setTargetAtTime(0, now, 0.3); } catch(e){} }
+    window._battleBGMGain = null;
+    _currentBGM = null;
+  }
+
+  // ── MENU BGM: Heroic/adventurous arpeggiated melody ──
+  // Key: E minor pentatonic with a triumphant feel
+  // Uses layered oscillators: bass + melody + pad
+  function playMenuBGM(){
+    const ctx = getBGMCtx();
+    if(!ctx || !bgmOn) return;
+    stopAll();
+    _currentBGM = 'menu';
+    _bgmPhase = 0;
+
+    // Master gain for menu
+    _menuGain = ctx.createGain();
+    _menuGain.gain.value = 0;
+    _menuGain.connect(ctx.destination);
+    // Fade in
+    _menuGain.gain.setTargetAtTime(getTargetVol(), ctx.currentTime, 0.5);
+
+    // Reverb-like effect using delay
+    const delay = ctx.createDelay(0.5);
+    delay.delayTime.value = 0.28;
+    const delayGain = ctx.createGain();
+    delayGain.gain.value = 0.22;
+    delay.connect(delayGain);
+    delayGain.connect(delay);
+    delayGain.connect(_menuGain);
+
+    // Melody notes — heroic/fantasy feel (E minor pentatonic + major lifts)
+    // Pattern A: ascending heroic
+    // Pattern B: flowing adventure  
+    // Pattern C: climax
+    const patterns = [
+      // Pattern A — Heroic fanfare feel
+      [329.63,392,440,523.25,659.25,523.25,440,392,
+       329.63,392,493.88,587.33,659.25,587.33,493.88,392],
+      // Pattern B — Adventure running theme
+      [261.63,329.63,392,329.63,261.63,293.66,349.23,293.66,
+       261.63,329.63,392,440,392,349.23,329.63,261.63],
+      // Pattern C — Triumphant build  
+      [392,493.88,587.33,659.25,783.99,659.25,587.33,493.88,
+       523.25,659.25,783.99,880,783.99,659.25,523.25,392],
+    ];
+
+    const bassNotes = [82.41,98,110,130.81,164.81,130.81,110,98]; // E2 etc
+
+    function scheduleMenuPhrase(startTime){
+      if(!bgmOn || _currentBGM !== 'menu') return;
+      const pat = patterns[_bgmPhase % patterns.length];
+      const noteLen = 0.22;
+
+      // Bass line
+      bassNotes.forEach((freq, i) => {
+        const t = startTime + i * noteLen * 2;
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.55, t + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, t + noteLen * 1.8);
+        const lpf = ctx.createBiquadFilter();
+        lpf.type = 'lowpass'; lpf.frequency.value = 400;
+        osc.connect(lpf); lpf.connect(g); g.connect(_menuGain);
+        osc.start(t); osc.stop(t + noteLen * 1.9);
+      });
+
+      // Melody line
+      pat.forEach((freq, i) => {
+        const t = startTime + i * noteLen;
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = i % 4 === 0 ? 'sawtooth' : 'triangle';
+        osc.frequency.value = freq;
+        const detune = ctx.createOscillator();
+        const dg = ctx.createGain();
+        detune.type = 'sine';
+        detune.frequency.value = freq * 1.005;
+        dg.gain.value = 0.3;
+        const lpf = ctx.createBiquadFilter();
+        lpf.type = 'lowpass'; lpf.frequency.value = 2200;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.42, t + 0.02);
+        g.gain.setValueAtTime(0.38, t + noteLen * 0.7);
+        g.gain.exponentialRampToValueAtTime(0.001, t + noteLen * 0.95);
+        osc.connect(lpf); lpf.connect(g); g.connect(delay); g.connect(_menuGain);
+        detune.connect(dg); dg.connect(_menuGain);
+        osc.start(t); osc.stop(t + noteLen);
+        detune.start(t); detune.stop(t + noteLen);
+      });
+
+      // Pad chord (atmospheric)
+      const chords = [
+        [164.81,196,246.94,329.63],
+        [130.81,164.81,196,261.63],
+        [196,246.94,293.66,392],
+      ];
+      const chord = chords[_bgmPhase % chords.length];
+      chord.forEach(freq => {
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0, startTime);
+        g.gain.linearRampToValueAtTime(0.08, startTime + 0.6);
+        g.gain.setValueAtTime(0.08, startTime + noteLen * pat.length - 0.6);
+        g.gain.linearRampToValueAtTime(0, startTime + noteLen * pat.length);
+        osc.connect(g); g.connect(_menuGain);
+        osc.start(startTime); osc.stop(startTime + noteLen * pat.length + 0.1);
+      });
+
+      _bgmPhase++;
+      const phraseLen = pat.length * noteLen;
+      _menuBGMTimer = setTimeout(() => scheduleMenuPhrase(ctx.currentTime + 0.02), (phraseLen - 0.1) * 1000);
+    }
+
+    scheduleMenuPhrase(ctx.currentTime + 0.1);
+  }
+
+  // ── BATTLE BGM: Tense, action-packed combat music ──
+  // Fast-paced percussive rhythm + intense melody
+  function playBattleBGM(){
+    const ctx = getBGMCtx();
+    if(!ctx || !bgmOn) return;
+    stopAll();
+    _currentBGM = 'battle';
+    _bgmPhase = 0;
+
+    _battleGain = ctx.createGain();
+    _battleGain.gain.value = 0;
+    _battleGain.connect(ctx.destination);
+    _battleGain.gain.setTargetAtTime(getTargetVol(), ctx.currentTime, 0.4);
+
+    // Expose for cutscene mute
+    window._battleBGMGain = _battleGain;
+
+    // Compressor for punch
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -18;
+    comp.ratio.value = 4;
+    comp.connect(_battleGain);
+
+    // Battle themes — minor key, intense, fast
+    // BPM ~140 → 16th note = 60/(140*4) ≈ 0.107s
+    const BPM = 138;
+    const beat = 60 / BPM;
+    const sixteenth = beat / 4;
+
+    // Melody patterns (A minor / D minor tension)
+    const melodyA = [
+      440,0,392,0,349.23,0,329.63,392,
+      440,392,329.63,0,293.66,0,261.63,0
+    ];
+    const melodyB = [
+      293.66,329.63,349.23,392,440,392,349.23,329.63,
+      293.66,0,246.94,0,220,246.94,261.63,293.66
+    ];
+    const melodyC = [
+      523.25,493.88,440,415.3,392,349.23,329.63,293.66,
+      261.63,293.66,329.63,349.23,392,440,493.88,523.25
+    ];
+    const melodies = [melodyA, melodyB, melodyC];
+
+    // Driving bass riff
+    const bassRiff = [110,0,110,0,130.81,0,110,0,  146.83,0,130.81,0,110,0,98,0];
+
+    function scheduleKick(t){
+      // Synthesized kick drum
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.08);
+      g.gain.setValueAtTime(1.0, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      osc.connect(g); g.connect(comp);
+      osc.start(t); osc.stop(t + 0.2);
+    }
+
+    function scheduleSnare(t){
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+      const d   = buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/d.length, 1.5);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const bpf = ctx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=2400; bpf.Q.value=0.8;
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.55, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.12);
+      src.connect(bpf); bpf.connect(g); g.connect(comp);
+      src.start(t); 
+    }
+
+    function scheduleHihat(t, open=false){
+      const buf = ctx.createBuffer(1, ctx.sampleRate * (open?0.18:0.04), ctx.sampleRate);
+      const d   = buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/d.length, 0.8);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const hpf = ctx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=8000;
+      const g   = ctx.createGain(); g.gain.setValueAtTime(0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t+(open?0.2:0.05));
+      src.connect(hpf); hpf.connect(g); g.connect(comp);
+      src.start(t);
+    }
+
+    function scheduleBattlePhrase(startTime){
+      if(!bgmOn || _currentBGM !== 'battle') return;
+
+      const mel = melodies[_bgmPhase % melodies.length];
+      const phraseBeats = 4; // 4 beats per phrase = 1 bar
+      const totalSixteenths = phraseBeats * 4; // 16
+
+      // Drums
+      for(let s=0; s<totalSixteenths; s++){
+        const t = startTime + s * sixteenth;
+        // Kick: beats 1 and 3 (s=0, s=8)
+        if(s===0 || s===8) scheduleKick(t);
+        // Extra kicks for drive
+        if(s===4 || s===12) scheduleKick(t);
+        // Snare: beats 2 and 4 (s=4, s=12)
+        if(s===4 || s===12) scheduleSnare(t);
+        // Hi-hat: every 2 sixteenths
+        if(s%2===0) scheduleHihat(t, s%8===6);
+      }
+
+      // Bass riff
+      bassRiff.slice(0, totalSixteenths).forEach((freq, s) => {
+        if(!freq) return;
+        const t = startTime + s * sixteenth;
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.value = freq;
+        const lpf = ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=350;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.7, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, t + sixteenth * 0.85);
+        osc.connect(lpf); lpf.connect(g); g.connect(comp);
+        osc.start(t); osc.stop(t + sixteenth);
+      });
+
+      // Melody
+      mel.forEach((freq, s) => {
+        if(!freq) return;
+        const t = startTime + s * sixteenth;
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = freq;
+        const lpf = ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=1800;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.35, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, t + sixteenth * 0.8);
+        osc.connect(lpf); lpf.connect(g); g.connect(_battleGain);
+        osc.start(t); osc.stop(t + sixteenth);
+      });
+
+      _bgmPhase++;
+      const phraseLen = beat * phraseBeats;
+      _battleBGMTimer = setTimeout(
+        () => scheduleBattlePhrase(ctx.currentTime + 0.02),
+        (phraseLen - 0.08) * 1000
+      );
+    }
+
+    scheduleBattlePhrase(ctx.currentTime + 0.1);
+  }
+
+  // ── Switch BGM based on screen ──
+  function switchBGMTo(mode){
+    if(!bgmOn) return;
+    const ctx = getBGMCtx();
+    if(!ctx) return;
+
+    if(mode === 'menu' && _currentBGM !== 'menu'){
+      // Cross-fade: fade out battle, fade in menu
+      if(_battleBGMTimer){ clearTimeout(_battleBGMTimer); _battleBGMTimer = null; }
+      if(_battleGain){
+        try { _battleGain.gain.setTargetAtTime(0, ctx.currentTime, 0.4); } catch(e){}
+      }
+      setTimeout(playMenuBGM, 400);
+    } else if(mode === 'battle' && _currentBGM !== 'battle'){
+      // Cross-fade: fade out menu, start battle
+      if(_menuBGMTimer){ clearTimeout(_menuBGMTimer); _menuBGMTimer = null; }
+      if(_menuGain){
+        try { _menuGain.gain.setTargetAtTime(0, ctx.currentTime, 0.35); } catch(e){}
+      }
+      setTimeout(playBattleBGM, 350);
+    }
+  }
+
+  // ── Replace the original BGM functions ──
+  window.startBGM = function(){
+    if(!bgmOn) return;
+    const screen = document.querySelector('.screen.active');
+    const id = screen ? screen.id : '';
+    if(id === 'game-screen') playBattleBGM();
+    else playMenuBGM();
+  };
+
+  window.stopBGMNode = function(){
+    stopAll();
+  };
+
+  // Override toggleBGM to use new system
+  const _origToggleBGM = window.toggleBGM;
+  window.toggleBGM = function(){
+    bgmOn = !bgmOn;
+    if(bgmOn){
+      const ctx = getBGMCtx();
+      if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+      window.startBGM();
+    } else {
+      stopAll();
+      // Set old gain to 0 for compat
+      if(typeof bgmGain !== 'undefined' && bgmGain) bgmGain.gain.value = 0;
+    }
+    saveBGMSettings();
+    syncBGMUI();
+  };
+
+  // Override setBGMVol to scale new gains
+  const _origSetBGMVol = window.setBGMVol;
+  window.setBGMVol = function(val){
+    bgmVolume = val / 100;
+    const target = getTargetVol();
+    if(_menuGain && _currentBGM==='menu'){
+      try { _menuGain.gain.setTargetAtTime(bgmOn ? target : 0, _bgmCtx.currentTime, 0.1); } catch(e){}
+    }
+    if(_battleGain && _currentBGM==='battle'){
+      try { _battleGain.gain.setTargetAtTime(bgmOn ? target : 0, _bgmCtx.currentTime, 0.1); } catch(e){}
+    }
+    // Legacy
+    if(typeof bgmGain !== 'undefined' && bgmGain){
+      bgmGain.gain.value = bgmOn ? bgmVolume * 0.15 : 0;
+    }
+    saveBGMSettings();
+    syncBGMUI();
+  };
+
+  // ── Hook into showScreen to switch BGM on navigation ──
+  const _origShowScreenBGM = window.showScreen;
+  window.showScreen = function(id){
+    _origShowScreenBGM && _origShowScreenBGM(id);
+    if(id === 'game-screen') switchBGMTo('battle');
+    else if(id === 'menu-screen' || id === 'gameover-screen') switchBGMTo('menu');
+  };
+
+  // ── Expose references for cutscene system ──
+  window._getBGMGain   = () => _currentBGM==='battle' ? _battleGain : _menuGain;
+  window._pauseAllBGM  = () => { const g=window._getBGMGain(); if(g&&_bgmCtx) try{g.gain.setTargetAtTime(0,_bgmCtx.currentTime,0.15);}catch(e){} };
+  window._resumeAllBGM = () => { const g=window._getBGMGain(); if(g&&_bgmCtx) try{g.gain.setTargetAtTime(getTargetVol(),_bgmCtx.currentTime,0.25);}catch(e){} };
+
+  // Update cutscene to use unified pause/resume
+  const _origPlay = window._playCutscene;
+  window._playCutscene = function(cardName, cb){
+    window._pauseAllBGM();
+    _origPlay(cardName, cb);
+  };
+  const _origSkip = window._skipCutscene;
+  window._skipCutscene = function(){
+    _origSkip();
+    window._resumeAllBGM();
+  };
+
+  // ── Auto-start BGM if user lands on menu ──
+  // We need user gesture first — patch the first interaction
+  let _bgmStarted = false;
+  function tryAutoStartBGM(){
+    if(_bgmStarted || !bgmOn) return;
+    _bgmStarted = true;
+    const ctx = getBGMCtx();
+    if(ctx) {
+      if(ctx.state === 'suspended') ctx.resume().then(()=>window.startBGM()).catch(()=>{});
+      else window.startBGM();
+    }
+  }
+  document.addEventListener('click',     tryAutoStartBGM, { once: true });
+  document.addEventListener('touchstart',tryAutoStartBGM, { once: true, passive: true });
+  // Also try when login completes (user just tapped)
+  const _origUpdateMenu = window.updateMenuUsername;
+  window.updateMenuUsername = function(){
+    _origUpdateMenu && _origUpdateMenu();
+    setTimeout(tryAutoStartBGM, 200);
+  };
+
+})(); // end upgradeBGM
+
+// ════════════════════════════════════════════════════════════
+// FINAL: Ensure all overlays start with correct pointer-events
+// ════════════════════════════════════════════════════════════
+(function finalCleanup(){
+  // Run once after DOM is ready
+  function applyPointerFixes(){
+    // Cinematic overlay — should NOT block when inactive
+    const cineOv = document.getElementById('cinematic-overlay');
+    if(cineOv && !cineOv.classList.contains('active')){
+      cineOv.style.pointerEvents = 'none';
+    }
+    // Cutscene — should NOT block when not showing
+    const cutOv = document.getElementById('legendary-cutscene');
+    if(cutOv && !cutOv.classList.contains('show')){
+      cutOv.style.pointerEvents = 'none';
+    }
+    // Legendary gacha reveal
+    const legOv = document.getElementById('legendary-reveal');
+    if(legOv && !legOv.classList.contains('active')){
+      legOv.style.pointerEvents = 'none';
+    }
+  }
+  // Apply immediately and after each screen change
+  setTimeout(applyPointerFixes, 300);
+  setTimeout(applyPointerFixes, 1500);
+
+  // Patch showScreen (final layer — runs after all other patches)
+  const _lastShowScreen = window.showScreen;
+  window.showScreen = function(id){
+    _lastShowScreen && _lastShowScreen(id);
+    setTimeout(applyPointerFixes, 150);
+  };
+})();
+
+})(); // end applyV6Patches
 </script>
 </body>
 </html>
