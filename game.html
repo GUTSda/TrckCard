@@ -441,7 +441,11 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 .gcard.in-deck{box-shadow:0 0 0 2px var(--gold),0 0 10px rgba(255,215,0,.3)}
 .gcard.silhouette{filter:brightness(.18) saturate(0);cursor:default}
 .gcard.silhouette:hover{transform:none}
-.g-icon{font-size:1.4rem;margin-bottom:.2rem}
+.g-icon{font-size:1.4rem;margin-bottom:.2rem;overflow:hidden;border-radius:6px;line-height:1;}
+/* MEDIA PATCH — card art image/video */
+.card-art-image{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit;pointer-events:none;user-select:none;-webkit-user-drag:none;}
+.card-art-video{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:inherit;pointer-events:none;}
+.g-icon.media-loaded{font-size:0;width:100%;height:72px;padding:0;margin-bottom:.3rem;}
 .g-name{font-family:'Cinzel',serif;font-size:.62rem;font-weight:700;line-height:1.2;margin-bottom:.12rem}
 .g-rarity{font-size:.54rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:1px 3px;border-radius:3px;margin-bottom:.2rem;display:inline-block}
 .g-elem-badge{font-size:.54rem;text-transform:uppercase;color:var(--text2);margin-bottom:.25rem}
@@ -661,6 +665,8 @@ body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);-w
 .arena-side.neutral{}
 
 .a-icon{font-size:3.5rem;margin-bottom:.2rem;filter:drop-shadow(0 4px 12px rgba(0,0,0,.8));}
+/* MEDIA PATCH — arena art container */
+.a-icon.media-loaded{font-size:0;width:110px;height:110px;border-radius:10px;overflow:hidden;margin:0 auto .3rem;filter:drop-shadow(0 4px 16px rgba(0,0,0,.9));}
 .a-name{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;margin-bottom:.3rem;color:var(--text);}
 .a-hp-bar{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;width:120px;margin:0 auto;}
 .a-hp-fill{height:100%;border-radius:3px;transition:width .5s;background:linear-gradient(90deg,#2ecc71,#27ae60);}
@@ -2871,8 +2877,9 @@ const CARD_DB = [
     skill:(u,t,gs)=>{addBuff(t,'stun',{turns:1});log(`${u.name} uses <b>Freeze Shell</b> — stunned!`,'skill')}},
   {id:11,name:'Mud Crab',rarity:'common',type:'active',element:'ground',icon:'🦀',hp:110,maxHp:110,baseDamage:18,skillName:'Shell Slam',skillDesc:'Deal 30 damage',cooldown:3,
     skill:(u,t,gs)=>{const d=applyDmg(t,30,false,gs);GS.stats.dmg+=d;log(`${u.name} uses <b>Shell Slam</b> — ${d} dmg!`,'skill')}},
-  {id:12,name:'Leaf Bunny',rarity:'common',type:'active',element:'nature',icon:'🐇',hp:85,maxHp:85,baseDamage:18,skillName:'Quick Heal',skillDesc:'Heal 20 HP',cooldown:3,
-    skill:(u,t,gs)=>{healCard(u,20,gs);log(`${u.name} uses <b>Quick Heal</b> — +20 HP!`,'heal')}},
+  // BUNNY PATCH — updated skillName/skillDesc; actual logic overridden in rebalanceCards patch
+  {id:12,name:'Leaf Bunny',rarity:'common',type:'active',element:'ground',icon:'🐇',hp:85,maxHp:85,baseDamage:18,skillName:'Quick! Dig a hole!!',skillDesc:'Enter Hiding for 2 rounds — untargetable. Attack to exit early. Passive: no damage for 2 turns = +10 dmg bonus once.',cooldown:0,
+    skill:(u,t,gs)=>{log(`🐇 ${u.name} hides!`,'skill')}},
   {id:13,name:'Steam Frog',rarity:'common',type:'active',element:'water',icon:'🐸',hp:95,maxHp:95,baseDamage:20,skillName:'Mist Dodge',skillDesc:'Avoid next attack',cooldown:4,
     skill:(u,t,gs)=>{addBuff(u,'dodge',{turns:1});log(`${u.name} uses <b>Mist Dodge</b> — will dodge!`,'skill')}},
   {id:14,name:'Ember Fox',rarity:'common',type:'active',element:'fire',icon:'🦊',hp:90,maxHp:90,baseDamage:22,skillName:'Burn Bite',skillDesc:'8 dmg/turn for 4 turns',cooldown:3,
@@ -2917,7 +2924,7 @@ const CARD_DB = [
     skill:(u,t,gs)=>{if(u.buffs&&u.buffs.some(b=>b.type==='shield')){log(`${u.name}'s Earth Bulwark is still active — wait for it to expire!`,'info');u.currentCd=0;return;}addBuff(u,'shield',{value:.7,turns:3});u.currentCd=4;log(`${u.name} uses <b>Earth Bulwark</b> — mega shield!`,'skill')}},
   {id:26,name:'World Tree Spirit',rarity:'legendary',type:'active',element:'nature',icon:'🌟',hp:150,maxHp:150,baseDamage:28,skillName:'Life Bloom',skillDesc:'After 8 attempts: Heals 80 HP instantly, then +5 HP for the next 4 turns.',cooldown:0,_attemptCounter:0,_bloomActive:false,_bloomTicks:0,
     skill:(u,t,gs)=>{u._attemptCounter=(u._attemptCounter||0)+1;if(u._attemptCounter<8){log(`${u.name} gathers life energy... (${u._attemptCounter}/8 attempts)`,'heal');return;}u._attemptCounter=0;healCard(u,80,gs);u._bloomActive=true;u._bloomTicks=4;log(`${u.name} uses <b>Life Bloom</b> — +80 HP! Blooming for 4 turns (+5/turn)…`,'heal')}},
-  {id:39,name:'Chaos Hydra',rarity:'legendary',type:'active',element:'fire',icon:'🐉',hp:160,maxHp:160,baseDamage:35,skillName:'Multi-Bite',skillDesc:'4× 25 damage + poison',cooldown:6,
+  {id:39,name:'Chaos Hydra',rarity:'legendary',type:'active',element:'fire',icon:'🐉',hp:160,maxHp:160,baseDamage:35,skillName:'Multi-Bite',skillDesc:'4× 25 damage + poison',cooldown:6,mediaSource:'Hydra_Card',
     skill:(u,t,gs)=>{let td=0;for(let i=0;i<4;i++)td+=applyDmg(t,25,false,gs);addBuff(t,'poison',{dmg:15,turns:3});GS.stats.dmg+=td;log(`${u.name} uses <b>Multi-Bite</b> — 4 hits ${td} dmg + poison!`,'skill')}},
   {id:40,name:'Void Colossus',rarity:'legendary',type:'active',element:'ground',icon:'👾',hp:190,maxHp:190,baseDamage:38,skillName:'Graviton Crush',skillDesc:'100 dmg + Shield 2 turns. Cooldown (5 rounds) starts after shield expires.',cooldown:5,
     skill:(u,t,gs)=>{if(u.buffs&&u.buffs.some(b=>b.type==='shield')){log(`${u.name}'s shield is still active!`,'info');u.currentCd=0;return;}const d=applyDmg(t,100,false,gs);GS.stats.dmg+=d;addBuff(u,'shield',{value:.6,turns:2});log(`${u.name} uses <b>Graviton Crush</b> — ${d} dmg!`,'skill')}},
@@ -2958,6 +2965,66 @@ const CARD_DB = [
   {id:50,name:'Quartz Golem',rarity:'legendary',type:'active',element:'ground',icon:'💠',hp:140,maxHp:140,baseDamage:30,skillName:'Crystal Fortress',skillDesc:'80% dmg reduction + 40 dmg reflect for 2 turns. Cooldown starts after shield expires.',cooldown:5,_shieldActive:false,
     skill:(u,t,gs)=>{if(u.buffs&&u.buffs.some(b=>b.type==='shield')){log(`${u.name}'s Crystal Fortress is already active — wait for it to expire!`,'info');u.currentCd=0;return;}addBuff(u,'shield',{value:.8,turns:2});addBuff(u,'reflect',{dmg:40,turns:2});u._shieldActive=true;log(`${u.name} uses <b>Crystal Fortress</b> — mega shield + reflect!`,'skill')}},
 ];
+
+/* ═══════════════════════════════════════════
+   MEDIA PATCH — Centralized Card Media System
+   ═══════════════════════════════════════════ */
+// Asset source map — add new assets here only
+const CARD_MEDIA_SOURCES = {
+  'Template_Card': { type:'image', src:'Template_Card.png' },
+  'Hydra_Card':    { type:'video', src:'Hydra_Card.mp4' }
+};
+
+// IntersectionObserver for video pause/resume (performance on mobile)
+const _cardVideoObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    const v=e.target.querySelector('.card-art-video');
+    if(!v)return;
+    if(e.isIntersecting){v.play().catch(()=>{});}else{v.pause();}
+  });
+},{threshold:0.1});
+
+// MEDIA PATCH — resolver
+function getCardMedia(cardId){
+  const card=CARD_DB.find(c=>c.id===cardId);
+  if(!card)return null;
+  const key=card.mediaSource||'Template_Card';
+  return CARD_MEDIA_SOURCES[key]||CARD_MEDIA_SOURCES['Template_Card'];
+}
+
+// MEDIA PATCH — render function, single source of truth
+function renderCardMediaElement(cardId){
+  const media=getCardMedia(cardId);
+  if(!media)return null;
+  if(media.type==='video'){
+    const v=document.createElement('video');
+    v.src=media.src;v.autoplay=true;v.muted=true;v.loop=true;
+    v.playsInline=true;v.setAttribute('playsinline','');
+    v.controls=false;v.preload='auto';
+    v.classList.add('card-art-video');
+    v.play().catch(()=>{});
+    return v;
+  }
+  const img=document.createElement('img');
+  img.src=media.src;img.alt='';img.draggable=false;
+  img.classList.add('card-art-image');
+  return img;
+}
+
+// MEDIA PATCH — inject media into all [data-card-id] g-icon/a-icon containers in a root element
+function applyCardMedia(root){
+  (root||document).querySelectorAll('[data-card-id]').forEach(el=>{
+    if(el.dataset.mediaApplied)return;
+    const id=parseInt(el.dataset.cardId);
+    const mediaEl=renderCardMediaElement(id);
+    if(!mediaEl)return;
+    el.innerHTML='';el.appendChild(mediaEl);
+    el.classList.add('media-loaded');
+    el.dataset.mediaApplied='1';
+    // Observe video containers for pause/resume
+    if(mediaEl.tagName==='VIDEO') _cardVideoObserver.observe(el.closest('.gcard,.arena-side')||el);
+  });
+}
 
 const STARTER_IDS = [1,2,4,7,3];
 
@@ -3258,13 +3325,14 @@ function renderDeckBuilder(el){
     const elClass=card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`;
     const div=document.createElement('div');div.className=`gcard ${elClass}${inDeck?' in-deck':''}`;
     div.innerHTML=`${inDeck?`<div class="deck-num">#${SD.deck.indexOf(id)+1}</div>`:''}
-      <div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div>
+      <div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${card.name}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
       ${card.type==='active'?`<div class="g-stat">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>`:''}
       <div class="g-desc">${card.skillDesc}</div>
       <button class="equip-btn" onclick="toggleDeckPool(${id})">${inDeck?'✕ Remove':'+ Equip'}</button>`;
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
   setTimeout(attachSlotTouchListeners,50);
 }
@@ -3378,12 +3446,13 @@ function renderOwnedCards(el){
     const card=CARD_DB.find(c=>c.id===id);if(!card)return;
     const elClass=card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`;
     const div=document.createElement('div');div.className=`gcard ${elClass}`;
-    div.innerHTML=`<div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div>
+    div.innerHTML=`<div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${card.name}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
       ${card.type==='active'?`<div class="g-stat">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>`:''}
       <div class="g-desc">${card.skillDesc}</div>`;
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
 }
 
@@ -3406,12 +3475,13 @@ function renderCollGrid(){
     const elClass=card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`;
     const div=document.createElement('div');div.className=`gcard ${elClass}${!owned?' silhouette':''}`;
     div.innerHTML=`${!owned?`<div class="unlock-tag">🔒</div>`:''}
-      <div class="g-icon">${card.icon}</div><div class="g-name">${owned?card.name:'???'}</div>
+      <div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${owned?card.name:'???'}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
       ${owned&&card.type==='active'?`<div class="g-stat">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>`:''}
       <div class="g-desc">${owned?card.skillDesc:'???'}</div>`;
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
 }
 function setDeckMode(m){SD.deckMode=m;saveProfile();renderInventory('deck');}
@@ -3438,10 +3508,11 @@ function renderShopCollection(){
     const elClass=card.type==='passive'?'card-elem-passive':card.type==='buff'?'card-elem-buff':`card-elem-${card.element}`;
     const div=document.createElement('div');div.className=`gcard ${elClass}${!owned?' silhouette':''}`;
     div.innerHTML=`${!owned?`<div class="unlock-tag">🔒</div>`:''}
-      <div class="g-icon">${card.icon}</div><div class="g-name">${owned?card.name:'???'}</div>
+      <div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${owned?card.name:'???'}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-desc">${owned?card.skillDesc:'???'}</div>`;
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
 }
 
@@ -3792,8 +3863,9 @@ function openBuffMenu(){
   if(!buffCards.length){grid.innerHTML='<p style="text-align:center;color:var(--text2)">No buff cards available!</p>';modal.classList.remove('hidden');return;}
   buffCards.forEach(card=>{
     const div=document.createElement('div');div.className='gcard card-elem-buff';
-    div.innerHTML=`<div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div><span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span><div class="g-desc">${card.skillDesc}</div><button class="equip-btn" onclick="attachBuff(${card.id})">+ Attach</button>`;
+    div.innerHTML=`<div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${card.name}</div><span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span><div class="g-desc">${card.skillDesc}</div><button class="equip-btn" onclick="attachBuff(${card.id})">+ Attach</button>`;
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
   modal.classList.remove('hidden');
 }
@@ -3871,13 +3943,14 @@ function openSwitch(isDeath){
   GS.playerCards.forEach((card,i)=>{
     if(!card||card.type!=='active'||card.hp<=0||(i===GS.playerActiveIdx&&!isDeath))return;
     any=true;const div=document.createElement('div');div.className=`gcard card-elem-${card.element}`;
-    div.innerHTML=`<div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div><div class="g-stat">HP <b>${Math.max(0,card.hp)}/${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>${card.skillName?`<div class="g-skill">⚡ ${card.skillName}</div>`:''}`;
+    div.innerHTML=`<div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${card.name}</div><div class="g-stat">HP <b>${Math.max(0,card.hp)}/${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>${card.skillName?`<div class="g-skill">⚡ ${card.skillName}</div>`:''}`;
     div.onclick=()=>{
       GS.playerActiveIdx=i;modal.classList.add('hidden');log(`You switch to ${card.name}!`,'info');updateUI();
       if(isDeath){setTimeout(()=>advanceRound(),400);}
       else{playerAct('pass');}
     };
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
   if(!any)grid.innerHTML='<p style="text-align:center;color:var(--text2)">No other active cards!</p>';
   modal.classList.remove('hidden');
@@ -3958,7 +4031,12 @@ function updateArena(){
   const bc=GS.botCards?GS.botCards[GS.botActiveIdx]:null;const pc=GS.playerCards?GS.playerCards[GS.playerActiveIdx]:null;
   if(bc){
     const ab=document.getElementById('arena-bot');if(ab)ab.className=`arena-side ${bc.element||'neutral'}`;
-    const abi=document.getElementById('a-bot-icon');if(abi)abi.textContent=bc.icon;
+    const abi=document.getElementById('a-bot-icon');
+    if(abi&&abi.dataset.lastCardId!==String(bc.id)){
+      abi.innerHTML='';abi.classList.remove('media-loaded');delete abi.dataset.mediaApplied;
+      abi.dataset.cardId=bc.id;applyCardMedia(abi.parentElement||document);
+      abi.dataset.lastCardId=String(bc.id);
+    }
     const abn=document.getElementById('a-bot-name');if(abn)abn.textContent=bc.name;
     const p=bc.maxHp>0?(bc.hp/bc.maxHp)*100:0;const f=document.getElementById('a-bot-hp');
     if(f){f.style.width=p+'%';f.className='a-hp-fill'+hpClass(p);}
@@ -3967,7 +4045,12 @@ function updateArena(){
   }
   if(pc){
     const ap=document.getElementById('arena-player');if(ap)ap.className=`arena-side ${pc.element||'neutral'}`;
-    const api=document.getElementById('a-pl-icon');if(api)api.textContent=pc.icon;
+    const api=document.getElementById('a-pl-icon');
+    if(api&&api.dataset.lastCardId!==String(pc.id)){
+      api.innerHTML='';api.classList.remove('media-loaded');delete api.dataset.mediaApplied;
+      api.dataset.cardId=pc.id;applyCardMedia(api.parentElement||document);
+      api.dataset.lastCardId=String(pc.id);
+    }
     const apn=document.getElementById('a-pl-name');if(apn)apn.textContent=pc.name;
     const p=pc.maxHp>0?(pc.hp/pc.maxHp)*100:0;const f=document.getElementById('a-pl-hp');
     if(f){f.style.width=p+'%';f.className='a-hp-fill'+hpClass(p);}
@@ -6202,7 +6285,7 @@ window._openFeaturedPick = function(slotIdx){
     const div = document.createElement('div');
     div.className = `gcard ${elClass}`;
     div.style.cursor='pointer';
-    div.innerHTML = `<div class="g-icon">${card.icon}</div><div class="g-name">${card.name}</div>
+    div.innerHTML = `<div class="g-icon" data-card-id="${card.id}"></div><div class="g-name">${card.name}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>`;
     div.onclick = ()=>{
       if(!SD.featuredCards) SD.featuredCards = [null,null,null,null,null];
@@ -6214,6 +6297,7 @@ window._openFeaturedPick = function(slotIdx){
       if(body2) window.renderProfileStats(body2);
     };
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
   modal.classList.add('show');
 };
@@ -6453,7 +6537,7 @@ setTimeout(()=>{
       div.style.cursor = 'pointer';
       // Store ID directly on element
       div.dataset.cardId = cardId;
-      div.innerHTML = `<div class="g-icon">${card.icon}</div>
+      div.innerHTML = `<div class="g-icon" data-card-id="${card.id}"></div>
         <div class="g-name">${card.name}</div>
         <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
         <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
@@ -6462,6 +6546,7 @@ setTimeout(()=>{
       // Use dataset ID — immune to sort/filter reordering
       div.onclick = function(){ openCardDetail(parseInt(this.dataset.cardId)); };
       grid.appendChild(div);
+      applyCardMedia(div); // MEDIA PATCH
     });
   };
 
@@ -6486,7 +6571,7 @@ setTimeout(()=>{
       div.className = `gcard ${elClass}${!owned ? ' silhouette' : ''}`;
       div.dataset.cardId = card.id;
       div.innerHTML = `${!owned ? `<div class="unlock-tag">🔒</div>` : ''}
-        <div class="g-icon">${card.icon}</div>
+        <div class="g-icon" data-card-id="${card.id}"></div>
         <div class="g-name">${owned ? card.name : '???'}</div>
         <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
         <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
@@ -6497,6 +6582,7 @@ setTimeout(()=>{
         div.onclick = function(){ openCardDetail(parseInt(this.dataset.cardId)); };
       }
       grid.appendChild(div);
+      applyCardMedia(div); // MEDIA PATCH
     });
   };
 
@@ -7849,7 +7935,7 @@ setTimeout(()=>{
       div.style.cursor = 'pointer';
       // Mark if already in featured
       const alreadyFeatured = (SD.featuredCards||[]).includes(id);
-      div.innerHTML = `<div class="g-icon">${card.icon}</div>
+      div.innerHTML = `<div class="g-icon" data-card-id="${card.id}"></div>
         <div class="g-name">${card.name}</div>
         <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
         ${alreadyFeatured?'<div style="font-size:.55rem;color:var(--gold);margin-top:.2rem">★ Featured</div>':''}`;
@@ -7864,6 +7950,7 @@ setTimeout(()=>{
         if(typeof showToast==='function') showToast('⭐ Featured card updated!');
       };
       grid.appendChild(div);
+      applyCardMedia(div); // MEDIA PATCH
     });
     // Clear show class before adding to reset scroll
     modal.classList.remove('show');
@@ -8642,7 +8729,7 @@ setTimeout(()=>{
         div.className = `gcard ${elClass}`;
         div.style.cursor = 'pointer';
         const alreadyFeatured = (SD.featuredCards||[]).includes(id);
-        div.innerHTML = `<div class="g-icon">${card.icon}</div>
+        div.innerHTML = `<div class="g-icon" data-card-id="${card.id}"></div>
           <div class="g-name">${card.name}</div>
           <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
           ${card.type==='active'?`<div class="g-stat" style="font-size:.56rem">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>`:''}
@@ -8657,6 +8744,7 @@ setTimeout(()=>{
           if(typeof showToast==='function') showToast('⭐ Featured card set!');
         };
         grid.appendChild(div);
+        applyCardMedia(div); // MEDIA PATCH
       });
     }
 
@@ -10629,12 +10717,13 @@ window.refreshCollIndexGrid = function(){
     const div=document.createElement('div');
     div.className=`gcard ${elClass}${!owned?' silhouette':''}`;
     div.innerHTML=`${!owned?'<div class="unlock-tag">🔒</div>':''}
-      <div class="g-icon">${card.icon}</div>
+      <div class="g-icon" data-card-id="${card.id}"></div>
       <div class="g-name">${owned?card.name:'???'}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-desc">${owned?card.skillDesc:'???'}</div>`;
     if(owned) div.onclick=()=>{ if(typeof window.openCardDetail==='function') window.openCardDetail(card.id); };
     grid.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
 };
 
@@ -12771,7 +12860,7 @@ function v14RenderCollGrid(){
 
     div.innerHTML = `
       ${!owned ? '<div class="unlock-tag">🔒</div>' : ''}
-      <div class="g-icon">${card.icon}</div>
+      <div class="g-icon" data-card-id="${card.id}"></div>
       <div class="g-name">${owned ? card.name : '???'}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       ${owned && card.type==='active' ? `<div class="g-stat" style="font-size:.55rem">HP <b>${card.maxHp}</b> · ATK <b>${card.baseDamage}</b></div>` : ''}
@@ -12781,6 +12870,7 @@ function v14RenderCollGrid(){
       div.onclick = ()=> window.openCardDetail(card.id);
     }
     frag.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
 
   grid.innerHTML = '';
@@ -13368,7 +13458,7 @@ function v15RenderShopCollGrid(){
     div.className = `gcard ${elClass}${!owned?' silhouette':''}`;
     div.innerHTML = `
       ${!owned ? '<div class="unlock-tag">🔒</div>' : ''}
-      <div class="g-icon">${card.icon}</div>
+      <div class="g-icon" data-card-id="${card.id}"></div>
       <div class="g-name">${owned ? card.name : '???'}</div>
       <span class="g-rarity badge-${card.rarity}">${card.rarity.toUpperCase()}</span>
       <div class="g-elem-badge">${card.element.toUpperCase()} · ${card.type.toUpperCase()}</div>
@@ -13380,6 +13470,7 @@ function v15RenderShopCollGrid(){
       div.onclick = ()=> window.openCardDetail(card.id);
     }
     frag.appendChild(div);
+    applyCardMedia(div); // MEDIA PATCH
   });
 
   grid.innerHTML = '';
@@ -14962,6 +15053,841 @@ window._loadProfileFromFirestore = async function(uid){
 };
 
 })(); // end applyV19Patches
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     V21 PATCH — Theme Fix, Cutscene Fix, Card Rebalance, UI Indicators
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── V21: ORB pips ── */
+.orb-pip-row { display:flex;gap:3px;align-items:center;justify-content:center;margin-top:2px; }
+.orb-pip { width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);transition:all .2s; }
+.orb-pip.filled { background:radial-gradient(circle,#9b59b6,#6c3483);border-color:#b97dd4;box-shadow:0 0 5px rgba(155,89,182,.8); }
+.orb-pip.ready  { background:radial-gradient(circle,#e056fd,#9b59b6);border-color:#e056fd;box-shadow:0 0 10px rgba(224,86,253,.9);animation:orbReady .8s ease-in-out infinite; }
+@keyframes orbReady { 0%,100%{box-shadow:0 0 5px rgba(224,86,253,.6);}50%{box-shadow:0 0 14px rgba(224,86,253,1);} }
+
+/* ── V21: Hiding chip ── */
+.chip-hiding { background:rgba(100,200,255,.15)!important;border:1px solid rgba(100,200,255,.4)!important;color:#80dfff!important;animation:hidePulse 1.5s ease-in-out infinite; }
+@keyframes hidePulse { 0%,100%{opacity:1}50%{opacity:.45} }
+
+/* ── V21: Freeze chip ── */
+.chip-freeze { background:rgba(0,191,255,.18)!important;border:1px solid rgba(0,191,255,.4)!important;color:#80eaff!important; }
+
+/* ── V21: Cutscene fullscreen ── */
+#legendary-cutscene { overflow:hidden!important; }
+#cutscene-video {
+  position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;
+  max-width:none!important;max-height:none!important;
+  object-fit:cover!important;
+}
+#cutscene-skip, #cutscene-audio-icon { position:absolute!important;z-index:10!important; }
+</style>
+
+<script>
+(function applyV21Patches(){
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   PATCH 1 — THEME BUG FIX
+   The core issue: SD isn't loaded yet when v19Boot fires, so
+   equippedTheme is empty and the body class never gets set.
+   Fix: hook deeply into _loadProfileFromFirestore AND auth state
+   so the body class is set as soon as SD.equippedTheme is known.
+   ═══════════════════════════════════════════════════════════════ */
+(function fixThemeBug(){
+
+  function applyBodyTheme(themeId){
+    document.body.classList.remove('theme-purple-pink','theme-blue-teal','theme-indigo-red');
+    if(themeId) document.body.classList.add(themeId);
+    // Also call the overlay-based apply if available
+    if(typeof window.applyThemeV11 === 'function') window.applyThemeV11(themeId||'');
+  }
+
+  function applyFromSD(){
+    if(!window.SD) return;
+    const th = SD.equippedTheme || '';
+    applyBodyTheme(th);
+  }
+
+  // Hook _loadProfileFromFirestore — fires after SD is populated
+  const _prevLoad = window._loadProfileFromFirestore;
+  window._loadProfileFromFirestore = async function(uid){
+    if(_prevLoad) await _prevLoad(uid);
+    // SD is now loaded — apply theme immediately
+    applyFromSD();
+    setTimeout(applyFromSD, 200);
+    setTimeout(applyFromSD, 800);
+  };
+
+  // Hook showScreen — re-apply every time menu is shown
+  const _prevShow = window.showScreen;
+  window.showScreen = function(id){
+    if(_prevShow) _prevShow(id);
+    if(id === 'menu-screen') setTimeout(applyFromSD, 50);
+  };
+
+  // Hook _equipThemeV11 to ensure body class stays in sync
+  const _prevEquip = window._equipThemeV11;
+  window._equipThemeV11 = function(themeId){
+    if(_prevEquip) _prevEquip(themeId);
+    applyBodyTheme(themeId || '');
+  };
+
+  // Hook saveProfile — theme could be changed and saved
+  const _prevSave = window.saveProfile;
+  window.saveProfile = function(){
+    if(_prevSave) _prevSave();
+    setTimeout(applyFromSD, 30);
+  };
+
+  // Firebase auth state hook — fires when user logs in
+  setTimeout(()=>{
+    try{
+      const auth = window._fbAuth || (window.firebase && firebase.auth && firebase.auth());
+      if(auth && auth.onAuthStateChanged){
+        auth.onAuthStateChanged(user=>{
+          if(user){
+            // SD may not be ready yet — poll until it is
+            let tries = 0;
+            const poll = setInterval(()=>{
+              tries++;
+              if(window.SD && window.SD.equippedTheme !== undefined){
+                clearInterval(poll);
+                applyFromSD();
+              }
+              if(tries > 20) clearInterval(poll);
+            }, 150);
+          }
+        });
+      }
+    }catch(e){}
+  }, 300);
+
+  // Safety boot passes — try at multiple intervals
+  setTimeout(applyFromSD, 600);
+  setTimeout(applyFromSD, 1500);
+  setTimeout(applyFromSD, 3000);
+
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   PATCH 2 — CUTSCENE VIDEO SCREEN FIT
+   ═══════════════════════════════════════════════════════════════ */
+(function fixCutsceneLayout(){
+  function patchLayout(){
+    const ov  = document.getElementById('legendary-cutscene');
+    const vid = document.getElementById('cutscene-video');
+    if(ov){ ov.style.overflow = 'hidden'; }
+    if(vid){
+      vid.style.cssText += ';position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;max-width:none!important;max-height:none!important;';
+    }
+    const skip = document.getElementById('cutscene-skip');
+    if(skip){ skip.style.position='absolute'; skip.style.zIndex='10'; }
+    const aico = document.getElementById('cutscene-audio-icon');
+    if(aico){ aico.style.position='absolute'; aico.style.zIndex='10'; }
+  }
+  patchLayout();
+  // Re-patch on each cutscene play
+  const _prev = window._playCutscene;
+  window._playCutscene = function(cardName, cb){
+    patchLayout();
+    if(_prev) _prev(cardName, cb);
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   PATCH 3 — CUTSCENE AUDIO: MP3 sync, mute-aware
+   ═══════════════════════════════════════════════════════════════ */
+(function fixCutsceneAudio(){
+  const FILES = {
+    'Chaos Hydra':       {video:'HydraCutscene.mp4',    audio:'HydraCutscene.mp3'},
+    'Gaia Guardian':     {video:'GaiaCutscene.mp4',     audio:'GaiaCutscene.mp3'},
+    'Infernal Phoenix':  {video:'PhoenixCutscene.mp4',  audio:'PhoenixCutscene.mp3'},
+    'Leviathan King':    {video:'LeviathanCutscene.mp4',audio:'LeviathanCutscene.mp3'},
+    'Quartz Golem':      {video:'QuartzCutscene.mp4',   audio:'QuartzCutscene.mp3'},
+    'Void Colossus':     {video:'VoidCutscene.mp4',     audio:'VoidCutscene.mp3'},
+    'World Tree Spirit': {video:'TreeCutscene.mp4',     audio:'TreeCutscene.mp3'},
+  };
+  let _aud = null;
+  let _cb  = null;
+
+  function isCutsceneOn(){ return !window.SD || SD.cutsceneOn !== false; }
+  function isMuted(){ return typeof window.sfxOn !== 'undefined' && !window.sfxOn; }
+
+  function stopAudio(){ if(_aud){ try{_aud.pause();_aud.src='';}catch(e){} _aud=null; } }
+
+  window._playCutscene = function(cardName, callback){
+    if(!isCutsceneOn()){ if(callback) setTimeout(callback,30); return; }
+    const files = FILES[cardName];
+    const ov  = document.getElementById('legendary-cutscene');
+    const vid = document.getElementById('cutscene-video');
+    if(!files||!ov||!vid){ if(callback) callback(); return; }
+
+    _cb = callback;
+    stopAudio();
+
+    // Mute BGM
+    if(typeof bgmGain!=='undefined'&&bgmGain){ try{bgmGain.gain.value=0;}catch(e){} }
+
+    vid.src = files.video;
+    vid.muted = true;
+    vid.currentTime = 0;
+    vid.loop = false;
+    ov.classList.add('show');
+
+    if(!isMuted()){
+      _aud = new Audio(files.audio);
+      _aud.volume = 0.85;
+    }
+
+    const start = ()=>{ vid.play().catch(()=>{}); if(_aud) _aud.play().catch(()=>{}); };
+    start();
+
+    const onEnd = ()=>{
+      vid.removeEventListener('ended', onEnd);
+      stopAudio();
+      ov.classList.remove('show');
+      if(typeof bgmGain!=='undefined'&&bgmGain&&typeof bgmOn!=='undefined'&&bgmOn){
+        try{bgmGain.gain.value=(bgmVolume||0.4)*0.15;}catch(e){}
+      }
+      if(_cb){_cb();_cb=null;}
+    };
+    vid.addEventListener('ended', onEnd);
+
+    const skipBtn = document.getElementById('cutscene-skip');
+    if(skipBtn){
+      const onSkip = ()=>{
+        vid.removeEventListener('ended', onEnd);
+        skipBtn.removeEventListener('click', onSkip);
+        stopAudio(); vid.pause();
+        ov.classList.remove('show');
+        if(typeof bgmGain!=='undefined'&&bgmGain&&typeof bgmOn!=='undefined'&&bgmOn){
+          try{bgmGain.gain.value=(bgmVolume||0.4)*0.15;}catch(e){}
+        }
+        if(_cb){_cb();_cb=null;}
+      };
+      skipBtn.addEventListener('click', onSkip);
+    }
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   PATCH 4 — CARD REBALANCE
+   ═══════════════════════════════════════════════════════════════ */
+(function rebalanceCards(){
+
+  function countFireCards(gs, excludeId){
+    if(!gs||!gs.playerCards) return 0;
+    return gs.playerCards.filter(c=>c&&c.element==='fire'&&c.id!==excludeId).length;
+  }
+
+  // ── INFERNAL PHOENIX (id:23) ──
+  // Revive HP = 40 + 10×fire allies. Dmg = 30 + 5 per 2 fire allies.
+  const phoenix = CARD_DB.find(c=>c.id===23);
+  if(phoenix){
+    phoenix.skillDesc='Deal damage + Burn 5×8. Revive once: 40+10 HP per Fire ally. +5 dmg per 2 Fire allies. Resets on kill (⚔️1).';
+    phoenix.skill=function(u,t,gs){
+      if(u._skillUsed){log(`${u.name}'s Rebirth Flame needs a kill! (⚔️1)`,'info');return;}
+      const fc=countFireCards(gs,u.id);
+      const d=applyDmg(t,30+Math.floor(fc/2)*5,false,gs);
+      GS.stats.dmg+=d;
+      addBuff(t,'poison',{dmg:5,turns:8});
+      if(!u._hasRevived){u._revive=true;u._reviveHP=40+fc*10;}
+      u._hasRevived=false;u._skillUsed=true;
+      log(`${u.name} uses <b>Rebirth Flame</b> — ${d} dmg + Burn! Revive at ${u._reviveHP||40} HP.`,'skill');
+    };
+  }
+
+  // Patch checkDeaths to use _reviveHP for Phoenix
+  const _origCheckDeaths = window.checkDeaths;
+  window.checkDeaths = function(){
+    if(!GS||GS.gameOver) return false;
+    const bc=GS.botCards[GS.botActiveIdx];
+    const pc=GS.playerCards[GS.playerActiveIdx];
+    if(bc&&bc.hp<=0){
+      if(bc._revive&&!bc._hasRevived){bc._revive=false;bc._hasRevived=true;bc.hp=bc._reviveHP||50;log(`${bc.name} revives at ${bc.hp} HP!`,'heal');updateUI();return false;}
+      log(`💀 ${bc.name} defeated!`,'win');GS.stats.kills++;addQuestProgress('kills',null,1);bc.buffs=[];
+      if(pc){
+        if(pc._killReset&&pc._skillUsed){pc._skillUsed=false;log(`⚔️ Kill! ${pc.name}'s skill recharged!`,'skill');}
+        // Mermaid kill bonus
+        if(pc.id===35){
+          pc._mermaidHealBonus=(pc._mermaidHealBonus||0)+5;
+          pc._mermaidOverhealBonus=Math.min(50,(pc._mermaidOverhealBonus||0)+5);
+          log(`🧜 ${pc.name} grows! Heal +5, overheal cap +5`,'heal');
+        }
+        if(pc._katana){pc.baseDamage+=5;log(`⚔️ Katana kill bonus! +5 ATK`,'skill');}
+      }
+      const next=GS.botCards.findIndex((c,i)=>c&&c.type==='active'&&c.hp>0&&i!==GS.botActiveIdx);
+      if(next===-1){playDeathAnim('bot',()=>endGame(true));return true;}
+      playDeathAnim('bot',()=>{GS.botActiveIdx=next;updateUI();log(`🤖 Bot sends ${GS.botCards[GS.botActiveIdx].name}!`,'info');updateUI();setTimeout(()=>advanceRound(),500);});
+      return true;
+    }
+    if(pc&&pc.hp<=0){
+      if(pc._revive&&!pc._hasRevived){pc._revive=false;pc._hasRevived=true;pc.hp=pc._reviveHP||50;log(`${pc.name} revives at ${pc.hp} HP!`,'heal');updateUI();return false;}
+      log(`💀 Your ${pc.name} defeated!`,'atk');pc.buffs=[];pc.attachedBuffs=[];
+      const hasNext=GS.playerCards.some((c,i)=>c&&c.type==='active'&&c.hp>0&&i!==GS.playerActiveIdx);
+      if(!hasNext){playDeathAnim('player',()=>endGame(false));return true;}
+      playDeathAnim('player',()=>{setButtons(false);openSwitch(true);});
+      return true;
+    }
+    return false;
+  };
+
+  // ── TREE SPIRIT (id:26) ──
+  // Cast: instant 80 heal. Next 4 ticks: +5 HP each. 8-attempt cooldown after cast.
+  const tree = CARD_DB.find(c=>c.id===26);
+  if(tree){
+    tree.skillDesc='Cast: +80 HP instantly, then +5 HP for 4 attempts. 8-attempt cooldown after cast.';
+    tree._postCastCooldown=0;
+    tree.skill=function(u,t,gs){
+      if((u._postCastCooldown||0)>0){log(`${u.name} gathering energy... (${u._postCastCooldown} attempts left)`,'heal');return;}
+      healCard(u,80,gs);
+      u._bloomActive=true;u._bloomTicks=4;u._postCastCooldown=8;
+      log(`${u.name} uses <b>Life Bloom</b> — +80 HP! +5/attempt for 4 attempts, then 8-attempt cooldown.`,'heal');
+    };
+  }
+
+  // Patch tickCDs to handle Tree Spirit's postCastCooldown + bloom
+  const _origTickCDs = window.tickCDs;
+  window.tickCDs = function(cards){
+    if(!cards) return;
+    cards.forEach(c=>{
+      if(!c) return;
+      if(c.currentCd>0) c.currentCd--;
+      // Tree Spirit
+      if(c.id===26){
+        if(c._bloomActive&&c._bloomTicks>0){
+          healCard(c,5,GS);c._bloomTicks--;
+          log(`🌟 ${c.name} blooms +5 HP (${c._bloomTicks} left)`,'heal');
+          if(c._bloomTicks<=0){c._bloomActive=false;log(`🌟 ${c.name}'s bloom fades.`,'info');}
+        }
+        if((c._postCastCooldown||0)>0) c._postCastCooldown--;
+      } else {
+        if(c._bloomActive&&c._bloomTicks>0){
+          healCard(c,5,GS);c._bloomTicks--;
+          if(c._bloomTicks<=0)c._bloomActive=false;
+        }
+      }
+      if(c._shieldActive){
+        const has=c.buffs&&c.buffs.some(b=>b.type==='shield');
+        if(!has){c._shieldActive=false;c.currentCd=Math.max(0,c.cooldown||4);}
+      }
+    });
+  };
+
+  // ── VOID COLOSSUS (id:40) — full ORB system ──
+  const vc = CARD_DB.find(c=>c.id===40);
+  if(vc){
+    vc.skillDesc='Gain 1 ORB per RPS loss (max 4). At 4 ORBs: 100 dmg + 100% shield 1 attempt. ORBs reset.';
+    vc.cooldown=0; vc._orbs=0;
+    vc.skill=function(u,t,gs){
+      if((u._orbs||0)<4){log(`${u.name} needs 4 ORBs! (${u._orbs||0}/4)`,'info');return;}
+      const d=applyDmg(t,100,false,gs);GS.stats.dmg+=d;
+      addBuff(u,'shield',{value:1.0,turns:1});
+      u._orbs=0;
+      log(`${u.name} uses <b>Graviton Crush</b> — ${d} dmg + 100% shield! ORBs reset.`,'skill');
+    };
+  }
+
+  // Patch playRPS to award ORB on player loss + Volcano Dragon win streak
+  const _origPlayRPS = window.playRPS;
+  window.playRPS = function(choice){
+    if(typeof sfxRPSReveal==='function') sfxRPSReveal();
+    else if(typeof sfxClick==='function') sfxClick();
+
+    const opts=['rock','paper','scissors'];
+    const bot=opts[Math.floor(Math.random()*3)];
+    let winner=null;
+    if(choice!==bot){
+      winner=((choice==='rock'&&bot==='scissors')||(choice==='paper'&&bot==='rock')||(choice==='scissors'&&bot==='paper'))?'player':'bot';
+    }
+    const icons={rock:'✊',paper:'✋',scissors:'✌️'};
+    const el=document.getElementById('rps-res-txt');
+    const tag=document.getElementById('rps-winner-tag');
+    const info=document.getElementById('rps-txt');
+
+    if(!winner){
+      el.className='rps-res tie';
+      el.textContent=`${icons[choice]} vs ${icons[bot]} — Tie! Re-rolling...`;
+      if(info)info.textContent='Tie!';
+      tag.style.display='none';
+      document.getElementById('rps-buttons').style.opacity='0.4';
+      document.getElementById('rps-buttons').style.pointerEvents='none';
+      setTimeout(()=>{el.textContent='';document.getElementById('rps-buttons').style.opacity='1';document.getElementById('rps-buttons').style.pointerEvents='';},700);
+    } else {
+      el.className=`rps-res ${winner==='player'?'win':'lose'}`;
+      el.textContent=`${icons[choice]} vs ${icons[bot]} — ${winner==='player'?'You win!':'Bot wins!'}`;
+      if(info)info.textContent=winner==='player'?'You act!':'Bot acts!';
+      tag.className=`rps-winner-tag ${winner==='player'?'you':'bot'}`;
+      tag.textContent=winner==='player'?'✅ You won! Choose your action:':'❌ Bot won! Prepare...';
+      tag.style.display='block';
+
+      // Void Colossus: +1 ORB on player loss, but only if VC is active card
+      if(winner==='bot'&&GS&&GS.playerCards){
+        const vcCard=GS.playerCards[GS.playerActiveIdx];
+        if(vcCard&&vcCard.id===40){vcCard._orbs=Math.min(4,(vcCard._orbs||0)+1);log(`👾 Void Colossus gains ORB! (${vcCard._orbs}/4)`,'info');}
+        // Reset Volcano Dragon win streak on loss
+        const vdCard=GS.playerCards.find(c=>c&&c.id===19);
+        if(vdCard)vdCard._winStreak=0;
+        // BUNNY PATCH — reset noDamageTurnsCount on RPS loss (bot attacks)
+        const lbCard=GS.playerCards.find(c=>c&&c.id===12);
+        if(lbCard)lbCard._noDamageTurnsCount=0;
+      }
+
+      if(winner==='player'&&GS&&GS.playerCards){
+        // Volcano Dragon win streak
+        const vdCard=GS.playerCards.find(c=>c&&c.id===19&&c.hp>0);
+        if(vdCard){
+          vdCard._winStreak=(vdCard._winStreak||0)+1;
+          if(vdCard._winStreak%4===0&&(vdCard._shieldCount||0)<3){
+            vdCard._shieldCount=(vdCard._shieldCount||0)+1;
+            log(`🐲 ${vdCard.name} win streak! +1 shield (${vdCard._shieldCount}/3)`,'skill');
+          }
+        }
+        // BUNNY PATCH — REMOVED: _hidingAttackReady Strike flag on RPS win
+        // Bunny no longer uses Strike; Attack button handles exit-and-attack directly
+      }
+
+      const res=rpsResolve;rpsResolve=null;
+      setTimeout(()=>{document.getElementById('rps-ov').classList.remove('show');res(winner);},900);
+    }
+  };
+
+  // ── TERRA KRAKEN (id:37) — 10 + 20% current enemy HP ──
+  const tk=CARD_DB.find(c=>c.id===37);
+  if(tk){
+    tk.skillDesc='Deal 10 + 20% of enemy current HP.';
+    tk.skill=function(u,t,gs){
+      const dmg=10+Math.floor((t.hp||0)*0.20);
+      const d=applyDmg(t,dmg,false,gs);GS.stats.dmg+=d;
+      log(`${u.name} uses <b>Quake Slam</b> — ${d} dmg (10 + 20% of ${t.hp} HP)!`,'skill');
+    };
+  }
+
+  // ── VOLCANO DRAGON (id:19) — Skill: +2 shields. Passive: retaliate 25% enemy ATK. Win streak +1 shield/4 wins. ──
+  const vd=CARD_DB.find(c=>c.id===19);
+  if(vd){
+    vd.skillDesc='Gain +2 shields (40% each). Passive: retaliate 25% of enemy ATK on hit. Every 4 RPS wins = +1 shield (max 3 stored).';
+    vd._winStreak=0;vd._shieldCount=0;
+    vd.skill=function(u,t,gs){
+      addBuff(u,'shield',{value:0.4,turns:2});
+      addBuff(u,'shield',{value:0.4,turns:2});
+      u._shieldCount=Math.min(3,(u._shieldCount||0)+2);
+      log(`${u.name} uses <b>Eruption</b> — +2 shields (40% dmg reduction)!`,'skill');
+    };
+  }
+
+  // Patch applyDmg: Volcano Dragon retaliation + Leaf Bunny hide immunity + Frost Shark reduction
+  const _origApplyDmg = window.applyDmg;
+  window.applyDmg = function(target, raw, isPlayerTarget, gs){
+    // BUNNY PATCH — hide immunity (uses _hiding, no change to logic)
+    if(isPlayerTarget&&target&&target.id===12&&target._hiding){
+      log(`🐇 ${target.name} is hiding — immune!`,'skill');
+      floatPopup('player','HIDE','buff');return 0;
+    }
+    // Frost Shark: -5 incoming while Frozen Sea active
+    let adj=raw;
+    if(isPlayerTarget&&target&&target.id===33&&target._frozenSeaActive) adj=Math.max(0,raw-5);
+
+    const dmg=_origApplyDmg(target,adj,isPlayerTarget,gs);
+    if(dmg>0&&typeof sfxHit==='function') sfxHit();
+
+    // BUNNY PATCH — Track Leaf Bunny damage this turn (replaces _tookDamageThisAttempt)
+    if(isPlayerTarget&&dmg>0&&target&&target.id===12) target._tookDamageThisTurn=true;
+
+    // Volcano Dragon retaliation
+    if(isPlayerTarget&&dmg>0&&target&&target.id===19&&target.hp>0&&gs&&gs.botCards){
+      const attacker=gs.botCards[gs.botActiveIdx];
+      if(attacker&&attacker.hp>0){
+        const ret=Math.max(1,Math.floor(attacker.baseDamage*0.25));
+        attacker.hp=Math.max(0,attacker.hp-ret);
+        floatPopup('bot',`-${ret} 🔥`,'dmg');
+        log(`🐲 ${target.name} retaliates — ${ret} dmg!`,'skill');
+      }
+    }
+    return dmg;
+  };
+
+  // ── MERMAID (id:35) — Kill: +5 heal, +5 overheal cap (max 50). ──
+  const mm=CARD_DB.find(c=>c.id===35);
+  if(mm){
+    mm._mermaidHealBonus=0;mm._mermaidOverhealBonus=0;
+    mm.skillDesc='Heal self + allies. Kill: heal +5 & overheal cap +5 permanently (max +50). Resets skill on kill (⚔️1).';
+    mm.skill=function(u,t,gs){
+      if(u._skillUsed){log(`${u.name}'s Ocean Blessing needs a kill! (⚔️1)`,'info');return;}
+      const amt=30+(u._mermaidHealBonus||0);
+      const cap=u.maxHp+(u._mermaidOverhealBonus||0);
+      u.hp=Math.min(cap,u.hp+amt);floatPopup('player',`+${amt}`,'heal');
+      gs.playerCards.forEach((c,i)=>{
+        if(c&&c.type==='active'&&c.hp>0&&i!==gs.playerActiveIdx){
+          c.hp=Math.min(c.maxHp+20,c.hp+20);
+        }
+      });
+      u._skillUsed=true;
+      log(`${u.name} uses <b>Ocean Blessing</b> — healed ${amt} HP. Next: defeat 1 enemy.`,'heal');
+    };
+  }
+
+  // ── FROST SHARK (id:33) — Frozen Sea: 9 attempts, freeze+10dmg every 3rd. -5 incoming while active. ──
+  const fs=CARD_DB.find(c=>c.id===33);
+  if(fs){
+    fs.skillDesc='Frozen Sea: 9 attempts, every 3rd attempt enemy frozen + 10 dmg. While active: -5 incoming damage.';
+    fs._frozenSeaActive=false;fs._frozenSeaAttempts=0;fs._frozenSeaTick=0;
+    fs.skill=function(u,t,gs){
+      u._frozenSeaActive=true;u._frozenSeaAttempts=9;u._frozenSeaTick=0;
+      log(`${u.name} uses <b>Frozen Sea</b>! Enemy frozen every 3 attempts for 9 turns. -5 incoming dmg.`,'skill');
+    };
+  }
+
+  // ── THUNDER ROC (id:15) — Base 20, skill: flat 35 to ALL enemies ──
+  const tr=CARD_DB.find(c=>c.id===15);
+  if(tr){
+    tr.baseDamage=20;
+    tr.skillDesc='Deal flat 35 damage to ALL enemies (ignores element).';
+    tr.skill=function(u,t,gs){
+      let total=applyDmg(t,35,false,gs);
+      if(gs&&gs.botCards){
+        gs.botCards.forEach((c,i)=>{
+          if(!c||c.hp<=0||i===gs.botActiveIdx)return;
+          c.hp=Math.max(0,c.hp-35);total+=35;
+        });
+      }
+      GS.stats.dmg+=total;
+      log(`${u.name} uses <b>Lightning Strike</b> — ${total} dmg to ALL enemies!`,'skill');
+    };
+  }
+
+  // BUNNY PATCH — REMOVED: old _hiding/_hidingAttackReady/Strike mechanic, _noHitAttempts/_passiveDmgBuffed (permanent baseDamage mutation)
+  // ── LEAF BUNNY (id:12) — New hiding system: 2-round countdown, Skip while hidden, passive hasBuffDmg ──
+  const lb=CARD_DB.find(c=>c.id===12);
+  if(lb){
+    lb.element='ground'; // BUNNY PATCH — ground element for +15 vs Water
+    lb.skillName='Quick! Dig a hole!!';
+    lb.skillDesc='Enter Hiding 2 rounds — untargetable. Attack exits hiding early with bonus dmg if passive active. Passive: 2 no-dmg turns = +10 dmg once.';
+    lb.cooldown=0;
+    // BUNNY PATCH — new state variables (replaces _hidingAttackReady, _noHitAttempts, _passiveDmgBuffed)
+    // Cooldown handled by standard currentCd system — no _skillCooldown needed
+    lb._hiding=false;
+    lb._hiddenRoundsRemaining=0;
+    lb._hasBuffDmg=false;
+    lb._noDamageTurnsCount=0;
+    lb._tookDamageThisTurn=false;
+    lb.skill=function(u,t,gs){
+      // Enter hiding — currentCd guard done in setButtons/playerAct
+      if(!u._hiding&&u.currentCd===0){
+        u._hiding=true;
+        u._hiddenRoundsRemaining=3; // BUNNY PATCH — 3 so activation round consumes 1, leaving 2 full hiding rounds
+        log(`🐇 ${u.name} digs a hole — <b>Hiding!</b> (2 rounds)`,'skill');
+      }
+    };
+  }
+
+  // ── GAIA GUARDIAN (id:25) — First use free, then ⚔️1. 2×80% self, 3×20% reserves. Max 9 shields. ──
+  const gg=CARD_DB.find(c=>c.id===25);
+  if(gg){
+    gg.skillDesc='First use free. After: need 1 kill (⚔️1). Self: 2×80% shields. Reserves: 3×20% shields. Max 9 total shields.';
+    gg.cooldown=0;gg._killReset=true;gg._skillUsed=false;gg._firstUseDone=false;
+    gg.skill=function(u,t,gs){
+      if(u._firstUseDone&&u._skillUsed){log(`${u.name}'s Earth Bulwark needs a kill! (⚔️1)`,'info');return;}
+      let total=gs.playerCards.reduce((s,c)=>s+(c&&c.buffs?c.buffs.filter(b=>b.type==='shield').length:0),0);
+      if(total>=9){log(`${u.name}: shield cap reached!`,'info');return;}
+      const selfSlots=Math.min(2,9-total);
+      for(let i=0;i<selfSlots;i++){addBuff(u,'shield',{value:0.80,turns:99});}total+=selfSlots;
+      gs.playerCards.forEach((c,idx)=>{
+        if(!c||c.hp<=0||c.type!=='active'||idx===gs.playerActiveIdx)return;
+        const slots=Math.min(3,9-total);
+        for(let i=0;i<slots;i++){addBuff(c,'shield',{value:0.20,turns:99});total++;}
+      });
+      u._firstUseDone=true;u._skillUsed=true;
+      log(`${u.name} uses <b>Earth Bulwark</b> — 80% shields for self, 20% for reserves! (${total}/9)`,'skill');
+    };
+  }
+
+  // Patch advanceRound: Frost Shark tick + Leaf Bunny passive tracking
+  const _origAdvanceRound = window.advanceRound;
+  window.advanceRound = async function(){
+    if(!GS||GS.gameOver)return;
+
+    // Frost Shark frozen sea tick
+    if(GS.playerCards){
+      const fsCard=GS.playerCards.find(c=>c&&c.id===33&&c.hp>0);
+      if(fsCard&&fsCard._frozenSeaActive&&fsCard._frozenSeaAttempts>0){
+        fsCard._frozenSeaTick=(fsCard._frozenSeaTick||0)+1;
+        fsCard._frozenSeaAttempts--;
+        if(fsCard._frozenSeaTick%3===0){
+          const bt=GS.botCards?GS.botCards[GS.botActiveIdx]:null;
+          if(bt&&bt.hp>0){addBuff(bt,'stun',{turns:1});bt.hp=Math.max(0,bt.hp-10);floatPopup('bot','-10 ❄️','dmg');log(`❄️ Frozen Sea triggers! ${bt.name} frozen + 10 dmg!`,'skill');}
+        }
+        if(fsCard._frozenSeaAttempts<=0){fsCard._frozenSeaActive=false;fsCard._frozenSeaTick=0;log(`❄️ Frozen Sea fades.`,'info');}
+      }
+    }
+
+    // BUNNY PATCH — Leaf Bunny hiding countdown + passive no-damage tracking
+    if(GS.playerCards){
+      const lbCard=GS.playerCards.find(c=>c&&c.id===12&&c.hp>0);
+      if(lbCard){
+        // BUNNY PATCH — hiding round countdown (fixes bug where hiding never expired)
+        if(lbCard._hiding){
+          lbCard._hiddenRoundsRemaining=(lbCard._hiddenRoundsRemaining||0)-1;
+          if(lbCard._hiddenRoundsRemaining<=0){
+            lbCard._hiding=false;lbCard._hiddenRoundsRemaining=0;
+            lbCard.currentCd=3; // BUNNY PATCH — 3-round cooldown starts when hiding ends
+            log(`🐇 ${lbCard.name} stops hiding — ran out of rounds.`,'info');
+          }
+          // While hiding: counts as no-damage turn for passive
+          lbCard._noDamageTurnsCount=(lbCard._noDamageTurnsCount||0)+1;
+        } else {
+          // Not hiding: check damage taken this turn
+          if(!lbCard._tookDamageThisTurn){
+            lbCard._noDamageTurnsCount=(lbCard._noDamageTurnsCount||0)+1;
+          } else {
+            lbCard._noDamageTurnsCount=0;
+            // BUNNY PATCH — buff is NOT removed on taking damage, only counter resets
+          }
+        }
+        // BUNNY PATCH — passive buff activation (does not stack)
+        if((lbCard._noDamageTurnsCount||0)>=2&&!lbCard._hasBuffDmg){
+          lbCard._hasBuffDmg=true;
+          floatPopup('player','💪 POWER UP!','buff');
+          log(`🐇 ${lbCard.name} passive: <b>Boo, i got power up!!</b> (+10 dmg next attack)`,'skill');
+        }
+        // BUNNY PATCH — reset per-turn damage flag for next round
+        lbCard._tookDamageThisTurn=false;
+      }
+    }
+
+    GS.round++;tickCDs(GS.playerCards);tickCDs(GS.botCards);updateUI();
+    await delay(300);
+    if(!GS.gameOver)startRound();
+  };
+
+  // cloneCard: preserve V21 fields
+  const _origClone = window.cloneCard;
+  window.cloneCard = function(card){
+    if(!card)return null;
+    return {...card,hp:card.maxHp,currentCd:0,buffs:[],_revive:false,_hasRevived:false,_reviveReady:true,
+      attachedBuffs:[],_skillUsed:card._killReset?false:undefined,_killReset:card._killReset||false,
+      _bloomActive:false,_bloomTicks:0,_attemptCounter:card._attemptCounter!==undefined?0:undefined,
+      // BUNNY PATCH — new fields: _hiddenRoundsRemaining, _hasBuffDmg, _noDamageTurnsCount, _tookDamageThisTurn
+      // BUNNY PATCH — REMOVED: _hidingAttackReady, _noHitAttempts, _passiveDmgBuffed, _tookDamageThisAttempt, _skillCooldown
+      _shieldActive:false,_orbs:0,_winStreak:0,_shieldCount:0,_hiding:false,_hiddenRoundsRemaining:0,
+      _hasBuffDmg:false,_noDamageTurnsCount:0,_tookDamageThisTurn:false,_frozenSeaActive:false,
+      _frozenSeaAttempts:0,_frozenSeaTick:0,_postCastCooldown:0,_mermaidHealBonus:0,
+      _mermaidOverhealBonus:0,_firstUseDone:false,_reviveHP:card._reviveHP||50};
+  };
+
+})(); // end rebalanceCards
+
+/* ═══════════════════════════════════════════════════════════════
+   PATCH 5 — UI INDICATORS + UPDATED setButtons
+   ═══════════════════════════════════════════════════════════════ */
+(function uiIndicators(){
+
+  // renderBuffs: inject new chips per card
+  const _origRenderBuffs = window.renderBuffs;
+  window.renderBuffs = function(buffs, card){
+    let html = _origRenderBuffs(buffs||[]);
+    if(!card) return html;
+    // ORB pips for Void Colossus
+    if(card.id===40){
+      const orbs=card._orbs||0;const ready=orbs>=4;
+      let pip='<span class="chip" style="background:rgba(155,89,182,.2);border:1px solid rgba(155,89,182,.4);color:#d4aaff;gap:3px;">ORB:';
+      for(let i=0;i<4;i++) pip+=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 1px;background:${i<orbs?(ready?'#e056fd':'#9b59b6'):'rgba(255,255,255,0.12)'};${i<orbs&&ready?'box-shadow:0 0 5px #e056fd;':''}"></span>`;
+      html=pip+'</span>'+html;
+    }
+    // BUNNY PATCH — hiding chip shows round count, no Strike text
+    if(card.id===12&&card._hiding) html+=`<span class="chip chip-hiding">👻 Hiding (${card._hiddenRoundsRemaining||0})</span>`;
+    // BUNNY PATCH — power up buff chip
+    if(card.id===12&&card._hasBuffDmg) html+=`<span class="chip" style="background:rgba(46,204,113,.2);border:1px solid rgba(46,204,113,.4);color:#5dffa0;">💪 Power Up!</span>`;
+    // Frozen Sea chip for Frost Shark
+    if(card.id===33&&card._frozenSeaActive) html+=`<span class="chip chip-freeze">❄️ Sea (${card._frozenSeaAttempts})</span>`;
+    // Win streak for Volcano Dragon
+    if(card.id===19&&(card._winStreak||0)>0) html+=`<span class="chip" style="background:rgba(255,80,0,.2);border:1px solid rgba(255,80,0,.4);color:#ff8c00;">🔥 ${card._winStreak%4||4}/4</span>`;
+    // Kill req for Gaia Guardian after first use
+    if(card.id===25&&card._firstUseDone&&card._skillUsed) html+=`<span class="chip" style="background:rgba(46,204,113,.15);border:1px solid rgba(46,204,113,.3);color:#5dffa0;">⚔️ Need kill</span>`;
+    return html;
+  };
+
+  // updateArena: pass card to renderBuffs
+  const _origUpdateArena = window.updateArena;
+  window.updateArena = function(){
+    _origUpdateArena();
+    const bc=GS.botCards?GS.botCards[GS.botActiveIdx]:null;
+    const pc=GS.playerCards?GS.playerCards[GS.playerActiveIdx]:null;
+    if(bc){const el=document.getElementById('a-bot-buffs');if(el)el.innerHTML=renderBuffs(bc.buffs,bc);}
+    if(pc){const el=document.getElementById('a-pl-buffs');if(el)el.innerHTML=renderBuffs(pc.buffs,pc);}
+  };
+
+  // updatePlayerHand: show ORB/hiding/freeze in CD tag
+  window.updatePlayerHand = function(){
+    const hand=document.getElementById('player-hand');if(!hand||!GS.playerCards)return;
+    hand.innerHTML='';
+    GS.playerCards.forEach((card,i)=>{
+      if(!card)return;
+      const isActive=i===GS.playerActiveIdx;const isDead=card.type==='active'&&card.hp<=0;
+      const isPas=card.type==='passive';const isBuf=card.type==='buff';
+      const elemC=isPas?'passive':isBuf?'buff':card.element||'neutral';
+      const div=document.createElement('div');
+      div.className=`hand-card card-elem-${elemC}${isDead?' dead':''}${isActive?' active-card '+elemC:''}`;
+      let cdTag='';
+      if(card.type==='active'&&card.skillName){
+        if(card.id===40) cdTag=`<div class="cd-tag" style="background:rgba(155,89,182,.8)">⚫${card._orbs||0}/4</div>`;
+        // BUNNY PATCH — show hiding rounds remaining in hand, remove Strike tag
+        else if(card.id===12&&card._hiding) cdTag=`<div class="cd-tag" style="background:rgba(0,191,255,.8)">👻${card._hiddenRoundsRemaining||0}rd</div>`;
+        else if(card.id===26&&(card._postCastCooldown||0)>0) cdTag=`<div class="cd-tag" style="background:rgba(46,180,60,.7)">${card._postCastCooldown}atk</div>`;
+        else if(card._killReset&&card._skillUsed) cdTag=`<div class="cd-tag" style="background:rgba(255,69,0,.8)">⚔️1</div>`;
+        else if(card.currentCd>0) cdTag=`<div class="cd-tag">CD${card.currentCd}</div>`;
+      }
+      const buffTag=(card.attachedBuffs&&card.attachedBuffs.length)?`<div class="buff-tag">⚔️×${card.attachedBuffs.length}</div>`:'';
+      const hpLine=card.type==='active'?`<div class="h-hp">HP <b>${Math.max(0,card.hp)}</b></div>`:`<div class="h-hp" style="color:var(--${isPas?'purple':'gold'});font-size:.48rem">${isPas?'PASSIVE':'BUFF'}</div>`;
+      div.innerHTML=`${cdTag}${buffTag}<div class="h-icon">${card.icon}</div><div class="h-info"><div class="h-name">${card.name}</div>${hpLine}</div>`;
+      hand.appendChild(div);
+    });
+    const gtop=document.getElementById('g-deck-top');
+    if(gtop)gtop.textContent=GS.playerCards.filter(c=>c&&c.type==='active'&&c.hp>0).length+' alive';
+  };
+
+  // setButtons: handle Tree Spirit postCastCooldown + VC ORB gate + Leaf Bunny hide
+  window.setButtons = function(on){
+    try{
+      const pc=GS&&GS.playerCards?GS.playerCards[GS.playerActiveIdx]:null;
+      let skillReady=pc&&pc.skillName&&pc.skill&&(pc.currentCd===0)&&!(pc._killReset&&pc._skillUsed&&pc._firstUseDone);
+      // Tree Spirit: blocked by postCastCooldown
+      if(pc&&pc.id===26&&(pc._postCastCooldown||0)>0) skillReady=false;
+      // Void Colossus: allow click always (skill fn gates by ORB count), but grey if <4
+      if(pc&&pc.id===40) skillReady=on; // always clickable, shows toast if not ready
+      // BUNNY PATCH — skill gating: if hiding, skill = Skip (always enabled); if currentCd>0, disabled; else normal
+      if(pc&&pc.id===12){
+        if(pc._hiding){
+          skillReady=on; // Skip must always be pressable while hiding
+        } else if(pc.currentCd>0){
+          skillReady=false; // standard cooldown (3 rounds after hiding ends)
+        } else {
+          skillReady=on;
+        }
+      }
+      const skillOk=on&&skillReady;
+      const buffAvail=on&&GS.playerCards&&GS.playerCards.some(c=>c&&c.type==='buff'&&!(GS.usedBuffs||[]).includes(c.id));
+      const ba=document.getElementById('btn-atk');if(ba)ba.disabled=!on;
+      const bs=document.getElementById('btn-skill');
+      if(bs){
+        bs.disabled=!skillOk;
+        if(pc&&pc.id===40) bs.textContent=`✨ ORB (${pc._orbs||0}/4)`;
+        // BUNNY PATCH — skill button label: Skip / Cooldown (N) / skill name
+        else if(pc&&pc.id===12&&pc._hiding) bs.textContent='✨ Skip';
+        else if(pc&&pc.id===12&&pc.currentCd>0) bs.textContent=`✨ Cooldown (${pc.currentCd})`;
+        else if(pc&&pc.id===12) bs.textContent='✨ Quick! Dig a hole!!';
+        else if(pc&&pc.id===26&&(pc._postCastCooldown||0)>0) bs.textContent=`✨ (${pc._postCastCooldown}atk)`;
+        else if(pc&&pc._killReset&&pc._skillUsed) bs.textContent='✨ (⚔️1)';
+        else if(pc&&pc.currentCd>0) bs.textContent=`✨ (${pc.currentCd})`;
+        else bs.textContent='✨ Skill';
+      }
+      const bb=document.getElementById('btn-buff');if(bb)bb.disabled=!buffAvail;
+    }catch(e){}
+  };
+
+})(); // end uiIndicators
+
+/* ═══════════════════════════════════════════════════════════════
+   PATCH 6 — BUG PREVENTION: Leaf Bunny hide bot-skip, playerAct guard
+   ═══════════════════════════════════════════════════════════════ */
+(function bugPrevention(){
+
+  // BUNNY PATCH — botActOnce: Bunny hiding makes it untargetable; if all valid targets hidden, bot skips gracefully
+  const _origBotAct = window.botActOnce;
+  window.botActOnce = async function(){
+    if(!GS||GS.gameOver)return;
+    try{
+      // BUNNY PATCH — check if current player active card is Bunny hiding
+      const activeCard=GS.playerCards?GS.playerCards[GS.playerActiveIdx]:null;
+      if(activeCard&&activeCard.id===12&&activeCard._hiding){
+        log(`🐇 ${activeCard.name} is hiding — bot cannot target, skips!`,'info');
+        await delay(600);await advanceRound();return;
+      }
+      // BUNNY PATCH — general guard: if no valid (non-hidden) targets exist, bot skips gracefully
+      const validTargets=GS.playerCards?GS.playerCards.filter(c=>c&&c.type==='active'&&c.hp>0&&!(c.id===12&&c._hiding)):[];
+      if(!validTargets.length){
+        log(`Bot has no valid targets — skips!`,'info');
+        await delay(600);await advanceRound();return;
+      }
+      await _origBotAct();
+    }catch(e){console.error(e);await advanceRound();}
+  };
+
+  // playerAct: VC ORB check, Tree Spirit cooldown, Gaia first-use
+  const _origPlayerAct = window.playerAct;
+  window.playerAct = async function(type){
+    if(!GS||GS.gameOver)return;
+    setButtons(false);
+    try{
+      const pc=GS.playerCards[GS.playerActiveIdx];const bc=GS.botCards[GS.botActiveIdx];
+      if(!pc||!bc){await advanceRound();return;}
+      if(type==='attack'){
+        // BUNNY PATCH — Bunny exits hiding on attack, applies buff bonus
+        if(pc.id===12&&pc._hiding){
+          pc._hiding=false;pc._hiddenRoundsRemaining=0;
+          pc.currentCd=3; // BUNNY PATCH — 3-round cooldown starts on early exit via attack
+          // skillCooldown flag no longer needed — currentCd handles it
+        }
+        const bonus=elemBonus(pc,bc);
+        let baseDmg=pc.baseDamage+bonus;
+        // BUNNY PATCH — consume passive buff on attack
+        if(pc.id===12&&pc._hasBuffDmg){
+          baseDmg+=10;pc._hasBuffDmg=false;
+          log(`💪 ${pc.name} unleashes power up! (+10 bonus dmg)`,'skill');
+        }
+        const dmg=applyDmg(bc,baseDmg,false,GS);
+        GS.stats.dmg+=dmg;log(`⚔️ ${pc.name} attacks — ${dmg} dmg!${bonus>0?' (advantage!)':''}`, 'atk');
+        anim('player','attack');anim('bot','hit');
+      } else if(type==='skill'){
+        // BUNNY PATCH — while hiding, skill = Skip (pass turn, hiding continues)
+        if(pc.id===12&&pc._hiding){
+          log(`🐇 ${pc.name} skips (staying hidden).`,'info');
+          updateUI();if(checkDeaths())return;
+          await delay(500);await advanceRound();return;
+        }
+        // BUNNY PATCH — block if currentCd > 0 (standard cooldown handles post-hiding lockout)
+        if(pc.id===12&&pc.currentCd>0){log(`${pc.name}'s skill is on cooldown (${pc.currentCd}).`,'info');setButtons(true);return;}
+        if(pc.currentCd>0){setButtons(true);return;}
+        if(pc._killReset&&pc._skillUsed&&pc._firstUseDone){log(`${pc.name}'s skill needs a kill! (⚔️1)`,'info');setButtons(true);return;}
+        if(pc.id===26&&(pc._postCastCooldown||0)>0){log(`${pc.name} is gathering energy... (${pc._postCastCooldown} attempts left)`,'heal');setButtons(true);return;}
+        pc.skill(pc,bc,GS);
+        // Standard CD (not for kill-reset, not for VC, not for Frost Shark, not for Bunny which uses _skillCooldown)
+        if(!pc._killReset&&pc._attemptCounter===undefined&&pc.id!==40&&pc.id!==33&&pc.id!==12) pc.currentCd=pc.cooldown;
+        if(pc.id===33) pc.currentCd=pc.cooldown;
+        GS.stats.skills++;anim('player','skill');
+        if(typeof sfxSkill==='function') sfxSkill();
+      } else if(type==='pass'){log('You pass.','info');}
+      updateUI();if(checkDeaths())return;
+      await delay(500);await advanceRound();
+    }catch(e){console.error(e);}
+  };
+
+})(); // end bugPrevention
+
+/* ── V21 BOOT ── */
+setTimeout(()=>{
+  // Ensure theme re-applied from SD on late boot
+  if(window.SD){
+    const th=SD.equippedTheme||'';
+    document.body.classList.remove('theme-purple-pink','theme-blue-teal','theme-indigo-red');
+    if(th) document.body.classList.add(th);
+    if(typeof window.applyThemeV11==='function') window.applyThemeV11(th);
+  }
+  // Fix cutscene video
+  const vid=document.getElementById('cutscene-video');
+  if(vid){vid.style.objectFit='cover';vid.style.position='absolute';vid.style.inset='0';vid.style.width='100%';vid.style.height='100%';vid.style.maxWidth='none';vid.style.maxHeight='none';}
+}, 600);
+setTimeout(()=>{
+  if(window.SD){
+    const th=SD.equippedTheme||'';
+    document.body.classList.remove('theme-purple-pink','theme-blue-teal','theme-indigo-red');
+    if(th) document.body.classList.add(th);
+  }
+}, 2000);
+
+})(); // end applyV21Patches
 </script>
 </body>
 </html>
